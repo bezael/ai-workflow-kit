@@ -1,0 +1,76 @@
+{
+  "_comment": "Copia este archivo a ~/.claude/settings.json (global) o .claude/settings.json (proyecto).",
+  "_docs": "https://docs.anthropic.com/claude-code/hooks",
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "_comment": "Seguridad antes de ejecutar comandos Bash",
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/pre-bash-safety.sh",
+            "_note": "Cambia la ruta si instalaste los hooks en otro lugar"
+          }
+        ]
+      },
+      {
+        "_comment": "Detecta secrets antes de hacer git commit",
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/pre-commit-secrets.sh"
+          }
+        ]
+      }
+    ],
+
+    "PostToolUse": [
+      {
+        "_comment": "Formatea automáticamente después de escribir un archivo",
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/post-write-format.sh"
+          }
+        ]
+      },
+      {
+        "_comment": "Formatea automáticamente después de editar un archivo",
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/post-write-format.sh"
+          }
+        ]
+      },
+      {
+        "_comment": "Lintea TS/JS después de editar",
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/post-edit-lint.sh"
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "_comment": "Notificación de escritorio cuando Claude termina",
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/notify-done.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

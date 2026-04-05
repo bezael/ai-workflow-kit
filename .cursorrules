@@ -1,0 +1,32 @@
+# Cursor Rules
+
+## General behavior
+
+- Read existing code before suggesting changes
+- Follow patterns already established in the project
+- Prefer editing existing files over creating new ones
+- Don't add dependencies without mentioning it
+
+## Commits
+
+- Use Conventional Commits: feat/fix/chore/refactor/docs/test
+- Commit messages in English
+
+## Code
+
+- Strict TypeScript: no `any`, no `!` (non-null assertion) without justification
+- Small functions with single responsibility
+- Descriptive names: `getUserById` not `getUser`, `isEmailValid` not `checkEmail`
+- Explicit error handling, no silent swallowing
+
+## Tests
+
+- Write tests when new logic is added
+- One test per behavior, not per function
+- Descriptive test names: `should return 404 when user not found`
+
+## Security
+
+- No hardcoded secrets
+- Validate inputs at the system boundary
+- Sanitize before displaying user data in the DOM

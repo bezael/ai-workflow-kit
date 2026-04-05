@@ -1,0 +1,31 @@
+{
+  "name": "ai-workflow-kit",
+  "version": "1.0.0",
+  "description": "Skills, agents & hooks for Claude Code, Cursor and GitHub Copilot",
+  "type": "module",
+  "bin": {
+    "ai-workflow-kit": "./bin/cli.js"
+  },
+  "scripts": {
+    "start": "node bin/cli.js"
+  },
+  "keywords": [
+    "claude-code",
+    "cursor",
+    "copilot",
+    "ai-coding",
+    "skills",
+    "agents",
+    "hooks",
+    "workflow"
+  ],
+  "author": "Bezael Pérez <bezael@dominicode.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bezael/ai-workflow-kit"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
