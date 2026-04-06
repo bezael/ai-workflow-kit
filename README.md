@@ -124,6 +124,29 @@ The rules in `.cursorrules` apply automatically. Copy the file to your project r
 
 The `.github/copilot-instructions.md` file is used automatically in GitHub repos.
 
+## Versioning & Changelog
+
+This project follows [Semantic Versioning](https://semver.org/) and [Keep a Changelog](https://keepachangelog.com/).
+
+See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+
+### Releasing a new version
+
+```bash
+npm run release:patch   # 1.0.0 → 1.0.1  bug fixes
+npm run release:minor   # 1.0.0 → 1.1.0  new skills, agents, or hooks
+npm run release:major   # 1.0.0 → 2.0.0  breaking changes
+```
+
+The release script automatically:
+- Reads commits since the last tag and groups them by type (`feat` → Added, `fix` → Fixed, `refactor` → Changed)
+- Prepends the new entry to `CHANGELOG.md`
+- Bumps `package.json` version
+- Creates a single commit and an annotated git tag
+- Pushes both to the remote
+
+> Requires a clean working tree and conventional commit messages (`feat:`, `fix:`, `refactor:`, etc.).
+
 ## How to Contribute
 
 1. Fork the repo

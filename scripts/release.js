@@ -204,10 +204,18 @@ console.log(entry);
 updateChangelog(entry, next, tag);
 console.log("✓ CHANGELOG.md updated");
 
-// Stage changelog, then run npm version (creates commit + tag)
-run("git add CHANGELOG.md");
-run(`npm version ${bump} -m "chore(release): v%s"`);
-console.log("✓ package.json bumped and tag created");
+// Bump version in package.json directly (avoids npm version's own git check)
+const pkgPath = resolve(ROOT, "package.json");
+const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+pkg.version = next;
+writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf8");
+console.log(`✓ package.json bumped to ${next}`);
+
+// Single commit with both files + annotated tag
+run("git add CHANGELOG.md package.json");
+run(`git commit -m "chore(release): v${next}"`);
+run(`git tag -a v${next} -m "v${next}"`);
+console.log(`✓ Commit and tag v${next} created`);
 
 // Push
 run("git push && git push --tags");
