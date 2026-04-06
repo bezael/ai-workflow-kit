@@ -17,6 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initialize AI Workflow Kit with evals, CLI, and testing framework
 - Add initial project structure with installation scripts, hooks, and documentation
 
+## [1.1.0] - 2026-04-06
+
+### Added
+- Add GitHub Actions workflow for LLM skill evaluations
+- Add /deploy skill
+- Initialize AI Workflow Kit with evals, CLI, and testing framework
+- Add initial project structure with installation scripts, hooks, and documentation
+
 ## [1.0.0] - 2026-04-06
 
 ### Added
@@ -27,8 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Memory pattern (`memory/project.md`)
 - Support for Claude Code, Cursor, and GitHub Copilot
 - Eval framework with Vitest + LLM-based evals via Anthropic SDK
-- Spanish README (`README.es.md`)
-[1.0.0]: https://github.com/bezael/ai-workflow-kit/releases/tag/v1.0.0
+- Spanish README (`README.es.md`)[1.1.0]: https://github.com/bezael/ai-workflow-kit/compare/...v1.1.0
 
 [Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v1.1.0...HEAD
 [1.1.0]: https://github.com/bezael/ai-workflow-kit/compare/...v1.1.0
