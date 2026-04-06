@@ -182,7 +182,9 @@ if (!SKILLS_ONLY) {
     const template = fs.readFileSync(
       path.join(REPO_ROOT, 'hooks', 'settings.template.json'), 'utf8'
     )
-    const configured = template.replace(/~\/\.claude\/hooks/g, HOOKS_DST)
+    // Use forward slashes in JSON (valid on all platforms including Windows)
+    const hooksDstJson = HOOKS_DST.replace(/\\/g, '/')
+    const configured = template.replace(/~\/\.claude\/hooks/g, hooksDstJson)
 
     // Strip comment keys and write valid JSON
     try {

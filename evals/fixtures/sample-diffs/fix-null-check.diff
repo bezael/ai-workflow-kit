@@ -1,0 +1,22 @@
+diff --git a/src/utils/formatUser.ts b/src/utils/formatUser.ts
+index 1a2b3c4..5d6e7f8 100644
+--- a/src/utils/formatUser.ts
++++ b/src/utils/formatUser.ts
+@@ -1,8 +1,12 @@
+ interface User {
+   id: string
+   name: string
++  profile?: {
++    avatar?: string
++  }
+ }
+
+ export function formatUserDisplay(user: User): string {
+-  return `${user.name} (${user.id})`
++  if (!user) return 'Unknown user'
++  return `${user.name} (${user.id})`
+ }
++
++export function getUserAvatar(user: User): string {
++  return user.profile?.avatar ?? '/default-avatar.png'
++}

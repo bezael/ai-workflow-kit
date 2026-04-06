@@ -1,0 +1,89 @@
+diff --git a/src/components/LoginForm.tsx b/src/components/LoginForm.tsx
+new file mode 100644
+index 0000000..a3f1b2c
+--- /dev/null
++++ b/src/components/LoginForm.tsx
+@@ -0,0 +1,52 @@
++import { useState } from 'react'
++import { useNavigate } from 'react-router-dom'
++import { authService } from '../services/auth'
++
++interface LoginFormProps {
++  onSuccess?: () => void
++}
++
++export function LoginForm({ onSuccess }: LoginFormProps) {
++  const [email, setEmail] = useState('')
++  const [password, setPassword] = useState('')
++  const [isLoading, setIsLoading] = useState(false)
++  const [error, setError] = useState<string | null>(null)
++  const navigate = useNavigate()
++
++  async function handleSubmit(e: React.FormEvent) {
++    e.preventDefault()
++    setIsLoading(true)
++    setError(null)
++
++    try {
++      await authService.login({ email, password })
++      onSuccess?.()
++      navigate('/dashboard')
++    } catch (err) {
++      setError('Invalid email or password')
++    } finally {
++      setIsLoading(false)
++    }
++  }
++
++  return (
++    <form onSubmit={handleSubmit} className="login-form">
++      <h2>Sign in</h2>
++      {error && <p className="error">{error}</p>}
++      <label>
++        Email
++        <input
++          type="email"
++          value={email}
++          onChange={e => setEmail(e.target.value)}
++          required
++        />
++      </label>
++      <label>
++        Password
++        <input
++          type="password"
++          value={password}
++          onChange={e => setPassword(e.target.value)}
++          required
++        />
++      </label>
++      <button type="submit" disabled={isLoading}>
++        {isLoading ? 'Signing in...' : 'Sign in'}
++      </button>
++    </form>
++  )
++}
+diff --git a/src/services/auth.ts b/src/services/auth.ts
+new file mode 100644
+index 0000000..b2c3d4e
+--- /dev/null
++++ b/src/services/auth.ts
+@@ -0,0 +1,18 @@
++import { apiClient } from './api'
++
++interface LoginCredentials {
++  email: string
++  password: string
++}
++
++interface AuthResponse {
++  accessToken: string
++  refreshToken: string
++  user: { id: string; email: string; role: string }
++}
++
++export const authService = {
++  async login(credentials: LoginCredentials): Promise<AuthResponse> {
++    return apiClient.post('/auth/login', credentials)
++  },
++}

@@ -7,7 +7,15 @@
     "ai-workflow-kit": "./bin/cli.js"
   },
   "scripts": {
-    "start": "node bin/cli.js"
+    "start": "node bin/cli.js",
+    "test": "vitest run evals/hooks evals/cli",
+    "test:watch": "vitest evals/hooks evals/cli",
+    "eval": "node evals/run-evals.js",
+    "test:all": "vitest run evals/hooks evals/cli && node evals/run-evals.js"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "vitest": "^3.1.1"
   },
   "keywords": [
     "claude-code",
