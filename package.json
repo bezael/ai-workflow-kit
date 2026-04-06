@@ -7,14 +7,14 @@
     "ai-workflow-kit": "./bin/cli.js"
   },
   "scripts": {
-    "start": "node bin/cli.js",
+    "start": "npx node bin/cli.js",
     "test": "vitest run evals/hooks evals/cli",
     "test:watch": "vitest evals/hooks evals/cli",
-    "eval": "node evals/run-evals.js",
-    "test:all": "vitest run evals/hooks evals/cli && node evals/run-evals.js",
-    "release:patch": "node scripts/release.js patch",
-    "release:minor": "node scripts/release.js minor",
-    "release:major": "node scripts/release.js major"
+    "eval": "npx node evals/run-evals.js",
+    "test:all": "vitest run evals/hooks evals/cli && npx node evals/run-evals.js",
+    "release:patch": "npx node scripts/release.js patch",
+    "release:minor": "npx node scripts/release.js minor",
+    "release:major": "npx node scripts/release.js major"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
