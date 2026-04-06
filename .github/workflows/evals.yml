@@ -1,0 +1,54 @@
+name: Evals
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      run_llm_evals:
+        description: 'Run LLM skill evals (requires ANTHROPIC_API_KEY secret)'
+        type: boolean
+        default: false
+
+jobs:
+  # ─── Deterministic tests: hooks + CLI ────────────────────────────────────────
+  # Runs on every push and PR. No API key needed. Fast (~15s).
+  tests:
+    name: Hook & CLI tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - run: npm test
+
+  # ─── LLM skill evals ─────────────────────────────────────────────────────────
+  # Runs only on push to main OR when manually triggered with run_llm_evals=true.
+  # Costs ~$0.01 per run (Claude Haiku). Gate with the secret to avoid surprises.
+  skill-evals:
+    name: Skill evals (LLM)
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && inputs.run_llm_evals == true)
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Run skill evals
+        run: npm run eval
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
