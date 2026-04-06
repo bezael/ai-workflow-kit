@@ -38,6 +38,8 @@ jobs:
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'workflow_dispatch' && inputs.run_llm_evals == true)
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -49,6 +51,11 @@ jobs:
       - run: npm ci
 
       - name: Run skill evals
+        if: env.ANTHROPIC_API_KEY != ''
         run: npm run eval
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Skip notice
+        if: env.ANTHROPIC_API_KEY == ''
+        run: |
+          echo "⚠️  ANTHROPIC_API_KEY is not set — LLM evals skipped."
+          echo "   Add it in: Settings → Secrets and variables → Actions → New repository secret"
