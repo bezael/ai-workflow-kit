@@ -14,7 +14,8 @@
     "test:all": "vitest run evals/hooks evals/cli && npx node evals/run-evals.js",
     "release:patch": "npx node scripts/release.js patch",
     "release:minor": "npx node scripts/release.js minor",
-    "release:major": "npx node scripts/release.js major"
+    "release:major": "npx node scripts/release.js major",
+    "release:beta": "npx node scripts/release.js beta"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

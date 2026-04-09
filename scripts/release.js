@@ -155,8 +155,8 @@ function updateChangelog(entry, newVersion, prevTag) {
 
 const bump = process.argv[2] || "patch";
 
-if (!["patch", "minor", "major"].includes(bump)) {
-  console.error("Usage: node scripts/release.js [patch|minor|major]");
+if (!["patch", "minor", "major", "beta"].includes(bump)) {
+  console.error("Usage: node scripts/release.js [patch|minor|major|beta]");
   process.exit(1);
 }
 
@@ -187,13 +187,26 @@ const currentVersion = JSON.parse(
   readFileSync(resolve(ROOT, "package.json"), "utf8")
 ).version;
 
-const [major, minor, patch] = currentVersion.split(".").map(Number);
-const next =
-  bump === "major"
-    ? `${major + 1}.0.0`
-    : bump === "minor"
-    ? `${major}.${minor + 1}.0`
-    : `${major}.${minor}.${patch + 1}`;
+// Beta: if current is already X.Y.Z-beta.N → increment N, else bump minor and start beta.1
+let next;
+if (bump === "beta") {
+  const betaMatch = currentVersion.match(/^(\d+)\.(\d+)\.(\d+)-beta\.(\d+)$/);
+  if (betaMatch) {
+    const [, ma, mi, pa, n] = betaMatch;
+    next = `${ma}.${mi}.${pa}-beta.${Number(n) + 1}`;
+  } else {
+    const [ma, mi] = currentVersion.split(".").map(Number);
+    next = `${ma}.${mi + 1}.0-beta.1`;
+  }
+} else {
+  const [major, minor, patch] = currentVersion.replace(/-.*/, "").split(".").map(Number);
+  next =
+    bump === "major"
+      ? `${major + 1}.0.0`
+      : bump === "minor"
+      ? `${major}.${minor + 1}.0`
+      : `${major}.${minor}.${patch + 1}`;
+}
 
 const today = new Date().toISOString().slice(0, 10);
 const entry = buildEntry(next, today, sections);
@@ -201,8 +214,10 @@ const entry = buildEntry(next, today, sections);
 console.log(`\nChangelog entry for v${next}:\n`);
 console.log(entry);
 
-updateChangelog(entry, next, tag);
-console.log("✓ CHANGELOG.md updated");
+if (bump !== "beta") {
+  updateChangelog(entry, next, tag);
+  console.log("✓ CHANGELOG.md updated");
+}
 
 // Bump version in package.json directly (avoids npm version's own git check)
 const pkgPath = resolve(ROOT, "package.json");
@@ -212,7 +227,8 @@ writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf8");
 console.log(`✓ package.json bumped to ${next}`);
 
 // Single commit with both files + annotated tag
-run("git add CHANGELOG.md package.json");
+const filesToAdd = bump === "beta" ? "package.json" : "CHANGELOG.md package.json";
+run(`git add ${filesToAdd}`);
 run(`git commit -m "chore(release): v${next}"`);
 run(`git tag -a v${next} -m "v${next}"`);
 console.log(`✓ Commit and tag v${next} created`);
