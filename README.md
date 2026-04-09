@@ -11,7 +11,7 @@ Works with **Claude Code**, **Cursor**, and **GitHub Copilot**.
 npx ai-workflow-kit
 ```
 
-Restart Claude Code. You'll have `/commit`, `/pr`, `/plan`, `/debug`, `/review`, `/vibe-audit`, `/frontend`, `/api`, `/test`, `/refactor`, and `/docs` available — plus 5 automatic hooks.
+Restart Claude Code. You'll have `/ak:commit`, `/ak:pr`, `/ak:plan`, `/ak:debug`, `/ak:review`, `/ak:vibe-audit`, `/ak:frontend`, `/ak:api`, `/ak:test`, `/ak:refactor`, and `/ak:docs` available — plus 5 automatic hooks.
 
 ```bash
 npx ai-workflow-kit --skills   # skills and agents only
@@ -39,17 +39,17 @@ ai-workflow-kit/
 ├── .github/
 │   └── copilot-instructions.md     # Instructions for GitHub Copilot
 ├── skills/
-│   ├── commit.md                   # /commit — generates semantic commit messages
-│   ├── pr.md                       # /pr — creates PRs with full description
-│   ├── review.md                   # /review — reviews code with real engineering criteria
-│   ├── plan.md                     # /plan — plans before executing
-│   └── debug.md                    # /debug — structured debugging workflow
+│   ├── commit.md                   # /ak:commit — generates semantic commit messages
+│   ├── pr.md                       # /ak:pr — creates PRs with full description
+│   ├── review.md                   # /ak:review — reviews code with real engineering criteria
+│   ├── plan.md                     # /ak:plan — plans before executing
+│   └── debug.md                    # /ak:debug — structured debugging workflow
 ├── agents/
-│   ├── frontend.md                 # /frontend — generates UI components
-│   ├── api.md                      # /api — generates endpoints with validation
-│   ├── test.md                     # /test — writes behavior-driven tests
-│   ├── refactor.md                 # /refactor — improves code without breaking anything
-│   └── docs.md                     # /docs — JSDoc, README, ADR
+│   ├── frontend.md                 # /ak:frontend — generates UI components
+│   ├── api.md                      # /ak:api — generates endpoints with validation
+│   ├── test.md                     # /ak:test — writes behavior-driven tests
+│   ├── refactor.md                 # /ak:refactor — improves code without breaking anything
+│   └── docs.md                     # /ak:docs — JSDoc, README, ADR
 ├── hooks/
 │   ├── README.md                   # How to install and customize hooks
 │   ├── settings.template.json      # Ready-to-copy configuration
@@ -66,22 +66,22 @@ ai-workflow-kit/
 
 | Skill | Command | What it does |
 |-------|---------|--------------|
-| commit | `/commit` | Reads the real diff and generates a semantic commit message |
-| pr | `/pr` | Creates PR with description, test plan, and checklist |
-| review | `/review @file` | Reviews code: bugs, security, performance |
-| plan | `/plan [task]` | Plans before executing complex tasks |
-| debug | `/debug [problem]` | Diagnoses with hypotheses before proposing fixes |
-| vibe-audit | `/vibe-audit` | Full audit of apps generated with vibe coding |
+| commit | `/ak:commit` | Reads the real diff and generates a semantic commit message |
+| pr | `/ak:pr` | Creates PR with description, test plan, and checklist |
+| review | `/ak:review @file` | Reviews code: bugs, security, performance |
+| plan | `/ak:plan [task]` | Plans before executing complex tasks |
+| debug | `/ak:debug [problem]` | Diagnoses with hypotheses before proposing fixes |
+| vibe-audit | `/ak:vibe-audit` | Full audit of apps generated with vibe coding |
 
 ## Specialized Agents
 
 | Agent | Command | What it does |
 |-------|---------|--------------|
-| frontend | `/frontend [description]` | Generates components following the project's design system |
-| api | `/api [description]` | Generates endpoints with validation, auth, and error handling |
-| test | `/test @file` | Writes tests by behavior, not by implementation |
-| refactor | `/refactor @file` | Improves code without changing behavior |
-| docs | `/docs @file` | Generates JSDoc, README, or ADR as needed |
+| frontend | `/ak:frontend [description]` | Generates components following the project's design system |
+| api | `/ak:api [description]` | Generates endpoints with validation, auth, and error handling |
+| test | `/ak:test @file` | Writes tests by behavior, not by implementation |
+| refactor | `/ak:refactor @file` | Improves code without changing behavior |
+| docs | `/ak:docs @file` | Generates JSDoc, README, or ADR as needed |
 
 ## Available Hooks
 
@@ -152,7 +152,7 @@ The release script automatically:
 1. Fork the repo
 2. Add your skill in `skills/name.md` following the existing pattern
 3. Document the trigger, steps, and rules
-4. Open a PR with `/pr`
+4. Open a PR with `/ak:pr`
 
 ## Philosophy
 

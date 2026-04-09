@@ -7,33 +7,33 @@ Works with: **Claude Code**, **Cursor**, **GitHub Copilot**.
 
 ## Available Skills
 
-| Command     | Description                                         |
-|-------------|-----------------------------------------------------|
-| `/commit`   | Generates commit message with real diff context     |
-| `/pr`       | Creates PR with description, test plan, and checklist |
-| `/review`   | Reviews code or PR with configurable criteria       |
-| `/plan`     | Plans before executing complex tasks                |
-| `/debug`    | Structured debugging workflow                       |
-| `/vibe-audit` | Audit of apps generated with vibe coding          |
+| Command          | Description                                         |
+|------------------|-----------------------------------------------------|
+| `/ak:commit`     | Generates commit message with real diff context     |
+| `/ak:pr`         | Creates PR with description, test plan, and checklist |
+| `/ak:review`     | Reviews code or PR with configurable criteria       |
+| `/ak:plan`       | Plans before executing complex tasks                |
+| `/ak:debug`      | Structured debugging workflow                       |
+| `/ak:vibe-audit` | Audit of apps generated with vibe coding          |
 
 ## Specialized Agents
 
-| Agent        | When to use                                         |
-|--------------|-----------------------------------------------------|
-| `/frontend`  | Create UI components following the design system    |
-| `/api`       | Create endpoints with validation and error handling |
-| `/test`      | Write tests that verify real behavior               |
-| `/refactor`  | Improve code without changing behavior              |
-| `/docs`      | Generate useful documentation (JSDoc, README, ADR)  |
+| Agent           | When to use                                         |
+|-----------------|-----------------------------------------------------|
+| `/ak:frontend`  | Create UI components following the design system    |
+| `/ak:api`       | Create endpoints with validation and error handling |
+| `/ak:test`      | Write tests that verify real behavior               |
+| `/ak:refactor`  | Improve code without changing behavior              |
+| `/ak:docs`      | Generate useful documentation (JSDoc, README, ADR)  |
 
 ## How to use a skill
 
 ```
-/commit
-/pr feat: new feature
-/review @src/components/Button.tsx
-/plan add JWT authentication
-/debug submit button not responding on mobile
+/ak:commit
+/ak:pr feat: new feature
+/ak:review @src/components/Button.tsx
+/ak:plan add JWT authentication
+/ak:debug submit button not responding on mobile
 ```
 
 ## Project conventions
