@@ -34,3 +34,4 @@ coverage/
 .cache/
 tmp/
 .claude/settings.local.json
+social/
