@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0] - 2026-04-09
+
+### Changed
+- Update command prefixes in documentation to use '/ak:' format
+
+### Fixed
+- Update GitHub Actions workflow to handle missing ANTHROPIC_API_KEY
+
 ## [1.1.0] - 2026-04-06
 
 ### Added
@@ -36,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Claude Code, Cursor, and GitHub Copilot
 - Eval framework with Vitest + LLM-based evals via Anthropic SDK
 - Spanish README (`README.es.md`)[1.1.0]: https://github.com/bezael/ai-workflow-kit/compare/...v1.1.0
-
-[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v1.1.0...HEAD
 [1.1.0]: https://github.com/bezael/ai-workflow-kit/compare/...v1.1.0
+
+[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/bezael/ai-workflow-kit/compare/v1.1.0...v2.0.0
