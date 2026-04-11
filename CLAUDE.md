@@ -3,7 +3,7 @@
 ## What this repo is
 
 A collection of skills, agents, and memory patterns to make working with AI coding tools faster and more consistent.
-Works with: **Claude Code**, **Cursor**, **GitHub Copilot**.
+Works with: **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravity**.
 
 ## Available Skills
 

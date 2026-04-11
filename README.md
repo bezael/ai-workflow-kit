@@ -3,7 +3,7 @@
 ![AI Workflow Kit](./banner.png)
 
 Skills, agents, and hooks for working with AI coding tools consistently and professionally.
-Works with **Claude Code**, **Cursor**, and **GitHub Copilot**.
+Works with **Claude Code**, **Cursor**, **GitHub Copilot**, and **Google Antigravity**.
 
 ## Installation
 
@@ -35,9 +35,23 @@ chmod +x ~/.claude/hooks/*.sh
 ```
 ai-workflow-kit/
 ├── CLAUDE.md                        # Instructions for Claude Code
+├── GEMINI.md                        # Instructions for Google Antigravity
+├── AGENTS.md                        # Cross-tool rules (all AI tools)
 ├── .cursorrules                     # Rules for Cursor
 ├── .github/
 │   └── copilot-instructions.md     # Instructions for GitHub Copilot
+├── antigravity-skills/
+│   ├── commit/SKILL.md             # @commit — generates semantic commit messages
+│   ├── pr/SKILL.md                 # @pr — creates PRs with full description
+│   ├── review/SKILL.md             # @review — reviews code with real criteria
+│   ├── plan/SKILL.md               # @plan — plans before executing
+│   ├── debug/SKILL.md              # @debug — structured debugging workflow
+│   ├── vibe-audit/SKILL.md         # @vibe-audit — audits vibe-coded apps
+│   ├── frontend/SKILL.md           # @frontend — generates UI components
+│   ├── api/SKILL.md                # @api — generates endpoints with validation
+│   ├── test/SKILL.md               # @test — writes behavior-driven tests
+│   ├── refactor/SKILL.md           # @refactor — improves code without breaking anything
+│   └── docs/SKILL.md               # @docs — JSDoc, README, ADR
 ├── skills/
 │   ├── commit.md                   # /ak:commit — generates semantic commit messages
 │   ├── pr.md                       # /ak:pr — creates PRs with full description
@@ -123,6 +137,23 @@ The rules in `.cursorrules` apply automatically. Copy the file to your project r
 ### Use with GitHub Copilot
 
 The `.github/copilot-instructions.md` file is used automatically in GitHub repos.
+
+### Use with Google Antigravity
+
+Copy `GEMINI.md` and `AGENTS.md` to your project root. The installer copies skills to `~/.gemini/antigravity/skills/` automatically.
+
+```bash
+# Copy project rules
+cp GEMINI.md your-project/
+cp AGENTS.md your-project/
+
+# Or install all Antigravity skills globally
+npx ai-workflow-kit --skills
+```
+
+Once installed, invoke skills with `@` in the Antigravity sidebar:
+- `@commit`, `@pr`, `@review`, `@plan`, `@debug`, `@vibe-audit`
+- `@frontend`, `@api`, `@test`, `@refactor`, `@docs`
 
 ## Versioning & Changelog
 

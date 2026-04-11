@@ -65,6 +65,8 @@ CLAUDE_DIR="$HOME/.claude"
 SKILLS_DIR="$CLAUDE_DIR/skills"
 HOOKS_DIR="$CLAUDE_DIR/hooks"
 SETTINGS_FILE="$CLAUDE_DIR/settings.json"
+GEMINI_DIR="$HOME/.gemini"
+ANTIGRAVITY_SKILLS_DIR="$GEMINI_DIR/antigravity/skills"
 
 # ─── DRY RUN wrapper ─────────────────────────────────────────────────────────
 run() {
@@ -90,9 +92,10 @@ echo ""
 if $UNINSTALL; then
   step "Desinstalando AI Workflow Kit..."
 
-  SKILLS_TO_REMOVE=(commit pr review plan debug)
+  SKILLS_TO_REMOVE=(commit pr review plan debug vibe-audit)
   AGENTS_TO_REMOVE=(frontend api test refactor docs)
   HOOKS_TO_REMOVE=(pre-bash-safety pre-commit-secrets post-write-format post-edit-lint notify-done)
+  ANTIGRAVITY_SKILLS_TO_REMOVE=(commit pr review plan debug vibe-audit frontend api test refactor docs)
 
   for skill in "${SKILLS_TO_REMOVE[@]}" "${AGENTS_TO_REMOVE[@]}"; do
     FILE="$SKILLS_DIR/$skill.md"
@@ -107,6 +110,14 @@ if $UNINSTALL; then
     if [ -f "$FILE" ]; then
       run "rm '$FILE'"
       success "Eliminado: $FILE"
+    fi
+  done
+
+  for skill in "${ANTIGRAVITY_SKILLS_TO_REMOVE[@]}"; do
+    DIR="$ANTIGRAVITY_SKILLS_DIR/$skill"
+    if [ -d "$DIR" ]; then
+      run "rm -rf '$DIR'"
+      success "Eliminado Antigravity skill: $DIR"
     fi
   done
 
@@ -146,6 +157,15 @@ if command -v claude &>/dev/null; then
   success "Claude Code detectado: $CLAUDE_VERSION"
 else
   warn "Claude Code no está en el PATH. Instálalo con: npm install -g @anthropic-ai/claude-code"
+fi
+
+# Detectar Google Antigravity
+ANTIGRAVITY_DETECTED=false
+if [ -d "$GEMINI_DIR" ]; then
+  ANTIGRAVITY_DETECTED=true
+  success "Google Antigravity detectado: $GEMINI_DIR"
+else
+  info "Google Antigravity no detectado (~/.gemini no existe). Los skills de Antigravity se instalarán de todas formas."
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -214,6 +234,41 @@ if ! $HOOKS_ONLY; then
   done
 
   info "Skills instalados: $INSTALLED_SKILLS | Omitidos: $SKIPPED_SKILLS"
+
+  # ─── Instalar skills de Google Antigravity ────────────────────────────────
+  step "Instalando skills para Google Antigravity..."
+  run "mkdir -p '$ANTIGRAVITY_SKILLS_DIR'"
+
+  INSTALLED_AG=0
+  SKIPPED_AG=0
+
+  for skill_dir in "$SCRIPT_DIR"/antigravity-skills/*/; do
+    skill_name=$(basename "$skill_dir")
+    dest="$ANTIGRAVITY_SKILLS_DIR/$skill_name"
+
+    if [ -d "$dest" ]; then
+      if $DRY_RUN; then
+        run "cp -r '$skill_dir' '$ANTIGRAVITY_SKILLS_DIR/'"
+        ((INSTALLED_AG++))
+      else
+        read -r -p "  El skill de Antigravity '$skill_name' ya existe. ¿Sobreescribir? [s/N] " confirm
+        if [[ "$confirm" =~ ^[sS]$ ]]; then
+          cp -r "$skill_dir" "$ANTIGRAVITY_SKILLS_DIR/"
+          success "Actualizado Antigravity skill: $skill_name"
+          ((INSTALLED_AG++))
+        else
+          info "Omitido: $skill_name"
+          ((SKIPPED_AG++))
+        fi
+      fi
+    else
+      run "cp -r '$skill_dir' '$ANTIGRAVITY_SKILLS_DIR/'"
+      success "Instalado Antigravity skill: $skill_name"
+      ((INSTALLED_AG++))
+    fi
+  done
+
+  info "Antigravity skills instalados: $INSTALLED_AG | Omitidos: $SKIPPED_AG"
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -354,9 +409,13 @@ echo -e "${BOLD}─────────────────────�
 echo ""
 
 if ! $HOOKS_ONLY; then
-  echo -e "  ${GREEN}Skills:${RESET}   $SKILLS_DIR"
-  echo -e "  Comandos disponibles: /commit /pr /review /plan /debug"
-  echo -e "  Agentes disponibles:  /frontend /api /test /refactor /docs"
+  echo -e "  ${GREEN}Claude Code:${RESET}  $SKILLS_DIR"
+  echo -e "  Comandos: /ak:commit /ak:pr /ak:review /ak:plan /ak:debug /ak:vibe-audit"
+  echo -e "  Agentes:  /ak:frontend /ak:api /ak:test /ak:refactor /ak:docs"
+  echo ""
+  echo -e "  ${GREEN}Antigravity:${RESET}  $ANTIGRAVITY_SKILLS_DIR"
+  echo -e "  Skills:   @commit @pr @review @plan @debug @vibe-audit"
+  echo -e "  Agentes:  @frontend @api @test @refactor @docs"
   echo ""
 fi
 
