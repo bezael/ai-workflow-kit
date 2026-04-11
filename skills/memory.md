@@ -1,3 +1,8 @@
+---
+name: ak:memory
+description: Manage persistent memory across sessions. Subcommands: save [topic] captures session learnings, recall [question] retrieves relevant context before acting, clean removes stale entries.
+---
+
 # Skill: /ak:memory
 
 Manages persistent memory across sessions. Captures, retrieves, and maintains what the AI needs to know to work effectively in this project without being told the same thing twice.
@@ -35,7 +40,17 @@ Persist useful context from the current session to the right memory file.
 
 4. **Update `memory/MEMORY.md`** if you added a new decisions file.
 
-5. **Confirm** to the user what was saved and where.
+5. **Append an entry to `memory/CHANGELOG.md`** for every file touched:
+
+```markdown
+## YYYY-MM-DD — [Session topic or trigger]
+**Action:** Added | Updated | Removed
+**File:** memory/[file.md]
+**Entry:** [Title or short description of what was changed]
+**Why:** The reason this was worth persisting
+```
+
+6. **Confirm** to the user what was saved and where.
 
 ### Output format
 
@@ -45,6 +60,8 @@ Saved to memory/feedback.md:
 
 Saved to memory/decisions/2026-04-11-auth-strategy.md:
 - New ADR: JWT refresh token rotation chosen over sessions
+
+Logged in memory/CHANGELOG.md.
 ```
 
 ---
@@ -94,7 +111,8 @@ Remove or update memories that are outdated, wrong, or no longer useful.
    - **Fix it** if it just needs updating
    - **Remove it** if it's no longer relevant
    - **Mark it** with `> ⚠️ Review needed:` if unsure and let the user decide
-4. Report what changed.
+4. **Append a summary entry to `memory/CHANGELOG.md`** with action `Updated` or `Removed` for each change made.
+5. Report what changed.
 
 ### Output format
 

@@ -1,3 +1,8 @@
+---
+name: ak:review
+description: Review code with real engineering criteria — logic bugs, security vulnerabilities, and technical debt. Use when user says /review @file or /review to review current PR changes.
+---
+
 # Skill: /review
 
 Reviews code with real engineering criteria. Not just style — detects bugs, security issues, and technical debt.

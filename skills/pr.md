@@ -1,3 +1,8 @@
+---
+name: ak:pr
+description: Create a Pull Request with description, test plan, and checklist. Use when the user says /pr, "create PR", or "open pull request". Reads real branch commits and diff.
+---
+
 # Skill: /pr
 
 Creates a Pull Request with a clear description, test plan, and checklist. Reads the real branch commits.

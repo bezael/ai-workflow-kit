@@ -1,3 +1,8 @@
+---
+name: ak:commit
+description: Generate a semantic commit message by reading the real staged diff. Use when the user says /commit, "make a commit", or "commit the changes". Never invents — reads the actual diff.
+---
+
 # Skill: /commit
 
 Generates a semantic commit message by reading the real diff. Don't invent — read the code.

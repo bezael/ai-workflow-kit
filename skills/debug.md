@@ -1,3 +1,8 @@
+---
+name: ak:debug
+description: Structured debugging workflow — diagnose before proposing fixes. Use when user says /debug, reports a bug, an error, or unexpected behavior. Forms hypotheses before touching code.
+---
+
 # Skill: /debug
 
 Structured debugging workflow. Diagnose before proposing fixes.

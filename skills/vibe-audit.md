@@ -1,3 +1,8 @@
+---
+name: ak:vibe-audit
+description: Audit AI-generated apps for security, performance, and maintainability issues. Use when user says /vibe-audit or "I generated this with AI and want to know how bad it is".
+---
+
 # Skill: /vibe-audit
 
 Audit of apps built with vibe coding. Detects the typical problems AI generated without anyone reviewing them: security, performance, maintainability, and accumulated technical debt.
