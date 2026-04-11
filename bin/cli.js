@@ -52,14 +52,45 @@ const UNINSTALL   = args.includes('--uninstall')
 const LIST        = args.includes('--list')
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-function copyFile(src, dst) {
-  fs.mkdirSync(path.dirname(dst), { recursive: true })
-  fs.copyFileSync(src, dst)
+
+// Returns { src, name, isDir } for each skill in dir.
+// Supports both flat `<name>.md` files and `<name>/SKILL.md` directories.
+function listSkills(dir) {
+  if (!fs.existsSync(dir)) return []
+  return fs.readdirSync(dir).flatMap(entry => {
+    const full = path.join(dir, entry)
+    const stat = fs.statSync(full)
+    if (stat.isDirectory()) {
+      const skillMd = path.join(full, 'SKILL.md')
+      if (fs.existsSync(skillMd)) return [{ src: full, name: entry, isDir: true }]
+      return []
+    }
+    if (entry.endsWith('.md')) return [{ src: full, name: path.basename(entry, '.md'), isDir: false }]
+    return []
+  })
 }
 
 function listFiles(dir, ext) {
   if (!fs.existsSync(dir)) return []
   return fs.readdirSync(dir).filter(f => f.endsWith(ext)).map(f => path.join(dir, f))
+}
+
+function copyFile(src, dst) {
+  fs.mkdirSync(path.dirname(dst), { recursive: true })
+  fs.copyFileSync(src, dst)
+}
+
+function copyDir(src, dst) {
+  fs.mkdirSync(dst, { recursive: true })
+  for (const entry of fs.readdirSync(src)) {
+    const srcEntry = path.join(src, entry)
+    const dstEntry = path.join(dst, entry)
+    if (fs.statSync(srcEntry).isDirectory()) {
+      copyDir(srcEntry, dstEntry)
+    } else {
+      fs.copyFileSync(srcEntry, dstEntry)
+    }
+  }
 }
 
 async function ask(question) {
@@ -81,15 +112,15 @@ console.log()
 
 // ─── List ─────────────────────────────────────────────────────────────────────
 if (LIST) {
-  const skills = listFiles(path.join(REPO_ROOT, 'skills'), '.md')
-  const agents = listFiles(path.join(REPO_ROOT, 'agents'), '.md')
+  const skills = listSkills(path.join(REPO_ROOT, 'skills'))
+  const agents = listSkills(path.join(REPO_ROOT, 'agents'))
   const hooks  = listFiles(path.join(REPO_ROOT, 'hooks'), '.sh')
 
   console.log(`${c.bold}Skills (${skills.length})${c.reset}`)
-  skills.forEach(f => dim(`/` + path.basename(f, '.md')))
+  skills.forEach(s => dim(`/${s.name}`))
 
   console.log(`\n${c.bold}Agents (${agents.length})${c.reset}`)
-  agents.forEach(f => dim(`/` + path.basename(f, '.md')))
+  agents.forEach(s => dim(`/${s.name}`))
 
   console.log(`\n${c.bold}Hooks (${hooks.length})${c.reset}`)
   hooks.forEach(f => dim(path.basename(f)))
@@ -100,20 +131,32 @@ if (LIST) {
 // ─── Uninstall ───────────────────────────────────────────────────────────────
 if (UNINSTALL) {
   step('Uninstalling...')
+
   const toRemove = [
-    ...listFiles(path.join(REPO_ROOT, 'skills'), '.md'),
-    ...listFiles(path.join(REPO_ROOT, 'agents'), '.md'),
-  ].map(f => path.join(SKILLS_DST, path.basename(f)))
+    ...listSkills(path.join(REPO_ROOT, 'skills')),
+    ...listSkills(path.join(REPO_ROOT, 'agents')),
+  ].map(s => ({
+    dst: s.isDir
+      ? path.join(SKILLS_DST, s.name)
+      : path.join(SKILLS_DST, s.name + '.md'),
+    isDir: s.isDir,
+  }))
 
   const hooksToRemove = listFiles(path.join(REPO_ROOT, 'hooks'), '.sh')
-    .map(f => path.join(HOOKS_DST, path.basename(f)))
+    .map(f => ({ dst: path.join(HOOKS_DST, path.basename(f)), isDir: false }))
 
   let removed = 0
-  for (const f of [...toRemove, ...hooksToRemove]) {
-    if (fs.existsSync(f)) { fs.unlinkSync(f); removed++ }
+  for (const item of [...toRemove, ...hooksToRemove]) {
+    if (!fs.existsSync(item.dst)) continue
+    if (item.isDir) {
+      fs.rmSync(item.dst, { recursive: true, force: true })
+    } else {
+      fs.unlinkSync(item.dst)
+    }
+    removed++
   }
 
-  ok(`Removed ${removed} files`)
+  ok(`Removed ${removed} items`)
   warn(`settings.json was NOT modified — edit manually if needed: ${SETTINGS}`)
   console.log()
   process.exit(0)
@@ -135,23 +178,28 @@ if (!HOOKS_ONLY) {
   step('Installing skills...')
   fs.mkdirSync(SKILLS_DST, { recursive: true })
 
-  const skillFiles = [
-    ...listFiles(path.join(REPO_ROOT, 'skills'), '.md'),
-    ...listFiles(path.join(REPO_ROOT, 'agents'), '.md'),
+  const skillEntries = [
+    ...listSkills(path.join(REPO_ROOT, 'skills')).map(s => ({ ...s, type: 'skill' })),
+    ...listSkills(path.join(REPO_ROOT, 'agents')).map(s => ({ ...s, type: 'agent' })),
   ]
 
-  for (const src of skillFiles) {
-    const name = path.basename(src)
-    const dst  = path.join(SKILLS_DST, name)
-    const type = src.includes('/agents/') ? 'agent' : 'skill'
+  for (const entry of skillEntries) {
+    const dst = entry.isDir
+      ? path.join(SKILLS_DST, entry.name)
+      : path.join(SKILLS_DST, entry.name + '.md')
 
     if (fs.existsSync(dst) && !YES) {
-      const overwrite = await ask(`/${path.basename(src, '.md')} already exists. Overwrite?`)
-      if (!overwrite) { info(`Skipped: ${name}`); continue }
+      const overwrite = await ask(`/${entry.name} already exists. Overwrite?`)
+      if (!overwrite) { info(`Skipped: ${entry.name}`); continue }
     }
 
-    copyFile(src, dst)
-    ok(`${type}: /${path.basename(src, '.md')}`)
+    if (entry.isDir) {
+      copyDir(entry.src, dst)
+    } else {
+      copyFile(entry.src, dst)
+    }
+
+    ok(`${entry.type}: /${entry.name}`)
     installedCount++
   }
 }
@@ -242,12 +290,12 @@ if (!SKILLS_ONLY) {
 // ─── Summary ─────────────────────────────────────────────────────────────────
 console.log()
 console.log(`${c.bold}  ─────────────────────────────${c.reset}`)
-console.log(`${c.bold}${c.green}  Installation complete${c.reset}  (${installedCount} files)`)
+console.log(`${c.bold}${c.green}  Installation complete${c.reset}  (${installedCount} items)`)
 console.log(`${c.bold}  ─────────────────────────────${c.reset}`)
 console.log()
 
 if (!HOOKS_ONLY) {
-  console.log(`  ${c.dim}Skills available:${c.reset}  /commit /pr /review /plan /debug /vibe-audit`)
+  console.log(`  ${c.dim}Skills available:${c.reset}  /commit /pr /review /plan /debug /vibe-audit /memory`)
   console.log(`  ${c.dim}Agents available:${c.reset}  /frontend /api /test /refactor /docs`)
 }
 if (!SKILLS_ONLY) {
