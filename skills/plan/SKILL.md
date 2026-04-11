@@ -1,11 +1,17 @@
 ---
 name: ak:plan
 description: Plan before executing. Use when task touches 3+ files, requires new folder structure, involves DB or API changes, or has step dependencies. Waits for approval before writing code.
+disable-model-invocation: true
+argument-hint: <task description>
 ---
 
 # Skill: /plan
 
 Plan before executing. For complex tasks that touch multiple files or require architecture decisions.
+
+## Task to plan
+
+$ARGUMENTS
 
 ## When to use it
 

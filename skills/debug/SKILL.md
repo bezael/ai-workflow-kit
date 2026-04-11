@@ -1,11 +1,16 @@
 ---
 name: ak:debug
 description: Structured debugging workflow — diagnose before proposing fixes. Use when user says /debug, reports a bug, an error, or unexpected behavior. Forms hypotheses before touching code.
+argument-hint: [problem description]
 ---
 
 # Skill: /debug
 
 Structured debugging workflow. Diagnose before proposing fixes.
+
+## Problem reported
+
+$ARGUMENTS
 
 ## When to use it
 
@@ -15,10 +20,12 @@ When the user writes `/debug [problem description]` or reports a bug, error, or 
 
 ### Phase 1: Reproduce and understand
 
-1. Ask the user (if not provided):
+1. If **Problem reported** above is empty, ask the user:
    - What behavior were you expecting?
    - What behavior are you getting?
    - When did it start? Does it always happen or is it intermittent?
+   
+   If it's already provided, skip directly to step 2.
 
 2. Read the files relevant to the error. If there's a stack trace, follow the trail from the error upward.
 

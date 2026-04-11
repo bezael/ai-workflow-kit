@@ -1,11 +1,21 @@
 ---
 name: ak:pr
 description: Create a Pull Request with description, test plan, and checklist. Use when the user says /pr, "create PR", or "open pull request". Reads real branch commits and diff.
+disable-model-invocation: true
+argument-hint: [feat|fix|chore: title]
+allowed-tools: Bash(git *) Bash(gh *)
 ---
 
 # Skill: /pr
 
 Creates a Pull Request with a clear description, test plan, and checklist. Reads the real branch commits.
+
+## Context
+
+- Current branch: !`git branch --show-current`
+- Commits in this branch: !`git log main..HEAD --oneline`
+- Changed files: !`git diff main..HEAD --name-only`
+- Diff summary: !`git diff main..HEAD --stat`
 
 ## When to use it
 
@@ -13,11 +23,8 @@ When the user writes `/pr` or asks to "create PR" / "open pull request".
 
 ## Steps
 
-1. Detect the current branch: `git branch --show-current`
-2. Detect the base branch (main or master): `git remote show origin | grep HEAD`
-3. Read the branch commits: `git log main..HEAD --oneline`
-4. Read the full diff: `git diff main..HEAD --stat`
-5. With that information, build:
+1. Read the **Context** above — branch, commits, and changed files are already loaded.
+2. With that information, build:
 
 ### PR structure
 

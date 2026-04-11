@@ -1,11 +1,19 @@
 ---
 name: ak:commit
 description: Generate a semantic commit message by reading the real staged diff. Use when the user says /commit, "make a commit", or "commit the changes". Never invents — reads the actual diff.
+disable-model-invocation: true
+allowed-tools: Bash(git *)
 ---
 
 # Skill: /commit
 
 Generates a semantic commit message by reading the real diff. Don't invent — read the code.
+
+## Context
+
+- Staged files: !`git diff --staged --name-only`
+- Staged diff: !`git diff --staged`
+- Unstaged diff (if nothing staged): !`git diff`
 
 ## When to use it
 
@@ -13,8 +21,7 @@ When the user writes `/commit` or asks to "make a commit" / "commit the changes"
 
 ## Steps
 
-1. Run `git diff --staged` to see staged changes.
-   - If nothing is staged, run `git diff` to see unstaged changes and report it.
+1. Read the **Staged diff** above. If it's empty, use the **Unstaged diff** and warn the user that nothing is staged yet.
 2. Read the full diff. Identify:
    - **What changed** (files, functions, logic)
    - **Why it probably changed** (new feature, fix, refactor, docs, etc.)
