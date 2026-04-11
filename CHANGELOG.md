@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.0] - 2026-04-11
+
+### Added
+- Update README.es.md to introduce AI Workflow Kit and enhance installation instructions
+- Add documentation for Google Antigravity and cross-tool agent rules
+
 ## [2.0.0] - 2026-04-09
 
 ### Changed
@@ -43,8 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Memory pattern (`memory/project.md`)
 - Support for Claude Code, Cursor, and GitHub Copilot
 - Eval framework with Vitest + LLM-based evals via Anthropic SDK
-- Spanish README (`README.es.md`)[1.1.0]: https://github.com/bezael/ai-workflow-kit/compare/...v1.1.0
-[1.1.0]: https://github.com/bezael/ai-workflow-kit/compare/...v1.1.0
+- Spanish README (`README.es.md`)[1.1.0]: https://github.com/bezael/ai-workflow-kit/compare/...v1.1.0[2.0.0]: https://github.com/bezael/ai-workflow-kit/compare/v1.1.0...v2.0.0
 
-[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v2.0.0...HEAD
-[2.0.0]: https://github.com/bezael/ai-workflow-kit/compare/v1.1.0...v2.0.0
+[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.0.0...v2.1.0
