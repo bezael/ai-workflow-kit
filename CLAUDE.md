@@ -7,14 +7,17 @@ Works with: **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravit
 
 ## Available Skills
 
-| Command          | Description                                         |
-|------------------|-----------------------------------------------------|
-| `/ak:commit`     | Generates commit message with real diff context     |
-| `/ak:pr`         | Creates PR with description, test plan, and checklist |
-| `/ak:review`     | Reviews code or PR with configurable criteria       |
-| `/ak:plan`       | Plans before executing complex tasks                |
-| `/ak:debug`      | Structured debugging workflow                       |
-| `/ak:vibe-audit` | Audit of apps generated with vibe coding          |
+| Command                      | Description                                         |
+|------------------------------|-----------------------------------------------------|
+| `/ak:commit`                 | Generates commit message with real diff context     |
+| `/ak:pr`                     | Creates PR with description, test plan, and checklist |
+| `/ak:review`                 | Reviews code or PR with configurable criteria       |
+| `/ak:plan`                   | Plans before executing complex tasks                |
+| `/ak:debug`                  | Structured debugging workflow                       |
+| `/ak:vibe-audit`             | Audit of apps generated with vibe coding            |
+| `/ak:memory save [topic]`    | Persist learnings from the current session          |
+| `/ak:memory recall [question]` | Retrieve relevant memory before acting            |
+| `/ak:memory clean`           | Remove or update stale memories                     |
 
 ## Specialized Agents
 
@@ -53,4 +56,15 @@ Adapt this section to your real project. Example:
 
 ## Project memory
 
-See `memory/project.md` for architecture decisions and accumulated context.
+Memory is split across multiple files for clarity and maintainability:
+
+| File | Contents |
+|------|----------|
+| `memory/MEMORY.md` | Index — start here, lists all memory files |
+| `memory/project.md` | Architecture decisions, stack, business context |
+| `memory/feedback.md` | What to repeat, what to avoid, team preferences |
+| `memory/user.md` | Team roles, expertise, communication style |
+| `memory/decisions/` | Individual ADRs — one file per decision |
+
+**At the start of each non-trivial session:** read `memory/MEMORY.md`, then load the relevant files.
+**At the end of a session with learnings:** run `/ak:memory save` to persist them.

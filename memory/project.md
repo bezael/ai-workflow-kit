@@ -1,25 +1,45 @@
-# Project Memory
+# Memory: Project
 
-Use this file to store architecture decisions, project context, and accumulated learnings.
-Claude Code will read it every session if referenced in CLAUDE.md.
+Architecture decisions, stack context, and accumulated project knowledge.
 
-## Architecture decisions
-
-<!-- Example:
-### 2026-04-05 — Auth with JWT
-We chose refresh token rotation because the team already had experience with it
-and token theft risk was a priority. Session cookies were evaluated but the frontend
-is mobile-first which complicates cookie handling.
--->
+---
 
 ## Stack and conventions
 
-<!-- Document the real project stack here when you have it -->
+<!-- Document the real project stack here.
+Example:
+- Frontend: React 18 + TypeScript + Tailwind CSS
+- Backend: Node.js / Express
+- Database: PostgreSQL + Prisma ORM
+- Tests: Vitest + Testing Library
+- CI/CD: GitHub Actions
+- Deploy: Vercel (frontend) / Railway (backend)
+-->
 
-## What NOT to do
+## Architecture decisions
 
-<!-- Negative learnings: things that were tried and didn't work -->
+<!-- Format:
+### YYYY-MM-DD — [Decision title]
+**Decision:** What was decided.
+**Why:** The reason — constraint, trade-off, team preference.
+**Alternatives considered:** What was evaluated and rejected.
+**Still valid?** Yes / Review after [date or event]
+-->
 
 ## Business context
 
-<!-- Domain information that the AI needs to make better decisions -->
+<!-- Domain knowledge the AI needs to make better decisions.
+Example:
+- "Order" always means a confirmed purchase, not a cart
+- Users can have multiple roles simultaneously
+- Free tier is limited to 3 projects, paid has no limit
+-->
+
+## What NOT to do
+
+<!-- Hard-won negative learnings.
+Example:
+### 2026-03-10 — Don't use optimistic updates on payment flows
+Caused a bug where UI showed success but payment failed silently.
+Use pessimistic updates (wait for server confirmation) on anything money-related.
+-->
