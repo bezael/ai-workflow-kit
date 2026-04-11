@@ -9,6 +9,7 @@ Each entry points to a specific memory file — read the relevant ones based on 
 - [Feedback](feedback.md) — What worked, what to avoid, team preferences
 - [User](user.md) — Team roles, expertise, communication style preferences
 - [Decisions](decisions/) — Individual ADRs and one-off decisions (one file per decision)
+- [Changelog](CHANGELOG.md) — Log of all memory additions, updates, and removals
 
 ## How to use this index
 
