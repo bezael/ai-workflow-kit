@@ -13,6 +13,12 @@ Updated automatically by `/ak:memory save` and `/ak:memory clean`.
 **Why:** The reason this was worth persisting (what would be lost without it)
 -->
 
+## 2026-04-11 — Skills/agents upgrade + CLI interactive menu
+**Action:** Updated
+**File:** memory/project.md
+**Entry:** Architecture decisions for directory format, agents install path, and CLI design
+**Why:** Major refactor session — all skills migrated to directories, agents updated with Claude Code subagent frontmatter, CLI redesigned with interactive selection menu.
+
 ## 2026-04-11 — Initial memory system setup
 **Action:** Added
 **File:** memory/project.md, memory/feedback.md, memory/user.md, memory/decisions/
