@@ -134,87 +134,94 @@ async function ask(question) {
   return ans.toLowerCase() === 's' || ans.toLowerCase() === 'y'
 }
 
-// ─── Selection menu ──────────────────────────────────────────────────────────
+// ─── Selection — step 1: categories ─────────────────────────────────────────
 
-function renderMenu(allSkills, allAgents, allHooks) {
-  const numWidth = String(allSkills.length + allAgents.length + allHooks.length).length
-
-  function grid(items, startNum) {
-    const cols = 3
-    const colW  = 14
-    for (let i = 0; i < items.length; i += cols) {
-      const row = items.slice(i, i + cols)
-      const line = row.map(({ num, name }) => {
-        const label = `${String(num).padStart(numWidth)}  ${c.cyan}${name}${c.reset}`
-        // strip ANSI for length calculation
-        const rawLen = String(num).padStart(numWidth).length + 2 + name.length
-        return label + ' '.repeat(Math.max(1, colW - rawLen))
-      }).join('  ')
-      console.log('  ' + line)
-    }
-  }
-
-  let n = 1
-  const skillItems  = allSkills.map(s  => ({ num: n++, name: s.name,            item: s,  type: 'skill' }))
-  const agentItems  = allAgents.map(a  => ({ num: n++, name: a.name,            item: a,  type: 'agent' }))
-  const hookItems   = allHooks.map(h   => ({ num: n++, name: path.basename(h, '.sh'), item: h, type: 'hook'  }))
+async function selectCategories(allSkills, allAgents, allHooks) {
+  const skillNames = allSkills.map(s => s.name).join(', ')
+  const agentNames = allAgents.map(a => a.name).join(', ')
+  const hookNames  = allHooks.map(h => path.basename(h, '.sh')).join(', ')
 
   console.log(`\n${c.bold}  What would you like to install?${c.reset}\n`)
-
-  console.log(`  ${c.bold}SKILLS${c.reset}`)
-  grid(skillItems)
+  console.log(`  ${c.cyan}s${c.reset}   Skills    ${c.dim}${skillNames}${c.reset}`)
+  console.log(`  ${c.cyan}ag${c.reset}  Agents    ${c.dim}${agentNames}${c.reset}`)
+  console.log(`  ${c.cyan}h${c.reset}   Hooks     ${c.dim}${hookNames}${c.reset}`)
+  console.log(`  ${c.cyan}a${c.reset}   All of the above`)
   console.log()
 
-  console.log(`  ${c.bold}AGENTS${c.reset}`)
-  grid(agentItems)
+  const input = await prompt(`  Enter categories ${c.dim}(e.g. "s h" or "a")${c.reset}: `)
+  const tokens = input.toLowerCase().split(/[\s,]+/).filter(Boolean)
+
+  if (!tokens.length) return { wantSkills: false, wantAgents: false, wantHooks: false }
+
+  if (tokens.includes('a') || tokens.includes('all')) {
+    return { wantSkills: true, wantAgents: true, wantHooks: true }
+  }
+
+  return {
+    wantSkills: tokens.includes('s') || tokens.includes('skills'),
+    wantAgents: tokens.includes('ag') || tokens.includes('agents'),
+    wantHooks:  tokens.includes('h') || tokens.includes('hooks'),
+  }
+}
+
+// ─── Selection — step 2: items within a category ────────────────────────────
+
+async function selectItemsInCategory(items, getName) {
+  const numWidth = String(items.length).length
+  const cols = 3
+  const colW = 16
+
+  console.log()
+  for (let i = 0; i < items.length; i += cols) {
+    const row = items.slice(i, i + cols)
+    const line = row.map((item, j) => {
+      const n    = i + j + 1
+      const name = getName(item)
+      const label  = `  ${c.dim}${String(n).padStart(numWidth)}${c.reset}  ${c.cyan}${name}${c.reset}`
+      const rawLen = 2 + String(n).padStart(numWidth).length + 2 + name.length
+      return label + ' '.repeat(Math.max(1, colW - rawLen))
+    }).join('')
+    console.log(line)
+  }
   console.log()
 
-  console.log(`  ${c.bold}HOOKS${c.reset}`)
-  grid(hookItems)
-  console.log()
+  const input = await prompt(`  Enter numbers or ${c.cyan}Enter${c.reset} for all: `)
 
-  console.log(`  ${c.dim}Shortcuts: [a] all  [s] all skills  [ag] all agents  [h] all hooks${c.reset}`)
-  console.log()
+  if (!input.trim()) return items
 
-  return { skillItems, agentItems, hookItems }
+  const selected = new Set()
+  for (const token of input.split(/[\s,]+/).filter(Boolean)) {
+    const n = parseInt(token, 10)
+    if (n >= 1 && n <= items.length) selected.add(items[n - 1])
+  }
+  return [...selected]
 }
 
 async function selectItems(allSkills, allAgents, allHooks) {
-  const { skillItems, agentItems, hookItems } = renderMenu(allSkills, allAgents, allHooks)
-  const allItems = [...skillItems, ...agentItems, ...hookItems]
+  const { wantSkills, wantAgents, wantHooks } = await selectCategories(allSkills, allAgents, allHooks)
 
-  const input = await prompt(`  Enter numbers or shortcuts ${c.dim}(e.g. "1 3 5" or "s h")${c.reset}: `)
+  if (!wantSkills && !wantAgents && !wantHooks) return { skills: [], agents: [], hooks: [] }
 
-  if (!input) return { skills: [], agents: [], hooks: [] }
+  let skills = []
+  let agents = []
+  let hooks  = []
 
-  const tokens  = input.toLowerCase().split(/[\s,]+/).filter(Boolean)
-  const skills  = new Set()
-  const agents  = new Set()
-  const hooks   = new Set()
-
-  for (const token of tokens) {
-    if (token === 'a' || token === 'all') {
-      return { skills: allSkills, agents: allAgents, hooks: allHooks }
-    }
-    if (token === 's' || token === 'skills') {
-      allSkills.forEach(s => skills.add(s)); continue
-    }
-    if (token === 'ag' || token === 'agents') {
-      allAgents.forEach(a => agents.add(a)); continue
-    }
-    if (token === 'h' || token === 'hooks') {
-      allHooks.forEach(h => hooks.add(h)); continue
-    }
-    const num   = parseInt(token, 10)
-    const found = allItems.find(i => i.num === num)
-    if (found) {
-      if (found.type === 'skill') skills.add(found.item)
-      if (found.type === 'agent') agents.add(found.item)
-      if (found.type === 'hook')  hooks.add(found.item)
-    }
+  if (wantSkills && allSkills.length > 0) {
+    console.log(`\n  ${c.bold}SKILLS${c.reset}  — pick specific or Enter for all`)
+    skills = await selectItemsInCategory(allSkills, s => s.name)
   }
 
-  return { skills: [...skills], agents: [...agents], hooks: [...hooks] }
+  if (wantAgents && allAgents.length > 0) {
+    console.log(`\n  ${c.bold}AGENTS${c.reset}  — pick specific or Enter for all`)
+    agents = await selectItemsInCategory(allAgents, a => a.name)
+  }
+
+  if (wantHooks && allHooks.length > 0) {
+    console.log(`\n  ${c.bold}HOOKS${c.reset}  — pick specific or Enter for all`)
+    hooks = await selectItemsInCategory(allHooks, h => path.basename(h, '.sh'))
+  }
+
+  return { skills, agents, hooks }
 }
 
 // ─── Header ──────────────────────────────────────────────────────────────────

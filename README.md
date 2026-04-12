@@ -11,9 +11,18 @@ Works with **Claude Code**, **Cursor**, **GitHub Copilot**, and **Google Antigra
 npx ai-workflow-kit
 ```
 
+Or pin a specific version as a dev dependency (it's a dev tool, not a runtime dependency):
+
+```bash
+npm i -D ai-workflow-kit@2.2.0-beta.1
+npx ai-workflow-kit
+```
+
 Restart Claude Code. You'll have `/ak:commit`, `/ak:pr`, `/ak:plan`, `/ak:debug`, `/ak:review`, `/ak:vibe-audit`, `/ak:frontend`, `/ak:api`, `/ak:test`, `/ak:refactor`, and `/ak:docs` available — plus 5 automatic hooks.
 
 ```bash
+npx ai-workflow-kit --global   # install into ~/.claude/ — all projects (default)
+npx ai-workflow-kit --local    # install into .claude/ — this project only
 npx ai-workflow-kit --skills   # skills and agents only
 npx ai-workflow-kit --hooks    # hooks only
 npx ai-workflow-kit --yes      # no confirmations
