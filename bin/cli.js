@@ -254,15 +254,16 @@ let isLocal
 
 if (FORCE_LOCAL) {
   isLocal = true
-} else if (FORCE_GLOBAL) {
+} else if (FORCE_GLOBAL || YES || SKILLS_ONLY || HOOKS_ONLY || UNINSTALL) {
+  // Non-interactive modes: default to global, no prompt
   isLocal = false
 } else {
-  // Interactive scope question
+  // Fully interactive: ask the user
   console.log(`  ${c.bold}Where do you want to install?${c.reset}`)
   console.log(`  ${c.cyan}g${c.reset}  Global  ${c.dim}~/.claude/          — available in all projects${c.reset}`)
   console.log(`  ${c.cyan}l${c.reset}  Local   ${c.dim}.claude/ (here)     — this project only${c.reset}`)
   console.log()
-  const scopeAns = (YES || UNINSTALL) ? 'g' : await prompt(`  ${c.dim}[g/l]${c.reset} `)
+  const scopeAns = await prompt(`  ${c.dim}[g/l]${c.reset} `)
   isLocal = scopeAns.toLowerCase() === 'l'
   console.log()
 }
