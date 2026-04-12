@@ -19,7 +19,7 @@ const REPO_ROOT = path.resolve(__dir, '../..')
 const client = new Anthropic()
 
 function loadSkill(name) {
-  return fs.readFileSync(path.join(REPO_ROOT, 'skills', `${name}.md`), 'utf8')
+  return fs.readFileSync(path.join(REPO_ROOT, 'skills', name, 'SKILL.md'), 'utf8')
 }
 
 function loadFixture(relativePath) {

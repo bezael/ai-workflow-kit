@@ -33,12 +33,12 @@ afterAll(() => {
 })
 
 describe('CLI --list', () => {
-  it('lists 6 skills', () => {
+  it('lists 7 skills', () => {
     const r = runCLI(['--list'], tmpHome)
     expect(r.exitCode).toBe(0)
-    // 6 skills: commit, pr, review, plan, debug, vibe-audit
+    // 7 skills: commit, pr, review, plan, debug, vibe-audit, memory
     const skillMatches = r.stdout.match(/\/[a-z-]+/g) ?? []
-    expect(skillMatches.length).toBeGreaterThanOrEqual(6)
+    expect(skillMatches.length).toBeGreaterThanOrEqual(7)
   })
 
   it('lists agents section', () => {
@@ -69,19 +69,29 @@ describe('CLI --skills --yes', () => {
     expect(fs.existsSync(dir)).toBe(true)
   })
 
-  it('copies skill files to ~/.claude/skills/', () => {
+  it('copies skill directories to ~/.claude/skills/', () => {
     const dir = path.join(skillsHome, '.claude', 'skills')
-    const files = fs.readdirSync(dir)
-    expect(files).toContain('commit.md')
-    expect(files).toContain('pr.md')
-    expect(files).toContain('review.md')
-    expect(files).toContain('plan.md')
-    expect(files).toContain('debug.md')
-    expect(files).toContain('vibe-audit.md')
+    const entries = fs.readdirSync(dir)
+    expect(entries).toContain('commit')
+    expect(entries).toContain('pr')
+    expect(entries).toContain('review')
+    expect(entries).toContain('plan')
+    expect(entries).toContain('debug')
+    expect(entries).toContain('vibe-audit')
+    expect(entries).toContain('memory')
   })
 
-  it('copies agent files to ~/.claude/skills/', () => {
-    const dir = path.join(skillsHome, '.claude', 'skills')
+  it('each skill directory contains SKILL.md', () => {
+    const skillsDir = path.join(skillsHome, '.claude', 'skills')
+    for (const name of ['commit', 'pr', 'review', 'plan', 'debug', 'vibe-audit', 'memory']) {
+      const skillMd = path.join(skillsDir, name, 'SKILL.md')
+      expect(fs.existsSync(skillMd), `${name}/SKILL.md should exist`).toBe(true)
+    }
+  })
+
+  it('copies agent files to ~/.claude/agents/', () => {
+    const dir = path.join(skillsHome, '.claude', 'agents')
+    expect(fs.existsSync(dir)).toBe(true)
     const files = fs.readdirSync(dir)
     expect(files).toContain('frontend.md')
     expect(files).toContain('api.md')
@@ -197,12 +207,12 @@ describe('CLI --uninstall', () => {
     fs.rmSync(uninstallHome, { recursive: true, force: true })
   })
 
-  it('removes skill files', () => {
+  it('removes skill directories', () => {
     const skillsDir = path.join(uninstallHome, '.claude', 'skills')
     if (fs.existsSync(skillsDir)) {
-      const files = fs.readdirSync(skillsDir)
-      expect(files).not.toContain('commit.md')
-      expect(files).not.toContain('pr.md')
+      const entries = fs.readdirSync(skillsDir)
+      expect(entries).not.toContain('commit')
+      expect(entries).not.toContain('pr')
     }
     // If dir doesn't exist, that's also acceptable (fully cleaned up)
   })
