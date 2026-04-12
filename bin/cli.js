@@ -5,6 +5,8 @@
  * Usage:
  *   npx ai-workflow-kit              → interactive selection menu
  *   npx ai-workflow-kit --yes        → install everything without prompting
+ *   npx ai-workflow-kit --local      → install into .claude/ of the current project
+ *   npx ai-workflow-kit --global     → install into ~/.claude/ (default)
  *   npx ai-workflow-kit --skills     → all skills and agents only
  *   npx ai-workflow-kit --hooks      → all hooks only
  *   npx ai-workflow-kit --uninstall  → remove what was installed
@@ -34,15 +36,6 @@ const info = (s) => console.log(`${c.cyan}ℹ${c.reset}  ${s}`)
 const step = (s) => console.log(`\n${c.bold}${c.cyan}→ ${s}${c.reset}`)
 const dim  = (s) => console.log(`${c.dim}  ${s}${c.reset}`)
 
-// ─── Paths ───────────────────────────────────────────────────────────────────
-const __dir      = path.dirname(fileURLToPath(import.meta.url))
-const REPO_ROOT  = path.resolve(__dir, '..')
-const CLAUDE     = path.join(os.homedir(), '.claude')
-const SKILLS_DST = path.join(CLAUDE, 'skills')
-const AGENTS_DST = path.join(CLAUDE, 'agents')
-const HOOKS_DST  = path.join(CLAUDE, 'hooks')
-const SETTINGS   = path.join(CLAUDE, 'settings.json')
-
 // ─── Args ────────────────────────────────────────────────────────────────────
 const args        = process.argv.slice(2)
 const SKILLS_ONLY = args.includes('--skills')
@@ -50,6 +43,25 @@ const HOOKS_ONLY  = args.includes('--hooks')
 const YES         = args.includes('--yes') || args.includes('-y')
 const UNINSTALL   = args.includes('--uninstall')
 const LIST        = args.includes('--list')
+const FORCE_LOCAL  = args.includes('--local')
+const FORCE_GLOBAL = args.includes('--global')
+
+// ─── Paths ───────────────────────────────────────────────────────────────────
+const __dir     = path.dirname(fileURLToPath(import.meta.url))
+const REPO_ROOT = path.resolve(__dir, '..')
+
+function resolvePaths(isLocal) {
+  const base = isLocal
+    ? path.join(process.cwd(), '.claude')
+    : path.join(os.homedir(), '.claude')
+  return {
+    SKILLS_DST: path.join(base, 'skills'),
+    AGENTS_DST: path.join(base, 'agents'),
+    HOOKS_DST:  path.join(base, 'hooks'),
+    SETTINGS:   path.join(base, 'settings.json'),
+    base,
+  }
+}
 
 // ─── Discovery ───────────────────────────────────────────────────────────────
 
@@ -208,7 +220,7 @@ async function selectItems(allSkills, allAgents, allHooks) {
 // ─── Header ──────────────────────────────────────────────────────────────────
 console.log()
 console.log(`${c.bold}  AI Workflow Kit${c.reset}  ${c.dim}v${JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'package.json'), 'utf8')).version}${c.reset}`)
-console.log(`  ${c.dim}Skills · Agents · Hooks for Claude Code, Cursor & Copilot${c.reset}`)
+console.log(`  ${c.dim}Skills · Agents · Hooks for Claude Code, Cursor, Antigravity & Copilot${c.reset}`)
 console.log()
 
 // ─── List ─────────────────────────────────────────────────────────────────────
@@ -228,6 +240,31 @@ if (LIST) {
   console.log()
   process.exit(0)
 }
+
+// ─── Resolve scope (local vs global) ─────────────────────────────────────────
+
+let isLocal
+
+if (FORCE_LOCAL) {
+  isLocal = true
+} else if (FORCE_GLOBAL) {
+  isLocal = false
+} else {
+  // Interactive scope question
+  console.log(`  ${c.bold}Where do you want to install?${c.reset}`)
+  console.log(`  ${c.cyan}g${c.reset}  Global  ${c.dim}~/.claude/          — available in all projects${c.reset}`)
+  console.log(`  ${c.cyan}l${c.reset}  Local   ${c.dim}.claude/ (here)     — this project only${c.reset}`)
+  console.log()
+  const scopeAns = YES ? 'g' : await prompt(`  ${c.dim}[g/l]${c.reset} `)
+  isLocal = scopeAns.toLowerCase() === 'l'
+  console.log()
+}
+
+const { SKILLS_DST, AGENTS_DST, HOOKS_DST, SETTINGS, base: CLAUDE_BASE } = resolvePaths(isLocal)
+const scopeLabel = isLocal
+  ? `local  ${c.dim}(.claude/)${c.reset}`
+  : `global ${c.dim}(~/.claude/)${c.reset}`
+info(`Scope: ${scopeLabel}`)
 
 // ─── Uninstall ───────────────────────────────────────────────────────────────
 if (UNINSTALL) {
@@ -276,19 +313,15 @@ let selectedAgents = []
 let selectedHooks  = []
 
 if (SKILLS_ONLY) {
-  // --skills wins over --yes: scope to skills + agents only
   selectedSkills = allSkills
   selectedAgents = allAgents
 } else if (HOOKS_ONLY) {
-  // --hooks wins over --yes: scope to hooks only
   selectedHooks = allHooks
 } else if (YES) {
-  // --yes with no scope flag: install everything
   selectedSkills = allSkills
   selectedAgents = allAgents
   selectedHooks  = allHooks
 } else {
-  // Interactive selection menu
   const sel = await selectItems(allSkills, allAgents, allHooks)
   selectedSkills = sel.skills
   selectedAgents = sel.agents
@@ -305,7 +338,6 @@ if (SKILLS_ONLY) {
 
 let installedCount = 0
 
-// Skills → ~/.claude/skills/
 if (selectedSkills.length > 0) {
   step('Installing skills...')
   fs.mkdirSync(SKILLS_DST, { recursive: true })
@@ -326,7 +358,6 @@ if (selectedSkills.length > 0) {
   }
 }
 
-// Agents → ~/.claude/agents/ (flat .md files)
 if (selectedAgents.length > 0) {
   step('Installing agents...')
   fs.mkdirSync(AGENTS_DST, { recursive: true })
@@ -345,7 +376,6 @@ if (selectedAgents.length > 0) {
   }
 }
 
-// Hooks → ~/.claude/hooks/ + configure settings.json
 if (selectedHooks.length > 0) {
   step('Installing hooks...')
   fs.mkdirSync(HOOKS_DST, { recursive: true })
@@ -361,9 +391,9 @@ if (selectedHooks.length > 0) {
   step('Configuring settings.json...')
 
   if (!fs.existsSync(SETTINGS)) {
-    const template    = fs.readFileSync(path.join(REPO_ROOT, 'hooks', 'settings.template.json'), 'utf8')
+    const template     = fs.readFileSync(path.join(REPO_ROOT, 'hooks', 'settings.template.json'), 'utf8')
     const hooksDstJson = HOOKS_DST.replace(/\\/g, '/')
-    const configured  = template.replace(/~\/\.claude\/hooks/g, hooksDstJson)
+    const configured   = template.replace(/~\/\.claude\/hooks/g, hooksDstJson)
     try {
       const cleaned = configured
         .replace(/\s*"_comment":[^\n]+,?\n/g, '\n')
