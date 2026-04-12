@@ -262,7 +262,7 @@ if (FORCE_LOCAL) {
   console.log(`  ${c.cyan}g${c.reset}  Global  ${c.dim}~/.claude/          — available in all projects${c.reset}`)
   console.log(`  ${c.cyan}l${c.reset}  Local   ${c.dim}.claude/ (here)     — this project only${c.reset}`)
   console.log()
-  const scopeAns = YES ? 'g' : await prompt(`  ${c.dim}[g/l]${c.reset} `)
+  const scopeAns = (YES || UNINSTALL) ? 'g' : await prompt(`  ${c.dim}[g/l]${c.reset} `)
   isLocal = scopeAns.toLowerCase() === 'l'
   console.log()
 }
