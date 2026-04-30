@@ -1,15 +1,27 @@
-# Skill: commit
+---
+name: ak:commit
+description: Generate a semantic commit message by reading the real staged diff. Use when the user says /commit, "make a commit", or "commit the changes". Never invents — reads the actual diff.
+disable-model-invocation: true
+allowed-tools: Bash(git *)
+---
+
+# Skill: /commit
 
 Generates a semantic commit message by reading the real diff. Don't invent — read the code.
 
-## Trigger
+## Context
 
-When the user writes `@commit` or asks to "make a commit" / "commit the changes".
+- Staged file list: !`git diff --staged --name-status`
+- Staged diff: !`git diff --staged`
+- Unstaged diff (if nothing staged): !`git diff`
+
+## When to use it
+
+When the user writes `/commit` or asks to "make a commit" / "commit the changes".
 
 ## Steps
 
-1. Run `git diff --staged --name-status` to list all staged files (including binary ones), then run `git diff --staged` to see the content diff.
-   - If nothing is staged, run `git diff` to see unstaged changes and report it.
+1. Read the **Staged file list** and **Staged diff** above. If both are empty, use the **Unstaged diff** and warn the user that nothing is staged yet.
 2. Read the full diff. Identify:
    - **What changed** (files, functions, logic)
    - **Why it probably changed** (new feature, fix, refactor, docs, etc.)
@@ -41,4 +53,4 @@ Invalidates old token immediately after issuing new one.
 - NEVER commit `.env` files, credentials, or secrets.
 - If you see sensitive files in staged, warn before continuing.
 - If the diff is large and mixes concerns, suggest splitting it into multiple commits.
-- Binary files appear as `Binary files a/... and b/... differ` in the diff — use their names and statuses from the `--name-status` output to describe them. Never omit binary files from the commit message.
+- Binary files appear as `Binary files a/... and b/... differ` in the diff — use their names and statuses from **Staged file list** to describe them. Never omit binary files from the commit message.

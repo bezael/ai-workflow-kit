@@ -1,0 +1,17 @@
+diff --git a/public/logo.png b/public/logo.png
+new file mode 100644
+index 0000000..a1b2c3d
+Binary files /dev/null and b/public/logo.png differ
+diff --git a/public/fonts/inter.woff2 b/public/fonts/inter.woff2
+new file mode 100644
+index 0000000..b2c3d4e
+Binary files /dev/null and b/public/fonts/inter.woff2 differ
+diff --git a/src/constants.ts b/src/constants.ts
+index e4f5g6h..i7j8k9l 100644
+--- a/src/constants.ts
++++ b/src/constants.ts
+@@ -1,3 +1,7 @@
+ export const APP_NAME = 'MyApp'
++
++export const LOGO_PATH = '/logo.png'
++export const FONT_PATH = '/fonts/inter.woff2'
