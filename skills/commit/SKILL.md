@@ -11,7 +11,7 @@ Generates a semantic commit message by reading the real diff. Don't invent — r
 
 ## Context
 
-- Staged files: !`git diff --staged --name-only`
+- Staged file list: !`git diff --staged --name-status`
 - Staged diff: !`git diff --staged`
 - Unstaged diff (if nothing staged): !`git diff`
 
@@ -21,7 +21,7 @@ When the user writes `/commit` or asks to "make a commit" / "commit the changes"
 
 ## Steps
 
-1. Read the **Staged diff** above. If it's empty, use the **Unstaged diff** and warn the user that nothing is staged yet.
+1. Read the **Staged file list** and **Staged diff** above. If both are empty, use the **Unstaged diff** and warn the user that nothing is staged yet.
 2. Read the full diff. Identify:
    - **What changed** (files, functions, logic)
    - **Why it probably changed** (new feature, fix, refactor, docs, etc.)
@@ -53,3 +53,4 @@ Invalidates old token immediately after issuing new one.
 - NEVER commit `.env` files, credentials, or secrets.
 - If you see sensitive files in staged, warn before continuing.
 - If the diff is large and mixes concerns, suggest splitting it into multiple commits.
+- Binary files appear as `Binary files a/... and b/... differ` in the diff — use their names and statuses from **Staged file list** to describe them. Never omit binary files from the commit message.

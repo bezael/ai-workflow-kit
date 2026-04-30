@@ -5,6 +5,20 @@
 Skills, agents, and hooks for working with AI coding tools consistently and professionally.
 Works with **Claude Code**, **Cursor**, **GitHub Copilot**, and **Google Antigravity**.
 
+## Getting started in 60 seconds
+
+```bash
+# 1. Install
+npx ai-workflow-kit
+
+# 2. Restart Claude Code (or your AI tool)
+
+# 3. Run your first skill
+/ak:commit
+```
+
+That's it. You now have structured commit messages, PR descriptions, code review, debugging workflows, and more — all from your editor.
+
 ## Installation
 
 ```bash
@@ -89,22 +103,194 @@ ai-workflow-kit/
 
 | Skill | Command | What it does |
 |-------|---------|--------------|
-| commit | `/ak:commit` | Reads the real diff and generates a semantic commit message |
-| pr | `/ak:pr` | Creates PR with description, test plan, and checklist |
-| review | `/ak:review @file` | Reviews code: bugs, security, performance |
-| plan | `/ak:plan [task]` | Plans before executing complex tasks |
-| debug | `/ak:debug [problem]` | Diagnoses with hypotheses before proposing fixes |
-| vibe-audit | `/ak:vibe-audit` | Full audit of apps generated with vibe coding |
+| [commit](./antigravity-skills/commit/SKILL.md) | `/ak:commit` | Reads the real diff and generates a semantic commit message |
+| [pr](./antigravity-skills/pr/SKILL.md) | `/ak:pr` | Creates PR with description, test plan, and checklist |
+| [review](./antigravity-skills/review/SKILL.md) | `/ak:review @file` | Reviews code: bugs, security, performance |
+| [plan](./antigravity-skills/plan/SKILL.md) | `/ak:plan [task]` | Plans before executing complex tasks |
+| [debug](./antigravity-skills/debug/SKILL.md) | `/ak:debug [problem]` | Diagnoses with hypotheses before proposing fixes |
+| [vibe-audit](./antigravity-skills/vibe-audit/SKILL.md) | `/ak:vibe-audit` | Full audit of apps generated with vibe coding |
 
 ## Specialized Agents
 
 | Agent | Command | What it does |
 |-------|---------|--------------|
-| frontend | `/ak:frontend [description]` | Generates components following the project's design system |
-| api | `/ak:api [description]` | Generates endpoints with validation, auth, and error handling |
-| test | `/ak:test @file` | Writes tests by behavior, not by implementation |
-| refactor | `/ak:refactor @file` | Improves code without changing behavior |
-| docs | `/ak:docs @file` | Generates JSDoc, README, or ADR as needed |
+| [frontend](./agents/frontend/) | `/ak:frontend [description]` | Generates components following the project's design system |
+| [api](./agents/api/) | `/ak:api [description]` | Generates endpoints with validation, auth, and error handling |
+| [test](./agents/test/) | `/ak:test @file` | Writes tests by behavior, not by implementation |
+| [refactor](./agents/refactor/) | `/ak:refactor @file` | Improves code without changing behavior |
+| [docs](./agents/docs/) | `/ak:docs @file` | Generates JSDoc, README, or ADR as needed |
+
+## Real output examples
+
+<details>
+<summary><strong>/ak:commit</strong> — semantic commit from real diff</summary>
+
+```
+$ /ak:commit
+
+Reading staged diff...
+
+Suggested commit message:
+
+  feat(auth): add JWT refresh token rotation
+
+  - Generates new refresh token on every use (prevents replay attacks)
+  - Old token is invalidated immediately after rotation
+  - Adds 7-day expiry and httpOnly cookie storage
+
+Proceed? [Y/n]
+```
+
+</details>
+
+<details>
+<summary><strong>/ak:plan</strong> — plan before touching code</summary>
+
+```
+$ /ak:plan add rate limiting to the API
+
+## Plan: add rate limiting to the API
+
+### Goal
+Protect all public endpoints from abuse using per-IP sliding window limits.
+
+### Files to be touched
+- `src/middleware/rateLimiter.ts` — [new] sliding window implementation
+- `src/app.ts` — register middleware globally before route handlers
+- `src/config/limits.ts` — [new] per-route limit constants
+- `tests/middleware/rateLimiter.test.ts` — [new] behavior tests
+
+### Steps in order
+1. Install `rate-limiter-flexible` (Redis-backed, production-safe)
+2. Create `rateLimiter.ts` with 100 req/min default, 10 req/min for /auth/*
+3. Mount middleware in `app.ts` before all routes
+4. Add tests for limit exceeded (429), limit reset, and exempted routes
+
+### Risks / decisions
+- Redis required in prod — fallback to in-memory for local dev
+- Auth routes use stricter limits to slow brute-force attempts
+
+Approve this plan? [Y/n]
+```
+
+</details>
+
+<details>
+<summary><strong>/ak:debug</strong> — structured diagnosis</summary>
+
+```
+$ /ak:debug POST /api/orders returns 500 only on the second request
+
+Reading error logs and relevant files...
+
+## Hypotheses (ranked by likelihood)
+
+1. **Database connection not released after first request** (HIGH)
+   - `db.connect()` called inside handler without `finally` block
+   - Second request hits max pool size → timeout → 500
+   - Check: `src/handlers/orders.ts:34`
+
+2. **Singleton state mutated on first request** (MEDIUM)
+   - Shared `orderService` instance accumulates state
+   - Check: `src/services/OrderService.ts:12`
+
+3. **Missing await on async middleware** (LOW)
+   - Unlikely given the pattern but worth ruling out
+
+Recommended first step: add `finally { db.release() }` in orders handler.
+Reproduce with: `for i in 1 2; do curl -X POST localhost:3000/api/orders; done`
+```
+
+</details>
+
+<details>
+<summary><strong>/ak:review</strong> — real engineering criteria</summary>
+
+```
+$ /ak:review @src/services/PaymentService.ts
+
+Reviewing src/services/PaymentService.ts...
+
+## Issues found
+
+### CRITICAL
+- **Line 47**: Stripe secret key read from `process.env` inside a loop — 
+  rotated keys will silently use stale values until process restart.
+  Fix: read once at module init.
+
+### HIGH
+- **Line 89**: `catch (e) {}` swallows all payment errors.
+  Silent failures mean charged customers with no order created.
+
+### MEDIUM
+- **Line 112**: `amount` cast to `Number()` without validation —
+  NaN silently passed to Stripe, which returns a 400 that's also swallowed (see above).
+
+### LOW
+- **Line 23**: Redundant `async` on a function that never awaits.
+
+No security vulnerabilities found beyond those listed above.
+```
+
+</details>
+
+<details>
+<summary><strong>/ak:pr</strong> — PR with full description</summary>
+
+```
+$ /ak:pr feat: add CSV export to reports
+
+## feat: add CSV export to reports
+
+### Summary
+- Adds a CSV download button to the reports dashboard
+- Streams large datasets (>10k rows) to avoid memory spikes
+- Respects the existing date range and filter state
+
+### Test plan
+- [ ] Download CSV with 0, 1, and 10,000 rows
+- [ ] Verify column headers match table display
+- [ ] Confirm filters are applied in the export (not raw data)
+- [ ] Test with special characters in data (commas, quotes, newlines)
+
+### Notes
+Uses `fast-csv` (already in deps). No schema changes.
+
+Ready to open PR? [Y/n]
+```
+
+</details>
+
+<details>
+<summary><strong>/ak:vibe-audit</strong> — audit of AI-generated app</summary>
+
+```
+$ /ak:vibe-audit
+
+Scanning project for vibe-coding patterns...
+
+## Audit Report
+
+### Security (3 issues)
+- CRITICAL: API keys hardcoded in `src/lib/openai.ts:8`
+- HIGH: No input validation on user-supplied file paths (`/api/export`)
+- MEDIUM: CORS set to `*` in `server.ts` — restrict to known origins
+
+### Error handling (2 issues)
+- Missing error boundary in `app/dashboard/page.tsx`
+- Unhandled promise rejection in `hooks/useData.ts:34`
+
+### Code quality (4 issues)
+- 3 unused imports across 3 files
+- `any` type used 11 times — replace with real types
+
+### Tests
+- 0 test files found. Add tests before shipping.
+
+Fix the 2 critical/high issues before deploying to production.
+```
+
+</details>
 
 ## Available Hooks
 

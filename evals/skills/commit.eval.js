@@ -28,7 +28,7 @@ function loadFixture(relativePath) {
 
 const CONVENTIONAL_COMMIT_TYPES = ['feat', 'fix', 'refactor', 'chore', 'docs', 'test', 'style']
 
-async function runCommitEval(name, diffContent, expectedType) {
+async function runCommitEval(name, diffContent, expectedType, extraCriteria = []) {
   const skillPrompt = loadSkill('commit')
 
   const userMessage = `${skillPrompt}
@@ -67,6 +67,7 @@ Generate the commit message now.`
     {
       criterion: 'The message accurately describes what the diff actually changes, not something generic',
     },
+    ...extraCriteria,
   ]
 
   const result = await judge({
@@ -92,13 +93,21 @@ export async function runAll() {
       diff: loadFixture('sample-diffs/fix-null-check.diff'),
       expectedType: 'fix',
     },
+    {
+      name: 'chore: binary assets with text change',
+      diff: loadFixture('sample-diffs/chore-add-assets.diff'),
+      expectedType: 'chore',
+      extraCriteria: [
+        { criterion: 'The message references at least one of the binary assets (logo.png, inter.woff2) — binary files must not be silently dropped' },
+      ],
+    },
   ]
 
   const results = []
 
   for (const tc of cases) {
     process.stdout.write(`  Running: ${tc.name}...`)
-    const r = await runCommitEval(tc.name, tc.diff, tc.expectedType)
+    const r = await runCommitEval(tc.name, tc.diff, tc.expectedType, tc.extraCriteria)
     const status = r.passed ? '✅ PASS' : '❌ FAIL'
     console.log(` ${status} (${Math.round(r.score * 100)}%)`)
 
