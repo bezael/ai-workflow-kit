@@ -5,6 +5,20 @@
 Skills, agentes y hooks para trabajar con herramientas de AI coding de forma consistente y profesional.
 Compatible con **Claude Code**, **Cursor**, **GitHub Copilot** y **Google Antigravity**.
 
+## Cómo empezar en 60 segundos
+
+```bash
+# 1. Instalar
+npx ai-workflow-kit
+
+# 2. Reiniciar Claude Code (o tu herramienta de AI)
+
+# 3. Usar tu primer skill
+/ak:commit
+```
+
+Listo. Ahora tienes mensajes de commit estructurados, descripciones de PR, revisión de código, workflows de debugging y más — todo desde tu editor.
+
 ## Instalación
 
 ```bash
@@ -80,22 +94,164 @@ ai-workflow-kit/
 
 | Skill | Comando | Qué hace |
 |-------|---------|----------|
-| commit | `/ak:commit` | Lee el diff real y genera un mensaje de commit semántico |
-| pr | `/ak:pr` | Crea PR con descripción, plan de tests y checklist |
-| review | `/ak:review @file` | Revisa código: bugs, seguridad, performance |
-| plan | `/ak:plan [tarea]` | Planifica antes de ejecutar tareas complejas |
-| debug | `/ak:debug [problema]` | Diagnostica con hipótesis antes de proponer fixes |
-| vibe-audit | `/ak:vibe-audit` | Auditoría completa de apps generadas con vibe coding |
+| [commit](./antigravity-skills/commit/SKILL.md) | `/ak:commit` | Lee el diff real y genera un mensaje de commit semántico |
+| [pr](./antigravity-skills/pr/SKILL.md) | `/ak:pr` | Crea PR con descripción, plan de tests y checklist |
+| [review](./antigravity-skills/review/SKILL.md) | `/ak:review @file` | Revisa código: bugs, seguridad, performance |
+| [plan](./antigravity-skills/plan/SKILL.md) | `/ak:plan [tarea]` | Planifica antes de ejecutar tareas complejas |
+| [debug](./antigravity-skills/debug/SKILL.md) | `/ak:debug [problema]` | Diagnostica con hipótesis antes de proponer fixes |
+| [vibe-audit](./antigravity-skills/vibe-audit/SKILL.md) | `/ak:vibe-audit` | Auditoría completa de apps generadas con vibe coding |
 
 ## Agentes especializados
 
 | Agente | Comando | Qué hace |
 |--------|---------|----------|
-| frontend | `/ak:frontend [descripción]` | Genera componentes siguiendo el design system del proyecto |
-| api | `/ak:api [descripción]` | Genera endpoints con validación, auth y manejo de errores |
-| test | `/ak:test @file` | Escribe tests por comportamiento, no por implementación |
-| refactor | `/ak:refactor @file` | Mejora código sin cambiar comportamiento |
-| docs | `/ak:docs @file` | Genera JSDoc, README o ADR según se necesite |
+| [frontend](./agents/frontend/) | `/ak:frontend [descripción]` | Genera componentes siguiendo el design system del proyecto |
+| [api](./agents/api/) | `/ak:api [descripción]` | Genera endpoints con validación, auth y manejo de errores |
+| [test](./agents/test/) | `/ak:test @file` | Escribe tests por comportamiento, no por implementación |
+| [refactor](./agents/refactor/) | `/ak:refactor @file` | Mejora código sin cambiar comportamiento |
+| [docs](./agents/docs/) | `/ak:docs @file` | Genera JSDoc, README o ADR según se necesite |
+
+## Ejemplos de output real
+
+<details>
+<summary><strong>/ak:commit</strong> — commit semántico desde el diff real</summary>
+
+```
+$ /ak:commit
+
+Leyendo diff staged...
+
+Mensaje de commit sugerido:
+
+  feat(auth): agregar rotación de refresh token JWT
+
+  - Genera nuevo refresh token en cada uso (previene ataques de replay)
+  - El token anterior se invalida inmediatamente tras la rotación
+  - Agrega expiración de 7 días y almacenamiento en cookie httpOnly
+
+¿Continuar? [Y/n]
+```
+
+</details>
+
+<details>
+<summary><strong>/ak:plan</strong> — planificar antes de tocar código</summary>
+
+```
+$ /ak:plan agregar rate limiting a la API
+
+## Plan: agregar rate limiting a la API
+
+### Objetivo
+Proteger todos los endpoints públicos de abuso con límites de ventana deslizante por IP.
+
+### Archivos a modificar
+- `src/middleware/rateLimiter.ts` — [nuevo] implementación de ventana deslizante
+- `src/app.ts` — registrar middleware globalmente antes de los route handlers
+- `src/config/limits.ts` — [nuevo] constantes de límite por ruta
+- `tests/middleware/rateLimiter.test.ts` — [nuevo] tests de comportamiento
+
+### Pasos en orden
+1. Instalar `rate-limiter-flexible` (con soporte Redis, listo para producción)
+2. Crear `rateLimiter.ts` con 100 req/min por defecto, 10 req/min para /auth/*
+3. Montar middleware en `app.ts` antes de todas las rutas
+4. Agregar tests para límite excedido (429), reset del límite y rutas exentas
+
+### Riesgos / decisiones
+- Redis requerido en prod — fallback a in-memory para desarrollo local
+- Las rutas de auth usan límites más estrictos para ralentizar fuerza bruta
+
+¿Aprobar este plan? [Y/n]
+```
+
+</details>
+
+<details>
+<summary><strong>/ak:debug</strong> — diagnóstico estructurado</summary>
+
+```
+$ /ak:debug POST /api/orders devuelve 500 solo en la segunda request
+
+Leyendo logs de error y archivos relevantes...
+
+## Hipótesis (ordenadas por probabilidad)
+
+1. **Conexión a base de datos no liberada tras la primera request** (ALTA)
+   - `db.connect()` llamado dentro del handler sin bloque `finally`
+   - La segunda request alcanza el máximo del pool → timeout → 500
+   - Verificar: `src/handlers/orders.ts:34`
+
+2. **Estado del singleton mutado en la primera request** (MEDIA)
+   - La instancia compartida `orderService` acumula estado
+   - Verificar: `src/services/OrderService.ts:12`
+
+3. **await faltante en middleware async** (BAJA)
+   - Poco probable dado el patrón, pero vale descartarlo
+
+Primer paso recomendado: agregar `finally { db.release() }` en el handler de orders.
+```
+
+</details>
+
+<details>
+<summary><strong>/ak:review</strong> — criterios reales de ingeniería</summary>
+
+```
+$ /ak:review @src/services/PaymentService.ts
+
+Revisando src/services/PaymentService.ts...
+
+## Problemas encontrados
+
+### CRÍTICO
+- **Línea 47**: La clave secreta de Stripe se lee desde `process.env` dentro de un loop —
+  las claves rotadas usarán valores obsoletos hasta reiniciar el proceso.
+  Fix: leer una vez al inicializar el módulo.
+
+### ALTO
+- **Línea 89**: `catch (e) {}` silencia todos los errores de pago.
+  Fallos silenciosos significan clientes cobrados sin orden creada.
+
+### MEDIO
+- **Línea 112**: `amount` convertido con `Number()` sin validación —
+  NaN se pasa silenciosamente a Stripe, que devuelve 400 (también silenciado).
+
+### BAJO
+- **Línea 23**: `async` redundante en una función que nunca usa await.
+```
+
+</details>
+
+<details>
+<summary><strong>/ak:vibe-audit</strong> — auditoría de app generada con AI</summary>
+
+```
+$ /ak:vibe-audit
+
+Escaneando proyecto en busca de patrones de vibe coding...
+
+## Reporte de Auditoría
+
+### Seguridad (3 problemas)
+- CRÍTICO: API keys hardcodeadas en `src/lib/openai.ts:8`
+- ALTO: Sin validación en rutas de archivo enviadas por el usuario (`/api/export`)
+- MEDIO: CORS configurado a `*` en `server.ts` — restringir a orígenes conocidos
+
+### Manejo de errores (2 problemas)
+- Falta error boundary en `app/dashboard/page.tsx`
+- Promise rejection sin manejar en `hooks/useData.ts:34`
+
+### Calidad de código (4 problemas)
+- 3 imports no usados en 3 archivos
+- Tipo `any` usado 11 veces — reemplazar con tipos reales
+
+### Tests
+- 0 archivos de test encontrados. Agrega tests antes de hacer deploy.
+
+Corrige los 2 problemas críticos/altos antes de desplegar a producción.
+```
+
+</details>
 
 ## Hooks disponibles
 

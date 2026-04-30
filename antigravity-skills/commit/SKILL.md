@@ -8,7 +8,7 @@ When the user writes `@commit` or asks to "make a commit" / "commit the changes"
 
 ## Steps
 
-1. Run `git diff --staged` to see staged changes.
+1. Run `git diff --staged --name-status` to list all staged files (including binary ones), then run `git diff --staged` to see the content diff.
    - If nothing is staged, run `git diff` to see unstaged changes and report it.
 2. Read the full diff. Identify:
    - **What changed** (files, functions, logic)
@@ -41,3 +41,4 @@ Invalidates old token immediately after issuing new one.
 - NEVER commit `.env` files, credentials, or secrets.
 - If you see sensitive files in staged, warn before continuing.
 - If the diff is large and mixes concerns, suggest splitting it into multiple commits.
+- Binary files appear as `Binary files a/... and b/... differ` in the diff — use their names and statuses from the `--name-status` output to describe them. Never omit binary files from the commit message.
