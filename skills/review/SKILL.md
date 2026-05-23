@@ -1,7 +1,7 @@
 ---
 name: ak:review
 description: Review code with real engineering criteria — logic bugs, security vulnerabilities, and technical debt. Use when user says /review @file or /review to review current PR changes.
-argument-hint: [@file or leave empty for PR diff]
+argument-hint: "[@file or leave empty for PR diff]"
 context: fork
 agent: Explore
 allowed-tools: Read Grep Glob Bash(git *)

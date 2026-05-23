@@ -2,7 +2,7 @@
 name: ak:vibe-audit
 description: Audit AI-generated apps for security, performance, and maintainability issues. Use when user says /vibe-audit or "I generated this with AI and want to know how bad it is".
 disable-model-invocation: true
-argument-hint: [@folder or leave empty for current project]
+argument-hint: "[@folder or leave empty for current project]"
 context: fork
 agent: Explore
 ---

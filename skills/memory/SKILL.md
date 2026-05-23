@@ -1,6 +1,6 @@
 ---
 name: ak:memory
-description: Manage persistent memory across sessions. Subcommands: save [topic] captures session learnings, recall [question] retrieves relevant context before acting, clean removes stale entries.
+description: "Manage persistent memory across sessions. Subcommands: save [topic] captures session learnings, recall [question] retrieves relevant context before acting, clean removes stale entries."
 argument-hint: <save|recall|clean> [topic or question]
 ---
 
