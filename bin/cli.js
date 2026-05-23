@@ -3,12 +3,16 @@
  * AI Workflow Kit — CLI installer
  *
  * Usage:
- *   npx ai-workflow-kit              → interactive selection menu
+ *   npx ai-workflow-kit              → interactive (asks IDE, scope, items)
  *   npx ai-workflow-kit --yes        → install everything without prompting
- *   npx ai-workflow-kit --local      → install into .claude/ of the current project
+ *   npx ai-workflow-kit --local      → install into .claude/ of current project
  *   npx ai-workflow-kit --global     → install into ~/.claude/ (default)
- *   npx ai-workflow-kit --skills     → all skills and agents only
- *   npx ai-workflow-kit --hooks      → all hooks only
+ *   npx ai-workflow-kit --claude     → skip IDE prompt, use Claude Code
+ *   npx ai-workflow-kit --cursor     → skip IDE prompt, use Cursor
+ *   npx ai-workflow-kit --copilot    → skip IDE prompt, use GitHub Copilot
+ *   npx ai-workflow-kit --antigravity → skip IDE prompt, use Antigravity
+ *   npx ai-workflow-kit --skills     → skills and agents only (Claude Code)
+ *   npx ai-workflow-kit --hooks      → hooks only (Claude Code)
  *   npx ai-workflow-kit --uninstall  → remove what was installed
  *   npx ai-workflow-kit --list       → show what would be installed
  */
@@ -37,14 +41,18 @@ const step = (s) => console.log(`\n${c.bold}${c.cyan}→ ${s}${c.reset}`)
 const dim  = (s) => console.log(`${c.dim}  ${s}${c.reset}`)
 
 // ─── Args ────────────────────────────────────────────────────────────────────
-const args        = process.argv.slice(2)
-const SKILLS_ONLY = args.includes('--skills')
-const HOOKS_ONLY  = args.includes('--hooks')
-const YES         = args.includes('--yes') || args.includes('-y')
-const UNINSTALL   = args.includes('--uninstall')
-const LIST        = args.includes('--list')
-const FORCE_LOCAL  = args.includes('--local')
-const FORCE_GLOBAL = args.includes('--global')
+const args          = process.argv.slice(2)
+const SKILLS_ONLY   = args.includes('--skills')
+const HOOKS_ONLY    = args.includes('--hooks')
+const YES           = args.includes('--yes') || args.includes('-y')
+const UNINSTALL     = args.includes('--uninstall')
+const LIST          = args.includes('--list')
+const FORCE_LOCAL   = args.includes('--local')
+const FORCE_GLOBAL  = args.includes('--global')
+const FORCE_CLAUDE  = args.includes('--claude')
+const FORCE_CURSOR  = args.includes('--cursor')
+const FORCE_COPILOT = args.includes('--copilot')
+const FORCE_AG      = args.includes('--antigravity')
 
 // ─── Paths ───────────────────────────────────────────────────────────────────
 const __dir     = path.dirname(fileURLToPath(import.meta.url))
@@ -65,7 +73,6 @@ function resolvePaths(isLocal) {
 
 // ─── Discovery ───────────────────────────────────────────────────────────────
 
-// { src, name, isDir } — supports flat <name>.md and <name>/SKILL.md dirs
 function listSkills(dir) {
   if (!fs.existsSync(dir)) return []
   return fs.readdirSync(dir).flatMap(entry => {
@@ -81,8 +88,6 @@ function listSkills(dir) {
   })
 }
 
-// { src, name } — supports flat <name>.md and <name>/AGENT.md dirs
-// Always installed as flat files to ~/.claude/agents/<name>.md
 function listAgents(dir) {
   if (!fs.existsSync(dir)) return []
   return fs.readdirSync(dir).flatMap(entry => {
@@ -134,7 +139,38 @@ async function ask(question) {
   return ans.toLowerCase() === 's' || ans.toLowerCase() === 'y'
 }
 
-// ─── Selection — step 1: categories ─────────────────────────────────────────
+// ─── IDE Selection ───────────────────────────────────────────────────────────
+
+const IDES = [
+  { key: 'claude',      label: 'Claude Code',     hint: '~/.claude/' },
+  { key: 'cursor',      label: 'Cursor',           hint: '.cursorrules' },
+  { key: 'copilot',     label: 'GitHub Copilot',   hint: '.github/copilot-instructions.md' },
+  { key: 'antigravity', label: 'Antigravity',       hint: 'GEMINI.md + skills' },
+]
+
+async function selectIDE() {
+  if (FORCE_CLAUDE)  return 'claude'
+  if (FORCE_CURSOR)  return 'cursor'
+  if (FORCE_COPILOT) return 'copilot'
+  if (FORCE_AG)      return 'antigravity'
+  if (YES || SKILLS_ONLY || HOOKS_ONLY || UNINSTALL) return 'claude'
+
+  console.log(`  ${c.bold}Which IDE are you using?${c.reset}\n`)
+  IDES.forEach((ide, i) => {
+    const n = String(i + 1).padStart(2)
+    console.log(`  ${c.cyan}${n}${c.reset}  ${ide.label.padEnd(20)} ${c.dim}${ide.hint}${c.reset}`)
+  })
+  console.log()
+
+  const input = await prompt(`  Enter number ${c.dim}[1-${IDES.length}]${c.reset}: `)
+  const n = parseInt(input, 10)
+  if (n >= 1 && n <= IDES.length) return IDES[n - 1].key
+
+  warn('Invalid selection, defaulting to Claude Code.')
+  return 'claude'
+}
+
+// ─── Selection — categories ──────────────────────────────────────────────────
 
 async function selectCategories(allSkills, allAgents, allHooks) {
   const skillNames = allSkills.map(s => s.name).join(', ')
@@ -164,7 +200,7 @@ async function selectCategories(allSkills, allAgents, allHooks) {
   }
 }
 
-// ─── Selection — step 2: items within a category ────────────────────────────
+// ─── Selection — items ───────────────────────────────────────────────────────
 
 async function selectItemsInCategory(items, getName) {
   const numWidth = String(items.length).length
@@ -224,6 +260,15 @@ async function selectItems(allSkills, allAgents, allHooks) {
   return { skills, agents, hooks }
 }
 
+// ─── Antigravity — item selection ────────────────────────────────────────────
+
+async function selectAntigravitySkills(allSkills) {
+  console.log(`\n${c.bold}  Which skills would you like to install?${c.reset}\n`)
+  console.log(`  ${c.dim}Enter numbers separated by spaces, or Enter for all.${c.reset}`)
+
+  return selectItemsInCategory(allSkills, s => s.name)
+}
+
 // ─── Header ──────────────────────────────────────────────────────────────────
 console.log()
 console.log(`${c.bold}  AI Workflow Kit${c.reset}  ${c.dim}v${JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'package.json'), 'utf8')).version}${c.reset}`)
@@ -232,34 +277,168 @@ console.log()
 
 // ─── List ─────────────────────────────────────────────────────────────────────
 if (LIST) {
-  const skills = listSkills(path.join(REPO_ROOT, 'skills'))
-  const agents = listAgents(path.join(REPO_ROOT, 'agents'))
-  const hooks  = listFiles(path.join(REPO_ROOT, 'hooks'), '.sh')
+  const skills    = listSkills(path.join(REPO_ROOT, 'skills'))
+  const agents    = listAgents(path.join(REPO_ROOT, 'agents'))
+  const hooks     = listFiles(path.join(REPO_ROOT, 'hooks'), '.sh')
+  const agSkills  = listSkills(path.join(REPO_ROOT, 'antigravity-skills'))
 
-  console.log(`${c.bold}Skills (${skills.length})${c.reset}`)
+  console.log(`${c.bold}Claude Code${c.reset}`)
+  console.log(`  Skills (${skills.length}):`)
   skills.forEach(s => dim(`/${s.name}`))
-
-  console.log(`\n${c.bold}Agents (${agents.length})${c.reset}`)
+  console.log(`  Agents (${agents.length}):`)
   agents.forEach(a => dim(`/${a.name}`))
-
-  console.log(`\n${c.bold}Hooks (${hooks.length})${c.reset}`)
+  console.log(`  Hooks (${hooks.length}):`)
   hooks.forEach(f => dim(path.basename(f)))
+
+  console.log(`\n${c.bold}Cursor${c.reset}`)
+  dim('.cursorrules')
+
+  console.log(`\n${c.bold}GitHub Copilot${c.reset}`)
+  dim('.github/copilot-instructions.md')
+
+  console.log(`\n${c.bold}Antigravity${c.reset}`)
+  console.log(`  Skills (${agSkills.length}):`)
+  agSkills.forEach(s => dim(`@${s.name}`))
+  dim('GEMINI.md')
+
   console.log()
   process.exit(0)
 }
 
-// ─── Resolve scope (local vs global) ─────────────────────────────────────────
+// ─── IDE Selection ────────────────────────────────────────────────────────────
+const ide = await selectIDE()
+console.log()
+
+// ─── Cursor ──────────────────────────────────────────────────────────────────
+if (ide === 'cursor') {
+  const src = path.join(REPO_ROOT, '.cursorrules')
+  const dst = path.join(process.cwd(), '.cursorrules')
+
+  if (!fs.existsSync(src)) {
+    warn('.cursorrules file not found in the kit.')
+    process.exit(1)
+  }
+
+  if (fs.existsSync(dst) && !YES) {
+    const overwrite = await ask('.cursorrules already exists in this project. Overwrite?')
+    if (!overwrite) { info('Skipped.'); process.exit(0) }
+  }
+
+  copyFile(src, dst)
+
+  console.log()
+  console.log(`${c.bold}  ─────────────────────────────${c.reset}`)
+  console.log(`${c.bold}${c.green}  Installation complete${c.reset}`)
+  console.log(`${c.bold}  ─────────────────────────────${c.reset}`)
+  console.log()
+  ok('.cursorrules  →  ' + dst)
+  console.log()
+  process.exit(0)
+}
+
+// ─── GitHub Copilot ───────────────────────────────────────────────────────────
+if (ide === 'copilot') {
+  const src = path.join(REPO_ROOT, '.github', 'copilot-instructions.md')
+  const dst = path.join(process.cwd(), '.github', 'copilot-instructions.md')
+
+  if (!fs.existsSync(src)) {
+    warn('copilot-instructions.md not found in the kit.')
+    process.exit(1)
+  }
+
+  if (fs.existsSync(dst) && !YES) {
+    const overwrite = await ask('copilot-instructions.md already exists. Overwrite?')
+    if (!overwrite) { info('Skipped.'); process.exit(0) }
+  }
+
+  copyFile(src, dst)
+
+  console.log()
+  console.log(`${c.bold}  ─────────────────────────────${c.reset}`)
+  console.log(`${c.bold}${c.green}  Installation complete${c.reset}`)
+  console.log(`${c.bold}  ─────────────────────────────${c.reset}`)
+  console.log()
+  ok('.github/copilot-instructions.md  →  ' + dst)
+  console.log()
+  process.exit(0)
+}
+
+// ─── Antigravity ─────────────────────────────────────────────────────────────
+if (ide === 'antigravity') {
+  const allAgSkills = listSkills(path.join(REPO_ROOT, 'antigravity-skills'))
+  const geminiSrc   = path.join(REPO_ROOT, 'GEMINI.md')
+  const agentsMdSrc = path.join(REPO_ROOT, 'AGENTS.md')
+
+  let selectedSkills = allAgSkills
+
+  if (!YES) {
+    selectedSkills = await selectAntigravitySkills(allAgSkills)
+    if (selectedSkills.length === 0) {
+      info('Nothing selected. Exiting.')
+      console.log()
+      process.exit(0)
+    }
+  }
+
+  const agDst = path.join(process.cwd(), 'antigravity-skills')
+  let installedCount = 0
+
+  step('Installing Antigravity skills...')
+  fs.mkdirSync(agDst, { recursive: true })
+
+  for (const skill of selectedSkills) {
+    const dst = path.join(agDst, skill.name)
+    if (fs.existsSync(dst) && !YES) {
+      const overwrite = await ask(`@${skill.name} already exists. Overwrite?`)
+      if (!overwrite) { info(`Skipped: @${skill.name}`); continue }
+    }
+    copyDir(skill.src, dst)
+    ok(`skill: @${skill.name}`)
+    installedCount++
+  }
+
+  if (fs.existsSync(geminiSrc)) {
+    const dst = path.join(process.cwd(), 'GEMINI.md')
+    if (!fs.existsSync(dst) || YES) {
+      copyFile(geminiSrc, dst)
+      ok('GEMINI.md')
+      installedCount++
+    } else {
+      const overwrite = await ask('GEMINI.md already exists. Overwrite?')
+      if (overwrite) { copyFile(geminiSrc, dst); ok('GEMINI.md'); installedCount++ }
+      else info('Skipped: GEMINI.md')
+    }
+  }
+
+  if (fs.existsSync(agentsMdSrc)) {
+    const dst = path.join(process.cwd(), 'AGENTS.md')
+    if (!fs.existsSync(dst) || YES) {
+      copyFile(agentsMdSrc, dst)
+      ok('AGENTS.md')
+      installedCount++
+    }
+  }
+
+  console.log()
+  console.log(`${c.bold}  ─────────────────────────────${c.reset}`)
+  console.log(`${c.bold}${c.green}  Installation complete${c.reset}  (${installedCount} items)`)
+  console.log(`${c.bold}  ─────────────────────────────${c.reset}`)
+  console.log()
+  console.log(`  ${c.dim}Skills:${c.reset}  ${selectedSkills.map(s => '@' + s.name).join('  ')}`)
+  console.log()
+  process.exit(0)
+}
+
+// ─── Claude Code: resolve scope ──────────────────────────────────────────────
 
 let isLocal
 
 if (FORCE_LOCAL) {
   isLocal = true
 } else if (FORCE_GLOBAL || YES || SKILLS_ONLY || HOOKS_ONLY || UNINSTALL) {
-  // Non-interactive modes: default to global, no prompt
   isLocal = false
 } else {
-  // Fully interactive: ask the user
-  console.log(`  ${c.bold}Where do you want to install?${c.reset}`)
+  console.log(`  ${c.bold}Where do you want to install?${c.reset}\n`)
   console.log(`  ${c.cyan}g${c.reset}  Global  ${c.dim}~/.claude/          — available in all projects${c.reset}`)
   console.log(`  ${c.cyan}l${c.reset}  Local   ${c.dim}.claude/ (here)     — this project only${c.reset}`)
   console.log()
@@ -304,7 +483,7 @@ if (UNINSTALL) {
   process.exit(0)
 }
 
-// ─── Resolve selection ────────────────────────────────────────────────────────
+// ─── Claude Code: check install ──────────────────────────────────────────────
 
 const claudeInstalled = spawnSync('claude', ['--version'], { shell: true }).status === 0
 if (!claudeInstalled) {
@@ -342,7 +521,7 @@ if (SKILLS_ONLY) {
   }
 }
 
-// ─── Install ─────────────────────────────────────────────────────────────────
+// ─── Install skills ───────────────────────────────────────────────────────────
 
 let installedCount = 0
 
