@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0] - 2026-05-24
+
+### Added
+- **cli**: Flags `--claude`, `--cursor`, `--copilot`, `--antigravity` to skip IDE prompt
+- **cli**: Local and global installation options (`--local`, `--global`)
+- **cli**: Interactive selection menu with improved category and item handling
+- Skills: `/commit`, `/debug`, `/memory`, `/plan`, `/pr`, `/review`, `/vibe-audit`
+- Agents: `/api`, `/docs`, `/frontend`, `/refactor`, `/test`
+- Memory management documentation and changelog guidelines
+- Support for Google Antigravity alongside Claude Code, Cursor, and Copilot
+
+### Fixed
+- Argument-hint YAML formatting in skill documentation
+- CLI scope selection logic for non-interactive modes
+- CLI uninstall option included in scope selection
+
+### Changed
+- Enhanced CLI skill management with improved listing and copying functions
+- Updated project architecture decisions and stack documentation
+
+---
+
 ## [2.1.0] - 2026-04-11
 
 ### Added
@@ -51,5 +73,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Eval framework with Vitest + LLM-based evals via Anthropic SDK
 - Spanish README (`README.es.md`)[1.1.0]: https://github.com/bezael/ai-workflow-kit/compare/...v1.1.0[2.0.0]: https://github.com/bezael/ai-workflow-kit/compare/v1.1.0...v2.0.0
 
-[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.0.0...v2.1.0
