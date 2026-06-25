@@ -53,9 +53,11 @@ $ARGUMENTS
 4. **Wait for approval** before executing any changes.
    _Done when: user explicitly approves ("go ahead", "looks good", etc.)._
 
-5. **Execute** the plan exactly as approved. If you discover something that changes the plan, stop and report.
+5. **Mark the ticket InProgress**: if the task is linked to an issue or ticket, mark it as `in_progress` now — before writing any code.
 
-6. **After implementation**: run `/ak:review` on the changed files before considering the task complete.
+6. **Execute** the plan exactly as approved. If you discover something that changes the plan, stop and report.
+
+7. **After implementation**: run `/ak:review` on the changed files before considering the task complete.
 
 ## Rules
 
