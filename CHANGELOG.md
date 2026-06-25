@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.0] - 2026-06-25
+
+### Added
+- Add /ak:handoff skill and update CLAUDE.md
+
+### Fixed
+- Update SKILL.md to clarify task execution steps
+
 ## [2.2.0] - 2026-05-24
 
 ### Added
@@ -72,7 +80,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Claude Code, Cursor, and GitHub Copilot
 - Eval framework with Vitest + LLM-based evals via Anthropic SDK
 - Spanish README (`README.es.md`)[1.1.0]: https://github.com/bezael/ai-workflow-kit/compare/...v1.1.0[2.0.0]: https://github.com/bezael/ai-workflow-kit/compare/v1.1.0...v2.0.0
-
-[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v2.2.0...HEAD
 [2.2.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.1.0...v2.2.0
-[2.1.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.0.0...v2.1.0
+[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.2.0...v2.3.0
