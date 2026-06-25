@@ -13,22 +13,16 @@ Plan before executing. For complex tasks that touch multiple files or require ar
 
 $ARGUMENTS
 
-## When to use it
-
-When the user writes `/plan [task]` or when the task:
-- Touches more than 3 files
-- Requires creating new folder structure
-- Involves database or API changes
-- Has dependencies between steps
-
 ## Steps
 
 1. **Understand the goal**: Read the user's task. If ambiguous, ask ONE clarifying question before continuing.
+   _Done when: the goal fits in one sentence._
 
 2. **Explore the relevant codebase**:
    - Read files related to the task
    - Identify existing patterns (how something similar is already done)
    - Detect dependencies and risks
+   _Done when: every file that will change has been read._
 
 3. **Propose a structured plan**:
 
@@ -56,10 +50,15 @@ When the user writes `/plan [task]` or when the task:
 - [What's out of scope and why]
 ```
 
-4. **Wait for approval** before executing any changes. Don't start writing code until the user says "go ahead" or similar.
+4. **Wait for approval** before executing any changes.
+   _Done when: user explicitly approves ("go ahead", "looks good", etc.)._
+
+5. **Execute** the plan exactly as approved. If you discover something that changes the plan, stop and report.
+
+6. **After implementation**: run `/ak:review` on the changed files before considering the task complete.
 
 ## Rules
 
-- A plan is a contract. If the user approves, execute exactly what you said.
-- If during execution you discover something that changes the plan, stop and report.
+- A plan is a contract. Execute exactly what was approved.
 - Prefer small iterative plans over large complete ones.
+- One clarifying question max — don't interview the user.

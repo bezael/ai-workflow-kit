@@ -15,6 +15,7 @@ Works with: **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravit
 | `/ak:plan`                   | Plans before executing complex tasks                |
 | `/ak:debug`                  | Structured debugging workflow                       |
 | `/ak:vibe-audit`             | Audit of apps generated with vibe coding            |
+| `/ak:handoff [focus]`        | Compact the conversation for a fresh agent to continue |
 | `/ak:memory save [topic]`    | Persist learnings from the current session          |
 | `/ak:memory recall [question]` | Retrieve relevant memory before acting            |
 | `/ak:memory clean`           | Remove or update stale memories                     |
@@ -37,6 +38,7 @@ Works with: **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravit
 /ak:review @src/components/Button.tsx
 /ak:plan add JWT authentication
 /ak:debug submit button not responding on mobile
+/ak:handoff implement auth in the next session
 ```
 
 ## Project conventions
