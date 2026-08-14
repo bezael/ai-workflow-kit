@@ -30,6 +30,27 @@ npx ai-workflow-kit --list     # see what would be installed
 npx ai-workflow-kit --uninstall
 ```
 
+## Running a plan
+
+`/ak:plan` writes `specs/<slug>/plan.md` with a checkbox per step, each carrying
+the command that proves it done. The `verify` subcommand runs those commands and
+ticks a box only when its command exits 0, so what the file records is what was
+demonstrated rather than what was claimed:
+
+```bash
+npx ai-workflow-kit verify <slug>            # run the next unchecked step
+npx ai-workflow-kit verify <slug> --all      # keep going until one fails
+npx ai-workflow-kit verify <slug> --recheck  # re-run ticked steps, catch regressions
+npx ai-workflow-kit verify <slug> --dry-run  # print the commands, run nothing
+```
+
+With no slug it picks the only plan that has work left, and refuses to guess if
+several do. It prompts before each command unless you pass `--yes`.
+
+> The commands come from a markdown file in your working tree. A `specs/`
+> directory from a repo you don't trust can run anything your shell can — read
+> a plan before verifying it, the same as any script.
+
 Or manually:
 
 ```bash

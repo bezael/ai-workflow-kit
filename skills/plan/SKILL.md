@@ -92,7 +92,20 @@ the one that produces something checkable.
    - Tick the checkbox in `plan.md` only when that command passes
    - If you discover something that changes the plan, stop, write it under **Notes**, and report
 
+   The kit can do the running and ticking for you, which is stricter than doing
+   it by hand — it will not tick a box whose command exited non-zero:
+
+   ```bash
+   npx ai-workflow-kit verify <slug>            # next unchecked step
+   npx ai-workflow-kit verify <slug> --all      # until one fails
+   npx ai-workflow-kit verify <slug> --recheck  # re-run ticked steps
+   ```
+
 7. **When every box is ticked**: set `Status: done`, then run the review skill on the changed files before considering the task complete.
+
+   `--recheck` re-runs the commands behind steps already ticked. Worth doing
+   before calling the task finished: it catches a later step having broken an
+   earlier one, which a plan that is only ever appended to will never notice.
 
 ## Rules
 

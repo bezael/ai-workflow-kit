@@ -25,6 +25,7 @@ Antigravity's global root moved from `~/.gemini/antigravity/` to `~/.gemini/conf
 | `/ak:pr`                     | Creates PR with description, test plan, and checklist |
 | `/ak:review`                 | Reviews code or PR with configurable criteria       |
 | `/ak:plan`                   | Plans before executing, into a resumable `specs/<slug>/plan.md` |
+| `npx ai-workflow-kit verify` | Runs a plan's Verify commands, ticks only what passes |
 | `/ak:debug`                  | Structured debugging workflow                       |
 | `/ak:vibe-audit`             | Audit of apps generated with vibe coding            |
 | `/ak:handoff [focus]`        | Compact the conversation for a fresh agent to continue |

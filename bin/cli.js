@@ -43,6 +43,16 @@ const dim  = (s) => console.log(`${c.dim}  ${s}${c.reset}`)
 
 // ─── Args ────────────────────────────────────────────────────────────────────
 const args          = process.argv.slice(2)
+
+// ─── `verify` subcommand ─────────────────────────────────────────────────────
+// Runs the Verify commands in a specs/<slug>/plan.md and ticks the boxes that
+// pass. Dispatched before anything else, so the installer's header and IDE
+// prompts stay out of the way — this is a different job from installing.
+if (args[0] === 'verify') {
+  const { runVerify } = await import('./plan-verify.js')
+  process.exit(await runVerify(args.slice(1)))
+}
+
 const SKILLS_ONLY   = args.includes('--skills')
 const HOOKS_ONLY    = args.includes('--hooks')
 const YES           = args.includes('--yes') || args.includes('-y')
