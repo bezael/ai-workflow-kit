@@ -104,7 +104,7 @@ ai-workflow-kit/
 | commit | `/ak:commit` | Reads the real diff and generates a semantic commit message |
 | pr | `/ak:pr` | Creates PR with description, test plan, and checklist |
 | review | `/ak:review @file` | Reviews code: bugs, security, performance |
-| plan | `/ak:plan [task]` | Plans before executing complex tasks |
+| plan | `/ak:plan [task]` | Plans before executing, into a resumable `specs/<slug>/plan.md` |
 | debug | `/ak:debug [problem]` | Diagnoses with hypotheses before proposing fixes |
 | vibe-audit | `/ak:vibe-audit` | Full audit of apps generated with vibe coding |
 

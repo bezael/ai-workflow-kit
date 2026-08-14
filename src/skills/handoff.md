@@ -9,6 +9,7 @@ argument-hint: "[focus of the next session]"
 contract:
   - Document is self-contained — a fresh agent needs only this file to start
   - Existing artifacts are referenced by path or URL, never duplicated
+  - An in-flight specs/<slug>/plan.md is named as the place progress lives
   - Open threads and blockers are named explicitly
   - Secrets and PII are redacted
   - Written to the OS temp directory, not the workspace
@@ -19,6 +20,7 @@ acceptance:
   criteria:
     - Produces all sections: Where we left off, Open threads, Key decisions, Artifacts, Context
     - References existing artifacts by path instead of restating their contents
+    - Points at any in-flight specs/<slug>/plan.md rather than re-listing its steps
     - Names at least one concrete next action
     - Contains no credentials, API keys, or personal data
     - Writes to the OS temp directory rather than the current workspace
@@ -41,7 +43,12 @@ Compact the current conversation into a handoff document so a fresh agent can co
 
 ## Steps
 
-1. **Survey what exists**: Scan for artifacts already captured elsewhere — PRDs, plans, ADRs, issues, commits, diffs. Reference them by path or URL; do not duplicate their content.
+1. **Survey what exists**: Scan for artifacts already captured elsewhere — `specs/*/plan.md`, PRDs, ADRs, issues, commits, diffs. Reference them by path or URL; do not duplicate their content.
+
+   If a `specs/<slug>/plan.md` is mid-execution, that file — not this document —
+   is where step-by-step progress lives. Name it, say which step is next, and
+   stop there. Re-listing its checkboxes here creates a second copy that goes
+   stale the moment either one is edited.
 
 2. **Write the handoff document** with these sections:
 
@@ -59,6 +66,7 @@ Compact the current conversation into a handoff document so a fresh agent can co
 - [Decision] — [why, in one line]
 
 ## Artifacts to read first
+- `specs/<slug>/plan.md` — [approved plan, N of M steps done, next: step N+1]
 - `path/to/file.md` — [what it contains]
 - Issue #42 — [what it tracks]
 

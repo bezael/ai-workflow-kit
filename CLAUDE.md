@@ -24,7 +24,7 @@ Antigravity's global root moved from `~/.gemini/antigravity/` to `~/.gemini/conf
 | `/ak:commit`                 | Generates commit message with real diff context     |
 | `/ak:pr`                     | Creates PR with description, test plan, and checklist |
 | `/ak:review`                 | Reviews code or PR with configurable criteria       |
-| `/ak:plan`                   | Plans before executing complex tasks                |
+| `/ak:plan`                   | Plans before executing, into a resumable `specs/<slug>/plan.md` |
 | `/ak:debug`                  | Structured debugging workflow                       |
 | `/ak:vibe-audit`             | Audit of apps generated with vibe coding            |
 | `/ak:handoff [focus]`        | Compact the conversation for a fresh agent to continue |

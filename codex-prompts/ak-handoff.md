@@ -13,7 +13,12 @@ $ARGUMENTS
 
 ## Steps
 
-1. **Survey what exists**: Scan for artifacts already captured elsewhere — PRDs, plans, ADRs, issues, commits, diffs. Reference them by path or URL; do not duplicate their content.
+1. **Survey what exists**: Scan for artifacts already captured elsewhere — `specs/*/plan.md`, PRDs, ADRs, issues, commits, diffs. Reference them by path or URL; do not duplicate their content.
+
+   If a `specs/<slug>/plan.md` is mid-execution, that file — not this document —
+   is where step-by-step progress lives. Name it, say which step is next, and
+   stop there. Re-listing its checkboxes here creates a second copy that goes
+   stale the moment either one is edited.
 
 2. **Write the handoff document** with these sections:
 
@@ -31,6 +36,7 @@ $ARGUMENTS
 - [Decision] — [why, in one line]
 
 ## Artifacts to read first
+- `specs/<slug>/plan.md` — [approved plan, N of M steps done, next: step N+1]
 - `path/to/file.md` — [what it contains]
 - Issue #42 — [what it tracks]
 

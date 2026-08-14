@@ -1,19 +1,37 @@
 ---
-description: Plan before executing. Use when task touches 3+ files, requires new folder structure, involves DB or API changes, or has step dependencies. Waits for approval before writing code.
+description: Plan before executing, and persist the plan as a resumable artifact. Use when a task touches 3+ files, requires new folder structure, involves DB or API changes, or has step dependencies. Waits for approval before writing code.
 argument-hint: <task description>
 ---
 
 # Skill: /ak-plan
 
-Plan before executing. For complex tasks that touch multiple files or require architecture decisions.
+Plan before executing, and leave the plan on disk so the next session — or the next agent — can pick it up where this one stopped.
 
 ## Task to plan
 
 $ARGUMENTS
 
+## Step 0: Decide where this belongs
+
+1. **Derive a slug** from the task: short, kebab-case (`jwt-refresh`, `payment-retry`).
+
+2. **Look for existing work** at `specs/<slug>/`:
+
+| What you find | What to do |
+|---|---|
+| `spec.md` exists | This feature is already under the spec-first flow. **Read `spec.md` and `tasks.md` and work the first unchecked task.** Do not write a competing plan. |
+| only `plan.md` exists | Resume it. Report what is already checked off, then continue from the first unchecked step. |
+| nothing | Continue to Step 1 and create it. |
+
+3. **Check the task is the right shape for this skill.** This skill plans a
+   *change to code that already exists*. If the task is a new feature, module,
+   or product starting from a vague idea, say so and recommend the spec-first
+   flow (a full spec before any plan) instead — a one-file plan is the wrong
+   artifact for that, and you would be skipping the spec.
+
 ## Steps
 
-1. **Understand the goal**: Read the user's task. If ambiguous, ask ONE clarifying question before continuing.
+1. **Understand the goal**: Read the task. If ambiguous, ask ONE clarifying question before continuing.
    _Done when: the goal fits in one sentence._
 
 2. **Explore the relevant codebase**:
@@ -22,43 +40,64 @@ $ARGUMENTS
    - Detect dependencies and risks
    _Done when: every file that will change has been read._
 
-3. **Propose a structured plan**:
+3. **Write `specs/<slug>/plan.md`** using this structure:
 
 ```markdown
-## Plan: [task name]
+# Plan: [task name]
 
-### Goal
+Status: draft | approved | in progress | done
+Updated: YYYY-MM-DD
+
+## Goal
 [One line describing what will be achieved]
 
-### Files to be touched
+## Files to be touched
 - `path/file.ts` — [what change]
 - `path/other.ts` — [what change]
 - [new] `path/new.ts` — [what it does]
 
-### Steps in order
-1. [First concrete step]
-2. [Second step]
-3. [...]
+## Steps
+- [ ] 1. [First concrete step]
+      Verify: `[command that proves this step is done]`
+- [ ] 2. [Second step]
+      Verify: `[command]`
+- [ ] 3. [...]
 
-### Risks / decisions
+## Risks / decisions
 - [Risk or trade-off the user should know about]
 - [Alternative considered and why it wasn't chosen]
 
-### Not included in this plan
+## Not included in this plan
 - [What's out of scope and why]
+
+## Notes
+[Anything discovered mid-execution that changed the plan]
 ```
 
-4. **Wait for approval** before executing any changes.
-   _Done when: user explicitly approves ("go ahead", "looks good", etc.)._
+Every step needs a **Verify** line: the command that shows it is actually done
+(`npm test -- auth`, `curl -s localhost:3000/health`, `tsc --noEmit`). A step
+whose only proof is "I read it and it looks right" is not a step — fold it into
+the one that produces something checkable.
+
+4. **Show the plan and wait for approval** before executing any changes.
+   _Done when: the user explicitly approves ("go ahead", "looks good", etc.)._
+   Set `Status: approved` once they do.
 
 5. **Mark the ticket InProgress**: if the task is linked to an issue or ticket, mark it as `in_progress` now — before writing any code.
 
-6. **Execute** the plan exactly as approved. If you discover something that changes the plan, stop and report.
+6. **Execute** the plan in order. After each step:
+   - Run its **Verify** command
+   - Tick the checkbox in `plan.md` only when that command passes
+   - If you discover something that changes the plan, stop, write it under **Notes**, and report
 
-7. **After implementation**: run the review skill on the changed files before considering the task complete.
+7. **When every box is ticked**: set `Status: done`, then run the review skill on the changed files before considering the task complete.
 
 ## Rules
 
 - A plan is a contract. Execute exactly what was approved.
 - Prefer small iterative plans over large complete ones.
 - One clarifying question max — don't interview the user.
+- `plan.md` is the source of truth for progress, not the conversation. Keep the
+  checkboxes current as you go, so an interrupted session loses nothing.
+- Never tick a box whose Verify command has not been run and passed.
+- `specs/` is committed to the repo — write it as something a teammate will read.
