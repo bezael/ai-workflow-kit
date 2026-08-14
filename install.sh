@@ -67,7 +67,12 @@ SKILLS_DIR="$CLAUDE_DIR/skills"
 HOOKS_DIR="$CLAUDE_DIR/hooks"
 SETTINGS_FILE="$CLAUDE_DIR/settings.json"
 GEMINI_DIR="$HOME/.gemini"
-ANTIGRAVITY_SKILLS_DIR="$GEMINI_DIR/antigravity/skills"
+# Antigravity global customization root. Antes de la migración vivía en
+# ~/.gemini/antigravity/; ahora es ~/.gemini/config/ (las versiones migradas
+# dejan un symlink de compatibilidad en la ruta antigua).
+ANTIGRAVITY_CONFIG_DIR="$GEMINI_DIR/config"
+ANTIGRAVITY_SKILLS_DIR="$ANTIGRAVITY_CONFIG_DIR/skills"
+ANTIGRAVITY_LEGACY_SKILLS_DIR="$GEMINI_DIR/antigravity/skills"
 CODEX_DIR="${CODEX_HOME:-$HOME/.codex}"
 CODEX_PROMPTS_DIR="$CODEX_DIR/prompts"
 CODEX_REF_DIR="$CODEX_DIR/ak-workflow-kit"
@@ -125,11 +130,15 @@ if $UNINSTALL; then
   done
 
   for skill in "${ANTIGRAVITY_SKILLS_TO_REMOVE[@]}"; do
-    DIR="$ANTIGRAVITY_SKILLS_DIR/$skill"
-    if [ -d "$DIR" ]; then
-      run "rm -rf '$DIR'"
-      success "Eliminado Antigravity skill: $DIR"
-    fi
+    # Ruta actual y ruta pre-migración (en máquinas migradas son la misma vía
+    # symlink, así que sólo se borra una vez)
+    for base in "$ANTIGRAVITY_SKILLS_DIR" "$ANTIGRAVITY_LEGACY_SKILLS_DIR"; do
+      DIR="$base/$skill"
+      if [ -d "$DIR" ]; then
+        run "rm -rf '$DIR'"
+        success "Eliminado Antigravity skill: $DIR"
+      fi
+    done
   done
 
   for prompt in "${CODEX_PROMPTS_TO_REMOVE[@]}"; do
@@ -185,11 +194,15 @@ fi
 
 # Detectar Google Antigravity
 ANTIGRAVITY_DETECTED=false
-if [ -d "$GEMINI_DIR" ]; then
+if [ -d "$ANTIGRAVITY_CONFIG_DIR" ]; then
   ANTIGRAVITY_DETECTED=true
-  success "Google Antigravity detectado: $GEMINI_DIR"
+  success "Google Antigravity detectado: $ANTIGRAVITY_CONFIG_DIR"
+elif [ -d "$GEMINI_DIR/antigravity" ]; then
+  ANTIGRAVITY_DETECTED=true
+  warn "Antigravity detectado en la ruta antigua ($GEMINI_DIR/antigravity)."
+  warn "Se instalará en $ANTIGRAVITY_SKILLS_DIR — actualiza Antigravity si no los ve."
 else
-  info "Google Antigravity no detectado (~/.gemini no existe). Los skills de Antigravity se instalarán de todas formas."
+  info "Google Antigravity no detectado (~/.gemini/config no existe). Los skills de Antigravity se instalarán de todas formas."
 fi
 
 # Detectar OpenAI Codex

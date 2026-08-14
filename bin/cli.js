@@ -384,6 +384,44 @@ if (ide === 'antigravity') {
   const geminiSrc   = path.join(REPO_ROOT, 'GEMINI.md')
   const agentsMdSrc = path.join(REPO_ROOT, 'AGENTS.md')
 
+  // Antigravity discovers skills from a `skills/` folder inside a customization
+  // root: `.agents/` at the project root, or `~/.gemini/config/` globally.
+  // The pre-migration `~/.gemini/antigravity/skills` is legacy — migrated
+  // installs keep it as a symlink, fresh ones don't read it at all.
+  let agIsLocal
+  if (FORCE_LOCAL)                    agIsLocal = true
+  else if (FORCE_GLOBAL || YES)       agIsLocal = false
+  else {
+    console.log(`  ${c.bold}Where do you want to install?${c.reset}\n`)
+    console.log(`  ${c.cyan}g${c.reset}  Global  ${c.dim}~/.gemini/config/skills/  — available in all projects${c.reset}`)
+    console.log(`  ${c.cyan}l${c.reset}  Local   ${c.dim}.agents/skills/ (here)    — this project only${c.reset}`)
+    console.log()
+    const scopeAns = await prompt(`  ${c.dim}[g/l]${c.reset} `)
+    agIsLocal = scopeAns.toLowerCase() === 'l'
+    console.log()
+  }
+
+  const agDst = agIsLocal
+    ? path.join(process.cwd(), '.agents', 'skills')
+    : path.join(os.homedir(), '.gemini', 'config', 'skills')
+
+  if (UNINSTALL) {
+    step('Uninstalling Antigravity skills...')
+    let removed = 0
+    const legacyDst = path.join(os.homedir(), '.gemini', 'antigravity', 'skills')
+    for (const skill of allAgSkills) {
+      for (const base of agIsLocal ? [agDst] : [agDst, legacyDst]) {
+        const dst = path.join(base, skill.name)
+        if (!fs.existsSync(dst)) continue
+        fs.rmSync(dst, { recursive: true, force: true })
+        removed++
+      }
+    }
+    ok(`Removed ${removed} items`)
+    console.log()
+    process.exit(0)
+  }
+
   let selectedSkills = allAgSkills
 
   if (!YES) {
@@ -395,7 +433,6 @@ if (ide === 'antigravity') {
     }
   }
 
-  const agDst = path.join(process.cwd(), 'antigravity-skills')
   let installedCount = 0
 
   step('Installing Antigravity skills...')
@@ -439,7 +476,10 @@ if (ide === 'antigravity') {
   console.log(`${c.bold}${c.green}  Installation complete${c.reset}  (${installedCount} items)`)
   console.log(`${c.bold}  ─────────────────────────────${c.reset}`)
   console.log()
-  console.log(`  ${c.dim}Skills:${c.reset}  ${selectedSkills.map(s => '@' + s.name).join('  ')}`)
+  console.log(`  ${c.dim}Skills:${c.reset}   ${selectedSkills.map(s => '@' + s.name).join('  ')}`)
+  console.log(`  ${c.dim}Location:${c.reset} ${agDst}`)
+  console.log()
+  console.log('  Restart Antigravity to apply changes.')
   console.log()
   process.exit(0)
 }

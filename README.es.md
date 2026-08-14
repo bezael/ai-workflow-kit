@@ -151,16 +151,24 @@ El archivo `.github/copilot-instructions.md` se usa automáticamente en repos de
 
 ### Usar con Google Antigravity
 
-Copia `GEMINI.md` y `AGENTS.md` a la raíz de tu proyecto. El installer copia los skills a `~/.gemini/antigravity/skills/` automáticamente.
-
 ```bash
-# Copiar reglas del proyecto
-cp GEMINI.md tu-proyecto/
-cp AGENTS.md tu-proyecto/
-
-# O instalar todos los skills de Antigravity globalmente
-npx ai-workflow-kit --skills
+npx ai-workflow-kit --antigravity            # pregunta global o proyecto
+npx ai-workflow-kit --antigravity --global   # ~/.gemini/config/skills/
+npx ai-workflow-kit --antigravity --local    # .agents/skills/ en este proyecto
 ```
+
+Antigravity descubre los skills en una carpeta `skills/` dentro de un **customization root**, con esta precedencia:
+
+| Prioridad | Ubicación | Alcance |
+|-----------|-----------|---------|
+| 1 | `.agents/skills/` en la raíz del proyecto | este proyecto (commitéalo para compartir con el equipo) |
+| 2 | Rutas declaradas en `.agents/skills.json` | donde tú apuntes |
+| 3 | `~/.gemini/config/skills/` | todos los proyectos de tu máquina |
+| 4 | Skills built-in | vienen con la app |
+
+Las reglas van aparte y son jerárquicas — `GEMINI.md`, `AGENTS.md` y `.agents/rules/*.md`, cargadas subiendo desde el fichero que editas hasta la raíz del repo. El instalador te deja `GEMINI.md` y `AGENTS.md` en la raíz del proyecto.
+
+> **Cambio de ruta:** las versiones antiguas usaban `~/.gemini/antigravity/skills/`. Antigravity migró el root global a `~/.gemini/config/` y dejó un symlink de compatibilidad en las máquinas que actualizaron in situ. Las instalaciones nuevas no leen la ruta vieja, así que el kit ahora escribe en `~/.gemini/config/skills/`. Si instalaste una versión anterior del kit, ejecuta `npx ai-workflow-kit --antigravity --uninstall`: limpia las dos rutas.
 
 Una vez instalados, invoca los skills con `@` en el sidebar de Antigravity:
 - `@commit`, `@pr`, `@review`, `@plan`, `@debug`, `@vibe-audit`
