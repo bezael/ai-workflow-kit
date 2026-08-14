@@ -38,11 +38,13 @@ console.log('╚═════════════════════�
 
 // Dynamic imports so they load AFTER process.env is populated above
 const { runAll: runCommit }     = await import('./skills/commit.eval.js')
+const { runAll: runHelp }       = await import('./skills/help.eval.js')
 const { runAll: runReview }     = await import('./skills/review.eval.js')
 const { runAll: runVibeAudit }  = await import('./skills/vibe-audit.eval.js')
 
 const suites = [
   { name: 'commit', fn: runCommit },
+  { name: 'help', fn: runHelp },
   { name: 'review', fn: runReview },
   { name: 'vibe-audit', fn: runVibeAudit },
 ]

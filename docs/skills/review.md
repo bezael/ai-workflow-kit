@@ -1,0 +1,40 @@
+# /ak:review
+
+## What it does
+
+Reviews a file, or the current branch diff, against real engineering criteria — logic bugs, security holes, race conditions, missing error handling, performance traps — and reports them grouped by severity with a line number attached to each.
+
+Every finding has to cite the line or snippet it came from. A review that says "consider improving error handling" is unactionable; one that says "line 47: the `catch` returns `err` straight to the client" is a fix. The citation requirement is what forces the second kind.
+
+## When to reach for it
+
+Type `/ak:review @path/to/file`, or `/ak:review` on its own to review the branch diff. The agent can also reach for it when you ask for a code review.
+
+Reach for it before opening a PR, or on a file you've just changed heavily. For code nobody has ever reviewed — a whole AI-generated app — [`/ak:vibe-audit`](vibe-audit.md) is the wider sweep. For a specific misbehaviour rather than a general read, [`/ak:debug`](debug.md).
+
+## Severity is a decision, not a label
+
+Three buckets, and the boundary between them is what to *do*:
+
+| | Means |
+|---|---|
+| Critical | blocks merge — logic bugs, injection, XSS, auth bypass, races, leaks |
+| Important | fix now or as a tracked follow-up — missing error handling, edge cases, N+1 queries, untested critical logic |
+| Suggestion | optional — naming, duplication, readability |
+
+Every Critical carries a concrete fix, not just a description of the problem. And the output ends with one or two things the code does well — not politeness, but calibration: a review that only ever finds fault stops being read carefully.
+
+## It's working if
+
+- Each finding names a line you can jump to.
+- The Critical list is short and everything on it would genuinely block a merge.
+- You disagree with a Suggestion occasionally — that means it's reading the code rather than pattern-matching a checklist.
+- It runs read-only. It reports; it doesn't start editing.
+
+## Where it fits
+
+A chain step just before the PR — [`/ak:plan`](plan.md) → work → [`/ak:commit`](commit.md) → `/ak:review` → [`/ak:pr`](pr.md) — and a standalone you can point at any file.
+
+If [`/ak:setup`](setup.md) has run, it diffs against the base branch `.ak/config.md` recorded, and can quote lint and typecheck output as evidence rather than opinion.
+
+[`/ak:help`](help.md) routes across the whole set when you're not sure which skill a task wants.

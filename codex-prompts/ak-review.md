@@ -1,11 +1,13 @@
 ---
-description: Review code with real engineering criteria — logic bugs, security vulnerabilities, and technical debt.
+description: Review code with real engineering criteria — logic bugs, security vulnerabilities, and technical debt. Use when the user says /review, asks for a code review, or wants the branch diff checked before opening a PR.
 argument-hint: "[file path, or leave empty for the branch diff]"
 ---
 
 # Skill: /ak-review
 
 Reviews code with real engineering criteria. Not just style — detects bugs, security issues, and technical debt.
+
+If `.ak/config.md` exists, read it first: it records the base branch this branch is diffed against, and the lint and typecheck commands whose output is evidence rather than opinion.
 
 ## Target
 

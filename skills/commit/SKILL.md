@@ -1,6 +1,6 @@
 ---
 name: ak:commit
-description: Generate a semantic commit message by reading the real staged diff. Use when the user says /commit, "make a commit", or "commit the changes". Never invents — reads the actual diff.
+description: Write a Conventional Commits message from the real staged diff, never from a guess at what changed.
 disable-model-invocation: true
 allowed-tools: Bash(git *)
 ---
@@ -8,6 +8,8 @@ allowed-tools: Bash(git *)
 # Skill: /ak:commit
 
 Generates a semantic commit message by reading the real diff. Don't invent — read the code.
+
+If `.ak/config.md` exists, read it first: it records this repo's commit convention and the language its messages are written in. Without it, assume Conventional Commits in English.
 
 ## Context
 

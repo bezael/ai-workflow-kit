@@ -2,9 +2,9 @@
 id: plan
 name: plan
 description: >-
-  Plan before executing, and persist the plan as a resumable artifact. Use when
-  a task touches 3+ files, requires new folder structure, involves DB or API
-  changes, or has step dependencies. Waits for approval before writing code.
+  Plan a multi-file change into a resumable specs/<slug>/plan.md, and wait for
+  approval before writing any code.
+invocation: user
 argument-hint: "<task description>"
 
 contract:
@@ -31,9 +31,7 @@ acceptance:
     - Does not begin implementing before approval
 
 targets:
-  claude:
-    frontmatter:
-      disable-model-invocation: true
+  claude: {}
   antigravity: {}
   codex: {}
 ---
@@ -41,6 +39,8 @@ targets:
 # Skill: {{invoke}}
 
 Plan before executing, and leave the plan on disk so the next session — or the next agent — can pick it up where this one stopped.
+
+If `.ak/config.md` exists, read it first: the commands it records are the ones a step's `Verify:` line should use, so a plan can't be verified against a test runner this repo doesn't have.
 
 ## Task to plan
 

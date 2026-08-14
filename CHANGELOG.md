@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `/ak:help` — routes a task to the one skill that fits it, or says plainly that none does. Its catalogue of the set is generated from the specs, so it can't go stale.
+- `/ak:setup` — detects the repo's default branch, commands, git host and commit convention into `.ak/config.md`. `/ak:commit`, `/ak:pr`, `/ak:plan`, `/ak:review` and `/ak:debug` read it when it exists, and fall back to defaults when it doesn't.
+- **spec**: `invocation: user | model` on every skill. A user-invoked skill's description must not carry model-facing trigger phrasing, a model-invoked one must — both enforced by the schema. `disable-model-invocation` is now derived from it rather than hand-written.
+- **spec**: `status: stable | experimental | deprecated`, so a skill can ship unfinished or be retired visibly. Non-stable skills get a banner in every distribution and a warning in the installer; `deprecated` requires `replaced_by`.
+- **build**: `src/manifest.json`, generated — id, status, invocation and description per skill. The dependency-free CLI reads it instead of parsing YAML.
+- **docs**: `docs/skills/` — one page per skill on a fixed frame (what it does, when to reach for it, how to tell it's working, where it fits), plus an index.
+- **docs**: `docs/authoring-skills.md` — the spec fields, the build pipeline, and the conventions the gates enforce.
+- **docs**: `.out-of-scope/` — one file per feature decided against, with the reasoning.
+- **evals**: `evals/skills/help.eval.js`, the first eval whose cases need no fixture, and `evals/cli/spec.test.js` covering the schema gates.
+
+### Changed
+- **debug**: added a Redact section, a minimise-the-repro phase, and 3-5 falsifiable hypotheses with explicit predictions in place of bare probability labels.
+- **skills**: descriptions of user-invoked skills stripped of trigger phrasing; `/ak:memory` and `/ak:review` gained the triggers they needed to fire at all.
+- **build**: `npm run build` and `build:check` now also sync and verify the docs — install block, CLI flags, skill tables, and one docs page per skill.
+- **build**: install wording has one home in `src/install-block.md`, injected into both READMEs by `scripts/sync-docs.js`.
+- **release**: re-syncs the install block after the version bump, so the READMEs don't go stale in the release commit itself.
+
+### Fixed
+- README.md pinned `2.2.0-beta.1` as the example version.
+- README.es.md documented neither `--global` nor `--local`, which the CLI has long accepted.
+- Both READMEs' skill tables predated `/ak:handoff` and `/ak:memory`.
+- Antigravity's `{{args}}` placeholder fell back to "the path the user gave" for every skill, including ones whose argument is a problem description.
+- CLAUDE.md told contributors to keep `codex-prompts/` in sync by hand, which `build:check` has forbidden since the generator landed.
+
 ---
 
 ## [2.3.0] - 2026-06-25
