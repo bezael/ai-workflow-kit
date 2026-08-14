@@ -5,11 +5,14 @@ description: >-
   Structured debugging workflow — diagnose before proposing fixes. Use when
   user says /debug, reports a bug, an error, or unexpected behavior. Forms
   hypotheses before touching code.
+invocation: model
 argument-hint: "[problem description]"
 
 contract:
+  - Secrets are redacted from every command, output, and artifact shown
   - A reproducing command is named and run before any theory is formed
-  - Hypotheses are listed and ranked before code is changed
+  - The repro is minimised before hypotheses are formed
+  - Three to five ranked hypotheses, each with a falsifiable prediction, are listed before code is changed
   - One variable changes at a time, with the loop re-run after each change
   - The fix is the smallest change that turns the loop green
   - Debug instrumentation is removed before finishing
@@ -20,9 +23,12 @@ acceptance:
   criteria:
     - Establishes a reproducing command before proposing any cause
     - Does not propose a fix before the loop has been observed failing
-    - Lists at least two ranked hypotheses with explicit probability
+    - Shrinks the repro to the smallest case that still fails before hypothesising
+    - Lists at least three ranked hypotheses
+    - States a falsifiable prediction for each hypothesis, not just a probability label
     - Changes one variable at a time rather than several at once
     - Proposes a regression test before applying the fix
+    - Redacts credentials from any command or output it shows
     - States that debug logging must be removed afterwards
 
 targets:
@@ -35,9 +41,19 @@ targets:
 
 Structured debugging. Build a **tight loop** before hypothesizing.
 
+If `.ak/config.md` exists, read it first: the test command it records is the fastest route to a loop that can go red.
+
 ## Problem reported
 
 {{args}}
+
+## Redact
+
+This skill has you show commands, their output, and captured artifacts. **Redact every secret before showing it** — write `<REDACTED>` in its place.
+
+- Build loops against environment variables, so the credential stays in the environment and never in what you print.
+- Captured artifacts — HAR files, request logs, headers, connection strings — carry auth tokens. Quote only the lines that carry the signal.
+- If the redacted output isn't enough to diagnose the bug, say so and ask the user.
 
 ## Steps
 
@@ -62,44 +78,65 @@ The loop is tight when it is:
 
 Do not proceed to Phase 2 without a tight loop. Reading code to build a theory before this exists is the failure mode this skill prevents.
 
-### Phase 2: Hypotheses
+For an intermittent bug the goal isn't a clean repro but a **higher reproduction rate** — loop the trigger, add stress, inject sleeps. A 50% flake is debuggable; a 1% flake isn't.
 
-With the loop **red**, list the most likely causes before touching code:
+### Phase 2: Minimise the repro
+
+Run the loop and watch it go **red**. Confirm it produces the failure the *user* described, not a nearby one — wrong bug, wrong fix.
+
+Then shrink it to the **smallest scenario that still goes red**. Cut inputs, callers, config, and steps **one at a time**, re-running the loop after each cut.
+
+Done when every remaining element is load-bearing: removing any one of them turns the loop green.
+
+Worth the minutes it costs — every element you cut is one fewer suspect in Phase 3, and the minimised repro is the regression test in Phase 5.
+
+### Phase 3: Hypothesise
+
+With the loop red and minimised, list **3-5 causes ranked by likelihood** before touching code. Stopping at one anchors you to the first plausible idea.
+
+Each hypothesis must be **falsifiable** — state the prediction that would settle it:
 
 ```
 Hypotheses:
-1. [Most likely cause] — probability: high/medium/low
-2. [Second cause] — probability: high/medium/low
-3. [Third cause] — probability: high/medium/low
+1. [Most likely cause] — if this is it, [changing X] makes the bug disappear
+2. [Second cause] — if this is it, [changing Y] makes it worse
+3. [Third cause] — if this is it, [Z] already shows up in the logs
 ```
 
-Show the list to the user before testing. They often re-rank instantly from domain knowledge.
+A hypothesis you can't state a prediction for is a vibe. Sharpen it or drop it.
 
-### Phase 3: Verify
+Show the ranked list to the user before testing — they re-rank it instantly from domain knowledge ("we deployed a change to #2 yesterday"). Don't block on it if they're away.
 
-Change **one variable at a time** and run the loop after each change:
-- Targeted log at the boundaries that distinguish hypotheses
+### Phase 4: Verify
+
+Test the predictions, **one variable at a time**, running the loop after each change:
+- Targeted log at the boundary that distinguishes two hypotheses
 - Swap a value, toggle a flag, or inline a function
 
-The loop turns green when you've found the cause.
+A prediction that doesn't hold eliminates its hypothesis — say so and move down the list. The cause is confirmed when its prediction holds and the others' don't.
 
-### Phase 4: Fix
+### Phase 5: Fix
 
 Only when the cause is confirmed:
-1. Write a regression test before the fix (if a clean seam exists)
+1. Write a regression test before the fix — turn the minimised repro from Phase 2 into a failing test, and watch it fail
 2. Apply the minimal fix — the smallest change that makes the loop go **green**
-3. Re-run the full test suite
-4. Remove all `[DEBUG-id]` logs (grep the tag)
+3. Re-run the loop against the *original* scenario, not just the minimised one
+4. Re-run the full test suite
+5. Remove all `[DEBUG-id]` logs (grep the tag)
 
-### Phase 5: Prevention (optional)
+If there's no seam where the test can exercise the real bug pattern, **that absence is itself a finding** — note it rather than writing a shallow test that gives false confidence.
+
+### Phase 6: Prevention (optional)
 
 If the bug reveals a systemic gap, suggest how to close it:
 - No clean test seam → flag for a review
 - Type gap → stricter TypeScript
 - Architectural issue → plan a refactor
 
+State the hypothesis that turned out correct in the commit or PR message, so the next person debugging this area starts where you finished.
+
 ## Rules
 
-- No Phase 2 without a tight loop. Theorizing before reproducing is the exact failure this skill prevents.
+- No Phase 3 without a tight, minimised loop. Theorizing before reproducing is the exact failure this skill prevents.
 - The simplest fix that makes the loop green is the right fix.
 - If in production: hotfix first, proper fix second — document the gap.

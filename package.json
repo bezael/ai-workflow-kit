@@ -8,8 +8,8 @@
   },
   "scripts": {
     "start": "npx node bin/cli.js",
-    "build": "node scripts/build-skills.js",
-    "build:check": "node scripts/build-skills.js --check",
+    "build": "node scripts/build-skills.js && node scripts/sync-docs.js",
+    "build:check": "node scripts/build-skills.js --check && node scripts/sync-docs.js --check",
     "test": "npm run build:check && vitest run evals/hooks evals/cli",
     "test:watch": "vitest evals/hooks evals/cli",
     "eval": "npx node evals/run-evals.js",

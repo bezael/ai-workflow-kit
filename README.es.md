@@ -7,19 +7,30 @@ Compatible con **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigra
 
 ## Instalación
 
+<!-- ak:block quickstart.es -->
 ```bash
 npx ai-workflow-kit
 ```
 
-Reinicia tu herramienta de AI. Tendrás disponibles `/ak:commit`, `/ak:pr`, `/ak:plan`, `/ak:debug`, `/ak:review`, `/ak:vibe-audit`, `/ak:frontend`, `/ak:api`, `/ak:test`, `/ak:refactor`, `/ak:docs` — más 5 hooks automáticos.
+O fija una versión como dependencia de desarrollo (es una herramienta de desarrollo, no una dependencia de runtime):
 
 ```bash
+npm i -D ai-workflow-kit@2.3.0
+npx ai-workflow-kit
+```
+
+Reinicia tu herramienta de AI. Tendrás disponibles `/ak:api`, `/ak:commit`, `/ak:debug`, `/ak:docs`, `/ak:frontend`, `/ak:handoff`, `/ak:help`, `/ak:memory`, `/ak:plan`, `/ak:pr`, `/ak:refactor`, `/ak:review`, `/ak:setup`, `/ak:test`, `/ak:vibe-audit` — más 5 hooks automáticos.
+
+```bash
+npx ai-workflow-kit --global   # instala en ~/.claude/ — todos los proyectos (por defecto)
+npx ai-workflow-kit --local    # instala en .claude/ — solo este proyecto
 npx ai-workflow-kit --skills   # solo skills y agentes
 npx ai-workflow-kit --hooks    # solo hooks
 npx ai-workflow-kit --yes      # sin confirmaciones
 npx ai-workflow-kit --list     # ver qué se instalaría
 npx ai-workflow-kit --uninstall
 ```
+<!-- /ak:block -->
 
 ## Ejecutar un plan
 
@@ -62,6 +73,8 @@ ai-workflow-kit/
 ├── .github/
 │   └── copilot-instructions.md     # Instrucciones para GitHub Copilot
 ├── antigravity-skills/
+│   ├── help/SKILL.md               # @help — enruta una tarea a la skill que encaja
+│   ├── setup/SKILL.md              # @setup — registra las convenciones del repo en .ak/config.md
 │   ├── commit/SKILL.md             # @commit — genera mensajes de commit semánticos
 │   ├── pr/SKILL.md                 # @pr — crea PRs con descripción completa
 │   ├── review/SKILL.md             # @review — revisa código con criterios reales
@@ -74,6 +87,8 @@ ai-workflow-kit/
 │   ├── refactor/SKILL.md           # @refactor — mejora código sin romper nada
 │   └── docs/SKILL.md               # @docs — JSDoc, README, ADR
 ├── codex-prompts/
+│   ├── ak-help.md                  # /ak-help — enruta una tarea a la skill que encaja
+│   ├── ak-setup.md                 # /ak-setup — registra las convenciones del repo en .ak/config.md
 │   ├── ak-commit.md                # /ak-commit — genera mensajes de commit semánticos
 │   ├── ak-pr.md                    # /ak-pr — crea PRs con descripción completa
 │   ├── ak-review.md                # /ak-review — revisa código con criterios reales
@@ -83,6 +98,8 @@ ai-workflow-kit/
 │   ├── ak-handoff.md               # /ak-handoff — compacta la sesión para un agente nuevo
 │   └── ak-memory.md                # /ak-memory — save / recall / clean de la memoria
 ├── skills/
+│   ├── help/SKILL.md               # /ak:help — enruta una tarea a la skill que encaja
+│   ├── setup/SKILL.md              # /ak:setup — registra las convenciones del repo en .ak/config.md
 │   ├── commit/SKILL.md             # /ak:commit — genera mensajes de commit semánticos
 │   ├── pr/SKILL.md                 # /ak:pr — crea PRs con descripción completa
 │   ├── review/SKILL.md             # /ak:review — revisa código con criterios reales de ingeniería
@@ -111,14 +128,22 @@ ai-workflow-kit/
 
 ## Skills disponibles
 
+Una página por skill en [`docs/skills/`](docs/skills/README.md) — qué hace, cuándo recurrir a ella y cómo saber que está funcionando (en inglés).
+
+<!-- ak:skill-table -->
+
 | Skill | Comando | Qué hace |
 |-------|---------|----------|
+| help | `/ak:help [tarea]` | Señala la única skill que encaja con lo que estás haciendo |
+| setup | `/ak:setup` | Registra la rama, los comandos y las convenciones del repo en `.ak/config.md` |
 | commit | `/ak:commit` | Lee el diff real y genera un mensaje de commit semántico |
 | pr | `/ak:pr` | Crea PR con descripción, plan de tests y checklist |
 | review | `/ak:review @file` | Revisa código: bugs, seguridad, performance |
 | plan | `/ak:plan [tarea]` | Planifica antes de ejecutar, en un `specs/<slug>/plan.md` reanudable |
 | debug | `/ak:debug [problema]` | Diagnostica con hipótesis antes de proponer fixes |
 | vibe-audit | `/ak:vibe-audit` | Auditoría completa de apps generadas con vibe coding |
+| handoff | `/ak:handoff [foco]` | Compacta la sesión en un handoff para un agente nuevo |
+| memory | `/ak:memory <save\|recall\|clean>` | Persiste, recupera y limpia lo que el proyecto ha aprendido |
 
 ## Agentes especializados
 

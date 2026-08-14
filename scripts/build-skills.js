@@ -19,12 +19,15 @@
 
 import fs from 'fs'
 import path from 'path'
-import { REPO_ROOT, SRC_DIR, loadSkill, listSkillIds, resolveAcceptance } from './lib/spec.js'
+import { REPO_ROOT, SRC_DIR, loadSkill, listSkillIds, resolveAcceptance, statusOf } from './lib/spec.js'
 
 const CHECK = process.argv.includes('--check')
 
 const ALLOWLIST      = path.join(REPO_ROOT, 'src', 'eval-coverage.json')
 const ALLOWLIST_REL  = 'src/eval-coverage.json'
+
+const MANIFEST       = path.join(REPO_ROOT, 'src', 'manifest.json')
+const MANIFEST_REL   = 'src/manifest.json'
 
 function readAllowlist() {
   if (!fs.existsSync(ALLOWLIST)) return []
@@ -48,6 +51,10 @@ const TARGETS = {
       name: `ak:${spec.name}`,
       description: spec.description,
       ...(spec['argument-hint'] ? { 'argument-hint': spec['argument-hint'] } : {}),
+      // Derived from `invocation`. Claude Code is the only target with a flag
+      // for this: Antigravity has none, and Codex prompts are flat slash
+      // commands the human types, so they are user-invoked by construction.
+      ...(spec.invocation === 'user' ? { 'disable-model-invocation': true } : {}),
       ...(spec.targets?.claude?.frontmatter ?? {}),
     }),
     // Claude Code executes !`cmd` inline when the skill loads.
@@ -116,14 +123,17 @@ function renderFrontmatter(fields) {
   return ['---', ...lines, '---'].join('\n')
 }
 
-function renderBody(body, spec, target) {
+function renderBody(body, spec, target, catalogue) {
   let out = body
 
   out = out.replaceAll('{{invoke}}', target.invoke(spec))
+  out = out.replaceAll('{{catalogue}}', catalogue ?? '')
 
   // Argument placeholder. Claude Code and Codex substitute $ARGUMENTS;
   // Antigravity has none, so the block is dropped and prose stands in.
-  out = out.replaceAll('{{args}}', target.args ?? 'the path the user gave')
+  // What the prose should say depends on the skill — a file path for `review`,
+  // a description of the problem for `debug` — hence `args_fallback`.
+  out = out.replaceAll('{{args}}', target.args ?? spec.args_fallback ?? 'the request the user typed')
   out = out.replaceAll('{{args_block}}', target.args ? `## Target\n\n${target.args}` : '')
 
   for (const [key, label] of Object.entries(target.severity))
@@ -149,6 +159,17 @@ function renderBody(body, spec, target) {
     )
   }
 
+  // Lifecycle banner, hung under the H1 so it is the first line of prose.
+  const banner = statusBanner(spec, target)
+  if (banner) {
+    const lines = out.split('\n')
+    const h1    = lines.findIndex(l => l.startsWith('# '))
+    if (h1 === -1)
+      throw new Error(`${spec.id} → ${targetName(target)}: body has no H1 to hang the ${statusOf(spec)} banner under`)
+    lines.splice(h1 + 1, 0, '', banner)
+    out = lines.join('\n')
+  }
+
   // Collapse the blank lines an empty placeholder leaves behind.
   return out.replace(/\n{3,}/g, '\n\n').replace(/^\n+/, '').trimEnd() + '\n'
 }
@@ -157,9 +178,44 @@ function targetName(target) {
   return Object.keys(TARGETS).find(k => TARGETS[k] === target)
 }
 
-function render(spec, body, target) {
+/**
+ * The lifecycle banner, rendered in the target's own invocation style.
+ *
+ * A stable skill gets nothing. Anything else says so in the first thing the
+ * reader — human or model — sees, because a skill that is quietly unfinished
+ * or quietly retired is worse than one that isn't shipped at all.
+ */
+function statusBanner(spec, target) {
+  switch (statusOf(spec)) {
+    case 'experimental':
+      return '> **Experimental.** Still being shaped — the steps and the output format can change between releases.'
+    case 'deprecated':
+      return `> **Deprecated.** Use ${target.invoke({ name: spec.replaced_by })} instead. This still runs, but it will be removed in a future release.`
+    default:
+      return null
+  }
+}
+
+function render(spec, body, target, catalogue) {
   const fm = renderFrontmatter(target.frontmatter(spec))
-  return `${fm}\n\n${renderBody(body, spec, target)}`
+  return `${fm}\n\n${renderBody(body, spec, target, catalogue)}`
+}
+
+/**
+ * The whole skill set as a markdown table, in one target's invocation style.
+ *
+ * `{{catalogue}}` lets the router skill list its siblings without anyone
+ * maintaining that list by hand — a router that goes stale is worse than no
+ * router, because it answers confidently with the wrong set.
+ */
+function renderCatalogue(specs, target) {
+  const rows = specs
+    .filter(s => statusOf(s) !== 'deprecated')
+    .map(s => {
+      const tag = statusOf(s) === 'experimental' ? ' *(experimental)*' : ''
+      return `| ${target.invoke(s)}${tag} | ${s.invocation} | ${s.description.trim().replace(/\s+/g, ' ')} |`
+    })
+  return ['| Command | Invocation | What it does |', '|---|---|---|', ...rows].join('\n')
 }
 
 // ─── Build ───────────────────────────────────────────────────────────────────
@@ -176,17 +232,33 @@ function build() {
     process.exit(1)
   }
 
+  // Load everything before rendering anything: `{{catalogue}}` needs the whole
+  // set, and a skill that lists its siblings can't be built halfway through
+  // discovering them.
+  const loaded = sources.map(id => loadSkill(id, { knownTargets: Object.keys(TARGETS) }))
+  const catalogues = Object.fromEntries(
+    Object.entries(TARGETS).map(([name, t]) => [name, renderCatalogue(loaded.map(l => l.spec), t)]),
+  )
+
   let written = 0
   const drifted = []
   const coverage = { covered: [], pending: [] }
+  const manifest = []
 
-  for (const id of sources) {
-    const { spec, body } = loadSkill(id, { knownTargets: Object.keys(TARGETS) })
+  for (const { spec, body } of loaded) {
+    manifest.push({
+      id: spec.id,
+      name: spec.name,
+      status: statusOf(spec),
+      invocation: spec.invocation,
+      description: spec.description.trim(),
+      ...(spec.replaced_by ? { replaced_by: spec.replaced_by } : {}),
+    })
 
     for (const name of Object.keys(spec.targets)) {
       const target = TARGETS[name]
       const dst    = target.out(spec.id)
-      const next   = render(spec, body, target)
+      const next   = render(spec, body, target, catalogues[name])
       const prev   = fs.existsSync(dst) ? fs.readFileSync(dst, 'utf8') : null
 
       // Auxiliary files the skill body references (e.g. vibe-audit's
@@ -225,6 +297,23 @@ function build() {
     const acc = resolveAcceptance(spec)
     if (acc.pending) coverage.pending.push(`${spec.id} — ${acc.pending}`)
     else coverage.covered.push(spec.id)
+  }
+
+  // The manifest is what `bin/cli.js` reads to label a skill in its listing.
+  // The CLI ships with no dependencies and cannot parse YAML, so the build
+  // hands it JSON rather than making it re-derive the specs.
+  const manifestJson = JSON.stringify(
+    { generated: 'by scripts/build-skills.js — run `npm run build`, do not edit', skills: manifest },
+    null, 2,
+  ) + '\n'
+  const manifestPrev = fs.existsSync(MANIFEST) ? fs.readFileSync(MANIFEST, 'utf8') : null
+
+  if (CHECK) {
+    if (manifestPrev !== manifestJson) drifted.push(MANIFEST_REL)
+  } else if (manifestPrev !== manifestJson) {
+    fs.writeFileSync(MANIFEST, manifestJson)
+    console.log(`  ${manifestPrev === null ? 'created' : 'updated'}  ${MANIFEST_REL}`)
+    written++
   }
 
   if (CHECK) {

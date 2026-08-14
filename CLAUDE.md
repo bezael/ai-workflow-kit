@@ -5,7 +5,9 @@
 A collection of skills, agents, and memory patterns to make working with AI coding tools faster and more consistent.
 Works with: **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravity**, **OpenAI Codex**.
 
-For Codex the same skills ship as flat slash commands in `codex-prompts/` (`/ak-commit` instead of `/ak:commit`) — install them with `npx ai-workflow-kit --codex`. Keep both copies in sync when editing a skill.
+For Codex the same skills ship as flat slash commands in `codex-prompts/` (`/ak-commit` instead of `/ak:commit`) — install them with `npx ai-workflow-kit --codex`.
+
+**Every skill is generated.** The one hand-written file is `src/skills/<id>.md`; `skills/`, `antigravity-skills/`, and `codex-prompts/` are rendered from it by `npm run build`. Editing a generated file fails `npm run build:check` in CI. See [docs/authoring-skills.md](docs/authoring-skills.md) for the spec fields, the `invocation` axis, and the eval-coverage ratchet.
 
 ### Where each tool reads skills from
 
@@ -19,8 +21,12 @@ Antigravity's global root moved from `~/.gemini/antigravity/` to `~/.gemini/conf
 
 ## Available Skills
 
+<!-- ak:skill-table -->
+
 | Command                      | Description                                         |
 |------------------------------|-----------------------------------------------------|
+| `/ak:help [task]`            | Points at the one skill that fits the task at hand  |
+| `/ak:setup`                  | Records the repo's branch, commands, and conventions in `.ak/config.md` |
 | `/ak:commit`                 | Generates commit message with real diff context     |
 | `/ak:pr`                     | Creates PR with description, test plan, and checklist |
 | `/ak:review`                 | Reviews code or PR with configurable criteria       |
@@ -60,6 +66,8 @@ Antigravity's global root moved from `~/.gemini/antigravity/` to `~/.gemini/conf
 - PRs: always with description + test plan
 - Tests: before merge, not after
 - Code language: English. Comments: English.
+
+**Before proposing a feature, check [`.out-of-scope/`](.out-of-scope/README.md).** It holds one file per thing this repo has decided not to build, with the reasoning — so a settled decision isn't re-litigated. A request declined on design grounds gets a new file there.
 
 ## Default stack
 

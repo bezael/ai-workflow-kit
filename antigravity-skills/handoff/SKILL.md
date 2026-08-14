@@ -9,7 +9,7 @@ Compact the current conversation into a handoff document so a fresh agent can co
 
 ## Focus of next session
 
-the path the user gave
+the request the user typed
 
 ## Steps
 

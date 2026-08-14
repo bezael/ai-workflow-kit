@@ -226,8 +226,15 @@ pkg.version = next;
 writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf8");
 console.log(`✓ package.json bumped to ${next}`);
 
+// The install block pins the version, so the READMEs go stale the moment
+// package.json moves. Re-inject before committing rather than leaving CI to
+// fail on the next push.
+run("node scripts/sync-docs.js");
+
 // Single commit with both files + annotated tag
-const filesToAdd = bump === "beta" ? "package.json" : "CHANGELOG.md package.json";
+const filesToAdd = bump === "beta"
+  ? "package.json README.md README.es.md"
+  : "CHANGELOG.md package.json README.md README.es.md";
 run(`git add ${filesToAdd}`);
 run(`git commit -m "chore(release): v${next}"`);
 run(`git tag -a v${next} -m "v${next}"`);

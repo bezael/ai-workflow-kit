@@ -1,15 +1,17 @@
 ---
 name: pr
-description: Create a Pull Request with description, test plan, and checklist. Use when the user says /pr, "create PR", or "open pull request". Reads real branch commits and diff.
+description: Open a Pull Request whose description, test plan, and checklist come from the branch's real commits and diff.
 ---
 
 # Skill: @pr
 
 Creates a Pull Request with a clear description, test plan, and checklist. Reads the real branch commits.
 
+If `.ak/config.md` exists, read it first: it records the base branch, the git host, and whether `gh` is available. Without it, assume `main` and GitHub via `gh`.
+
 ## Requested title
 
-the path the user gave
+the request the user typed
 
 ## Context to gather first
 

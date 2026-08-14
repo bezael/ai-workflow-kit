@@ -2,10 +2,11 @@
 id: vibe-audit
 name: vibe-audit
 description: >-
-  Audit AI-generated apps for security, performance, and maintainability
-  issues. Use when user says /vibe-audit or "I generated this with AI and want
-  to know how bad it is".
+  Audit an AI-generated app for the security, performance, and maintainability
+  problems that vibe coding leaves behind.
+invocation: user
 argument-hint: "[folder path, or leave empty for the current project]"
+args_fallback: the path the user gave
 
 assets:
   - patterns.md
@@ -43,7 +44,6 @@ acceptance:
 targets:
   claude:
     frontmatter:
-      disable-model-invocation: true
       context: fork
       agent: Explore
     patterns_ref: "[patterns.md](patterns.md)"

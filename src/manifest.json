@@ -1,0 +1,75 @@
+{
+  "generated": "by scripts/build-skills.js — run `npm run build`, do not edit",
+  "skills": [
+    {
+      "id": "commit",
+      "name": "commit",
+      "status": "stable",
+      "invocation": "user",
+      "description": "Write a Conventional Commits message from the real staged diff, never from a guess at what changed."
+    },
+    {
+      "id": "debug",
+      "name": "debug",
+      "status": "stable",
+      "invocation": "model",
+      "description": "Structured debugging workflow — diagnose before proposing fixes. Use when user says /debug, reports a bug, an error, or unexpected behavior. Forms hypotheses before touching code."
+    },
+    {
+      "id": "handoff",
+      "name": "handoff",
+      "status": "stable",
+      "invocation": "user",
+      "description": "Compact the current conversation into a handoff document for a fresh agent to continue the work."
+    },
+    {
+      "id": "help",
+      "name": "help",
+      "status": "stable",
+      "invocation": "user",
+      "description": "Point at the one skill that fits the task in hand, or say plainly that none of them does."
+    },
+    {
+      "id": "memory",
+      "name": "memory",
+      "status": "stable",
+      "invocation": "model",
+      "description": "Manage persistent memory across sessions. Subcommands: save [topic] captures session learnings, recall [question] retrieves relevant context before acting, clean removes stale entries. Use when the user says /memory, asks what was decided earlier, or when a session produces a learning worth keeping."
+    },
+    {
+      "id": "plan",
+      "name": "plan",
+      "status": "stable",
+      "invocation": "user",
+      "description": "Plan a multi-file change into a resumable specs/<slug>/plan.md, and wait for approval before writing any code."
+    },
+    {
+      "id": "pr",
+      "name": "pr",
+      "status": "stable",
+      "invocation": "user",
+      "description": "Open a Pull Request whose description, test plan, and checklist come from the branch's real commits and diff."
+    },
+    {
+      "id": "review",
+      "name": "review",
+      "status": "stable",
+      "invocation": "model",
+      "description": "Review code with real engineering criteria — logic bugs, security vulnerabilities, and technical debt. Use when the user says /review, asks for a code review, or wants the branch diff checked before opening a PR."
+    },
+    {
+      "id": "setup",
+      "name": "setup",
+      "status": "stable",
+      "invocation": "user",
+      "description": "Work out this repo's conventions — branch, commands, git host, commit style — and record them in .ak/config.md so the other skills stop guessing."
+    },
+    {
+      "id": "vibe-audit",
+      "name": "vibe-audit",
+      "status": "stable",
+      "invocation": "user",
+      "description": "Audit an AI-generated app for the security, performance, and maintainability problems that vibe coding leaves behind."
+    }
+  ]
+}

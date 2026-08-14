@@ -4,6 +4,7 @@ name: handoff
 description: >-
   Compact the current conversation into a handoff document for a fresh agent
   to continue the work.
+invocation: user
 argument-hint: "[focus of the next session]"
 
 contract:
@@ -26,9 +27,7 @@ acceptance:
     - Writes to the OS temp directory rather than the current workspace
 
 targets:
-  claude:
-    frontmatter:
-      disable-model-invocation: true
+  claude: {}
   antigravity: {}
   codex: {}
 ---
