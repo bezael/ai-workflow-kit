@@ -27,9 +27,12 @@ jobs:
 
       - run: npm ci
 
-      # The distributions are generated from src/skills/. This fails the build
-      # if someone hand-edited a generated SKILL.md instead of the source.
-      - name: Check distributions are in sync with src/skills/
+      # Two gates in one command. Drift: the distributions are generated from
+      # src/skills/, so this fails if someone hand-edited a generated SKILL.md
+      # instead of the source. Coverage: a skill whose acceptance criteria have
+      # no fixture must be named in src/eval-coverage.json, so shipping one
+      # without an eval is a visible edit rather than an omission.
+      - name: Check distributions and eval coverage
         run: npm run build:check
 
       - run: npm test

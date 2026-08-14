@@ -23,6 +23,19 @@ import { REPO_ROOT, SRC_DIR, loadSkill, listSkillIds, resolveAcceptance } from '
 
 const CHECK = process.argv.includes('--check')
 
+const ALLOWLIST      = path.join(REPO_ROOT, 'src', 'eval-coverage.json')
+const ALLOWLIST_REL  = 'src/eval-coverage.json'
+
+function readAllowlist() {
+  if (!fs.existsSync(ALLOWLIST)) return []
+  try {
+    return JSON.parse(fs.readFileSync(ALLOWLIST, 'utf8')).pending ?? []
+  } catch (e) {
+    console.error(`✗ ${ALLOWLIST_REL} is not valid JSON: ${e.message}`)
+    process.exit(1)
+  }
+}
+
 // ─── Targets ─────────────────────────────────────────────────────────────────
 
 const TARGETS = {
@@ -224,6 +237,7 @@ function build() {
     }
     console.log(`✓ ${sources.length} skill source(s) in sync across all distributions`)
     reportCoverage(coverage, sources.length)
+    enforceCoverage(coverage)
     return
   }
 
@@ -238,6 +252,42 @@ function reportCoverage({ covered, pending }, total) {
   if (pending.length) {
     console.log('  Contract only, no fixture yet:')
     pending.forEach(p => console.log(`    · ${p}`))
+  }
+}
+
+/**
+ * Coverage ratchet. Every skill must declare acceptance criteria — that is
+ * enforced by the spec schema. This checks the stronger property: a skill
+ * whose criteria are not runnable has to be named in src/eval-coverage.json,
+ * so shipping one without an eval is a visible edit rather than an omission.
+ *
+ * It fails in both directions, which is what keeps the list from rotting into
+ * a permanent excuse: writing a fixture forces you to delete the entry.
+ */
+function enforceCoverage({ covered, pending }) {
+  const allowed = new Set(readAllowlist())
+  const pendingIds = pending.map(p => p.split(' — ')[0])
+  const failures = []
+
+  for (const id of pendingIds) {
+    if (!allowed.has(id)) {
+      failures.push(`${id} has no executable acceptance cases and is not listed in ${ALLOWLIST_REL}`)
+    }
+  }
+  for (const id of allowed) {
+    if (covered.includes(id)) {
+      failures.push(`${id} now has acceptance cases — remove it from ${ALLOWLIST_REL}`)
+    } else if (!pendingIds.includes(id)) {
+      failures.push(`${id} is listed in ${ALLOWLIST_REL} but has no skill source — remove it`)
+    }
+  }
+
+  if (failures.length) {
+    console.error(`\n✗ Eval coverage gate failed:\n`)
+    failures.forEach(f => console.error(`    ${f}`))
+    console.error(`\n  Give the skill an \`acceptance.cases\` entry pointing at a fixture,`)
+    console.error(`  or add it to ${ALLOWLIST_REL} with the reason it can't have one yet.\n`)
+    process.exit(1)
   }
 }
 

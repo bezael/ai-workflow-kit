@@ -2,6 +2,43 @@
 
 Two categories of tests: **deterministic** (hooks + CLI) and **LLM evals** (skill quality).
 
+## Where a rubric comes from
+
+Skill evals don't define their own criteria. Each one reads `acceptance` from
+the skill's spec in `src/skills/<id>.md` — the same file the Claude Code,
+Antigravity and Codex distributions are generated from:
+
+```yaml
+acceptance:
+  threshold: 0.8
+  cases:
+    - name: buggy user-controller
+      fixture: buggy-code/user-controller.ts
+  criteria:
+    - Identifies the SQL injection vulnerability (raw string interpolation in query)
+    - ...
+```
+
+Changing what a skill must do is one edit; the prompt and its eval both follow.
+`{{var}}` placeholders in a criterion are filled per case from `vars`, which is
+how `/commit` runs the same five criteria against two diffs with a different
+expected type each.
+
+## Coverage gate
+
+`npm run build:check` — which `npm test` and CI both run — enforces two things:
+
+- **Drift**: every generated distribution matches what the source renders to.
+- **Coverage**: a skill whose criteria have no runnable `cases` must be listed
+  in `src/eval-coverage.json`.
+
+The coverage list fails in both directions. An unlisted skill without cases
+fails, and so does a listed skill that has since gained them — writing a
+fixture forces you to delete the entry, so the list can only shrink.
+
+Today 3 of 8 skills have executable cases. The other 5 declare their criteria
+and name the fixture they still need.
+
 ## Quick start
 
 ```bash

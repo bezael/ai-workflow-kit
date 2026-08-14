@@ -1,0 +1,24 @@
+{
+  "$comment": [
+    "Skills allowed to ship with a contract but no executable eval.",
+    "",
+    "Every skill in src/skills/ must declare `acceptance.criteria`. A skill may",
+    "additionally declare `acceptance.cases`, which makes those criteria runnable",
+    "against a fixture — that is what `npm run eval` executes.",
+    "",
+    "A skill with no cases must be listed here. `npm run build:check` fails when:",
+    "  · a skill has no cases and is not listed  → new skill shipped without an eval",
+    "  · a skill has cases but is still listed   → stale entry, delete the line",
+    "  · a listed skill no longer exists         → stale entry, delete the line",
+    "",
+    "The list only shrinks. Adding to it is a deliberate, reviewable act; write",
+    "the fixture instead whenever you can."
+  ],
+  "pending": [
+    "debug",
+    "handoff",
+    "memory",
+    "plan",
+    "pr"
+  ]
+}
