@@ -1,14 +1,16 @@
 {
   "name": "ai-workflow-kit",
   "version": "2.3.0",
-  "description": "Skills, agents & hooks for Claude Code, Cursor, GitHub Copilot, and Google Antigravity",
+  "description": "Skills, agents & hooks for Claude Code, Cursor, GitHub Copilot, Google Antigravity, and OpenAI Codex",
   "type": "module",
   "bin": {
     "ai-workflow-kit": "./bin/cli.js"
   },
   "scripts": {
     "start": "npx node bin/cli.js",
-    "test": "vitest run evals/hooks evals/cli",
+    "build": "node scripts/build-skills.js",
+    "build:check": "node scripts/build-skills.js --check",
+    "test": "npm run build:check && vitest run evals/hooks evals/cli",
     "test:watch": "vitest evals/hooks evals/cli",
     "eval": "npx node evals/run-evals.js",
     "test:all": "vitest run evals/hooks evals/cli && npx node evals/run-evals.js",
@@ -19,12 +21,14 @@
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
-    "vitest": "^3.1.1"
+    "vitest": "^3.1.1",
+    "yaml": "^2.9.0"
   },
   "keywords": [
     "claude-code",
     "cursor",
     "copilot",
+    "codex",
     "ai-coding",
     "skills",
     "agents",

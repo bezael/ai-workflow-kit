@@ -1,8 +1,10 @@
 /**
  * Eval: /review skill
  *
- * Tests that Claude, given the /review skill prompt + a file with known bugs,
- * identifies the critical issues with correct severity and actionable fixes.
+ * The rubric is NOT defined here — it comes from `acceptance` in
+ * src/skills/review.md, the same spec the distributions are built from.
+ * Changing what the skill must do means changing the spec, and both the
+ * prompt and this eval follow.
  *
  * Run: node evals/skills/review.eval.js
  */
@@ -12,13 +14,13 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import Anthropic from '@anthropic-ai/sdk'
 import { judge } from '../utils/llm-judge.js'
+import { loadSkill as loadSpec, REPO_ROOT } from '../../scripts/lib/spec.js'
 
 const __dir = path.dirname(fileURLToPath(import.meta.url))
-const REPO_ROOT = path.resolve(__dir, '../..')
 
 const client = new Anthropic()
 
-function loadSkill(name) {
+function loadSkillPrompt(name) {
   return fs.readFileSync(path.join(REPO_ROOT, 'skills', name, 'SKILL.md'), 'utf8')
 }
 
@@ -27,8 +29,11 @@ function loadFixture(relativePath) {
 }
 
 async function runReviewEval() {
-  const skillPrompt = loadSkill('review')
-  const codeFile = loadFixture('buggy-code/user-controller.ts')
+  const { spec } = loadSpec('review')
+  const { criteria, threshold, fixture, context } = spec.acceptance
+
+  const skillPrompt = loadSkillPrompt('review')
+  const codeFile = loadFixture(fixture)
 
   const userMessage = `${skillPrompt}
 
@@ -50,37 +55,14 @@ Perform a thorough code review now.`
 
   const output = response.content[0].type === 'text' ? response.content[0].text : ''
 
-  const rubric = [
-    {
-      criterion: 'Identifies the SQL injection vulnerability (raw string interpolation in query)',
-    },
-    {
-      criterion: 'Identifies the missing null check (user.profile.avatar crashes when profile is null)',
-    },
-    {
-      criterion: 'Identifies the sensitive data exposure in the error handler (err object returned directly)',
-    },
-    {
-      criterion: 'Identifies the missing authorization check (any user can read any other user\'s data)',
-    },
-    {
-      criterion: 'Categorizes the SQL injection and missing auth check as Critical (🔴) severity',
-    },
-    {
-      criterion: 'Provides a concrete fix or code suggestion, not just a description of the problem',
-    },
-    {
-      criterion: 'References specific line numbers or code snippets from the file as evidence',
-    },
-  ]
-
   const result = await judge({
     output,
-    rubric,
-    context: 'The file reviewed is user-controller.ts which contains SQL injection, null crash, missing auth, and error exposure bugs.',
+    rubric: criteria.map(criterion => ({ criterion })),
+    context,
+    threshold,
   })
 
-  return { name: 'review: user-controller.ts', output, ...result }
+  return { name: `review: ${fixture}`, output, ...result }
 }
 
 export async function runAll() {

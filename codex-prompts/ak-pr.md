@@ -1,19 +1,19 @@
 ---
-name: pr
 description: Create a Pull Request with description, test plan, and checklist. Use when the user says /pr, "create PR", or "open pull request". Reads real branch commits and diff.
+argument-hint: "[feat|fix|chore: title]"
 ---
 
-# Skill: @pr
+# Skill: /ak-pr
 
 Creates a Pull Request with a clear description, test plan, and checklist. Reads the real branch commits.
 
 ## Requested title
 
-the path the user gave
+$ARGUMENTS
 
 ## Context to gather first
 
-Run these and read the output before starting:
+Run these commands and read their output before starting:
 
 ```bash
 git branch --show-current   # Current branch
@@ -26,7 +26,7 @@ If the base branch isn't `main`, substitute the real one (`master`, `develop`, â
 
 ## When to use it
 
-When the user writes @pr or asks to "create PR" / "open pull request".
+When the user writes /ak-pr or asks to "create PR" / "open pull request".
 
 ## Steps
 

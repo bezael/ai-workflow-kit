@@ -5,7 +5,7 @@ disable-model-invocation: true
 allowed-tools: Bash(git *)
 ---
 
-# Skill: /commit
+# Skill: /ak:commit
 
 Generates a semantic commit message by reading the real diff. Don't invent — read the code.
 
@@ -13,15 +13,15 @@ Generates a semantic commit message by reading the real diff. Don't invent — r
 
 - Staged files: !`git diff --staged --name-only`
 - Staged diff: !`git diff --staged`
-- Unstaged diff (if nothing staged): !`git diff`
+- Unstaged diff (fallback when nothing is staged): !`git diff`
 
 ## When to use it
 
-When the user writes `/commit` or asks to "make a commit" / "commit the changes".
+When the user writes /ak:commit or asks to "make a commit" / "commit the changes".
 
 ## Steps
 
-1. Read the **Staged diff** above. If it's empty, use the **Unstaged diff** and warn the user that nothing is staged yet.
+1. Read the **staged diff** above. If it's empty, use the **unstaged diff** and warn the user that nothing is staged yet.
 2. Read the full diff. Identify:
    - **What changed** (files, functions, logic)
    - **Why it probably changed** (new feature, fix, refactor, docs, etc.)

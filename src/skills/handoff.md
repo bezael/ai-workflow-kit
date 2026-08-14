@@ -1,17 +1,45 @@
 ---
-name: ak:handoff
-description: Compact the current conversation into a handoff document for a fresh agent to continue the work.
+id: handoff
+name: handoff
+description: >-
+  Compact the current conversation into a handoff document for a fresh agent
+  to continue the work.
 argument-hint: "[focus of the next session]"
-disable-model-invocation: true
+
+contract:
+  - Document is self-contained — a fresh agent needs only this file to start
+  - Existing artifacts are referenced by path or URL, never duplicated
+  - An in-flight specs/<slug>/plan.md is named as the place progress lives
+  - Open threads and blockers are named explicitly
+  - Secrets and PII are redacted
+  - Written to the OS temp directory, not the workspace
+
+acceptance:
+  threshold: 0.8
+  pending: no fixture yet — needs a recorded session transcript to compact
+  criteria:
+    - Produces all sections: Where we left off, Open threads, Key decisions, Artifacts, Context
+    - References existing artifacts by path instead of restating their contents
+    - Points at any in-flight specs/<slug>/plan.md rather than re-listing its steps
+    - Names at least one concrete next action
+    - Contains no credentials, API keys, or personal data
+    - Writes to the OS temp directory rather than the current workspace
+
+targets:
+  claude:
+    frontmatter:
+      disable-model-invocation: true
+  antigravity: {}
+  codex: {}
 ---
 
-# Skill: /ak:handoff
+# Skill: {{invoke}}
 
 Compact the current conversation into a handoff document so a fresh agent can continue without losing context.
 
 ## Focus of next session
 
-$ARGUMENTS
+{{args}}
 
 ## Steps
 

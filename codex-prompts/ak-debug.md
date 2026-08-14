@@ -1,10 +1,9 @@
 ---
-name: ak:debug
 description: Structured debugging workflow — diagnose before proposing fixes. Use when user says /debug, reports a bug, an error, or unexpected behavior. Forms hypotheses before touching code.
 argument-hint: "[problem description]"
 ---
 
-# Skill: /ak:debug
+# Skill: /ak-debug
 
 Structured debugging. Build a **tight loop** before hypothesizing.
 

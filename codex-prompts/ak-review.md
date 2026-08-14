@@ -1,13 +1,9 @@
 ---
-name: ak:review
 description: Review code with real engineering criteria — logic bugs, security vulnerabilities, and technical debt.
 argument-hint: "[file path, or leave empty for the branch diff]"
-context: fork
-agent: Explore
-allowed-tools: Read Grep Glob Bash(git *)
 ---
 
-# Skill: /ak:review
+# Skill: /ak-review
 
 Reviews code with real engineering criteria. Not just style — detects bugs, security issues, and technical debt.
 
@@ -15,14 +11,18 @@ Reviews code with real engineering criteria. Not just style — detects bugs, se
 
 $ARGUMENTS
 
-## Context
+## Context to gather first
 
-- Branch diff (fallback when no file is given): !`git diff main..HEAD`
-- Changed files: !`git diff main..HEAD --name-only`
+Run these commands and read their output before starting:
+
+```bash
+git diff main..HEAD   # Branch diff (fallback when no file is given)
+git diff main..HEAD --name-only   # Changed files
+```
 
 ## When to use it
 
-When the user writes /ak:review with a file path, or /ak:review on its own to review the current branch changes.
+When the user writes /ak-review with a file path, or /ak-review on its own to review the current branch changes.
 
 ## Steps
 
@@ -70,6 +70,7 @@ When the user writes /ak:review with a file path, or /ak:review on its own to re
 
 ## Rules
 
+- This is a read-only review. Report findings; don't edit files unless the user asks.
 - Be specific: "line 42: this if never executes because..." is better than "there's a bug".
 - Don't review style if a linter is configured — trust the tooling.
 - If the file is very large (+500 lines), focus on new logic, not existing code.

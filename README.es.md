@@ -3,7 +3,7 @@
 ![AI Workflow Kit](./banner.png)
 
 Skills, agentes y hooks para trabajar con herramientas de AI coding de forma consistente y profesional.
-Compatible con **Claude Code**, **Cursor**, **GitHub Copilot** y **Google Antigravity**.
+Compatible con **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravity** y **OpenAI Codex**.
 
 ## Instalación
 
@@ -20,6 +20,27 @@ npx ai-workflow-kit --yes      # sin confirmaciones
 npx ai-workflow-kit --list     # ver qué se instalaría
 npx ai-workflow-kit --uninstall
 ```
+
+## Ejecutar un plan
+
+`/ak:plan` escribe `specs/<slug>/plan.md` con un checkbox por paso, cada uno con
+el comando que demuestra que está hecho. El subcomando `verify` ejecuta esos
+comandos y marca la casilla solo si el comando sale con 0, así que lo que
+registra el fichero es lo que se demostró, no lo que se afirmó:
+
+```bash
+npx ai-workflow-kit verify <slug>            # ejecuta el siguiente paso sin marcar
+npx ai-workflow-kit verify <slug> --all      # sigue hasta que uno falle
+npx ai-workflow-kit verify <slug> --recheck  # reejecuta los marcados, detecta regresiones
+npx ai-workflow-kit verify <slug> --dry-run  # muestra los comandos, no ejecuta nada
+```
+
+Sin slug elige el único plan con trabajo pendiente, y se niega a adivinar si hay
+varios. Pregunta antes de cada comando salvo que pases `--yes`.
+
+> Los comandos salen de un fichero markdown de tu working tree. Un `specs/` de
+> un repo en el que no confías puede ejecutar cualquier cosa que ejecute tu
+> shell — lee un plan antes de verificarlo, como cualquier script.
 
 O manualmente:
 
@@ -52,18 +73,30 @@ ai-workflow-kit/
 │   ├── test/SKILL.md               # @test — escribe tests orientados a comportamiento
 │   ├── refactor/SKILL.md           # @refactor — mejora código sin romper nada
 │   └── docs/SKILL.md               # @docs — JSDoc, README, ADR
+├── codex-prompts/
+│   ├── ak-commit.md                # /ak-commit — genera mensajes de commit semánticos
+│   ├── ak-pr.md                    # /ak-pr — crea PRs con descripción completa
+│   ├── ak-review.md                # /ak-review — revisa código con criterios reales
+│   ├── ak-plan.md                  # /ak-plan — planifica antes de ejecutar
+│   ├── ak-debug.md                 # /ak-debug — workflow de debugging estructurado
+│   ├── ak-vibe-audit.md            # /ak-vibe-audit — audita apps generadas con vibe coding
+│   ├── ak-handoff.md               # /ak-handoff — compacta la sesión para un agente nuevo
+│   └── ak-memory.md                # /ak-memory — save / recall / clean de la memoria
 ├── skills/
-│   ├── commit.md                   # /ak:commit — genera mensajes de commit semánticos
-│   ├── pr.md                       # /ak:pr — crea PRs con descripción completa
-│   ├── review.md                   # /ak:review — revisa código con criterios reales de ingeniería
-│   ├── plan.md                     # /ak:plan — planifica antes de ejecutar
-│   └── debug.md                    # /ak:debug — workflow de debugging estructurado
+│   ├── commit/SKILL.md             # /ak:commit — genera mensajes de commit semánticos
+│   ├── pr/SKILL.md                 # /ak:pr — crea PRs con descripción completa
+│   ├── review/SKILL.md             # /ak:review — revisa código con criterios reales de ingeniería
+│   ├── plan/SKILL.md               # /ak:plan — planifica antes de ejecutar
+│   ├── debug/SKILL.md              # /ak:debug — workflow de debugging estructurado
+│   ├── vibe-audit/SKILL.md         # /ak:vibe-audit — audita apps generadas con vibe coding
+│   ├── handoff/SKILL.md            # /ak:handoff — compacta la sesión para un agente nuevo
+│   └── memory/SKILL.md             # /ak:memory — save / recall / clean de la memoria
 ├── agents/
-│   ├── frontend.md                 # /ak:frontend — genera componentes de UI
-│   ├── api.md                      # /ak:api — genera endpoints con validación
-│   ├── test.md                     # /ak:test — escribe tests orientados a comportamiento
-│   ├── refactor.md                 # /ak:refactor — mejora código sin romper nada
-│   └── docs.md                     # /ak:docs — JSDoc, README, ADR
+│   ├── frontend/AGENT.md           # /ak:frontend — genera componentes de UI
+│   ├── api/AGENT.md                # /ak:api — genera endpoints con validación
+│   ├── test/AGENT.md               # /ak:test — escribe tests orientados a comportamiento
+│   ├── refactor/AGENT.md           # /ak:refactor — mejora código sin romper nada
+│   └── docs/AGENT.md               # /ak:docs — JSDoc, README, ADR
 ├── hooks/
 │   ├── README.md                   # Cómo instalar y personalizar hooks
 │   ├── settings.template.json      # Configuración lista para copiar
@@ -83,7 +116,7 @@ ai-workflow-kit/
 | commit | `/ak:commit` | Lee el diff real y genera un mensaje de commit semántico |
 | pr | `/ak:pr` | Crea PR con descripción, plan de tests y checklist |
 | review | `/ak:review @file` | Revisa código: bugs, seguridad, performance |
-| plan | `/ak:plan [tarea]` | Planifica antes de ejecutar tareas complejas |
+| plan | `/ak:plan [tarea]` | Planifica antes de ejecutar, en un `specs/<slug>/plan.md` reanudable |
 | debug | `/ak:debug [problema]` | Diagnostica con hipótesis antes de proponer fixes |
 | vibe-audit | `/ak:vibe-audit` | Auditoría completa de apps generadas con vibe coding |
 
@@ -139,20 +172,51 @@ El archivo `.github/copilot-instructions.md` se usa automáticamente en repos de
 
 ### Usar con Google Antigravity
 
-Copia `GEMINI.md` y `AGENTS.md` a la raíz de tu proyecto. El installer copia los skills a `~/.gemini/antigravity/skills/` automáticamente.
-
 ```bash
-# Copiar reglas del proyecto
-cp GEMINI.md tu-proyecto/
-cp AGENTS.md tu-proyecto/
-
-# O instalar todos los skills de Antigravity globalmente
-npx ai-workflow-kit --skills
+npx ai-workflow-kit --antigravity            # pregunta global o proyecto
+npx ai-workflow-kit --antigravity --global   # ~/.gemini/config/skills/
+npx ai-workflow-kit --antigravity --local    # .agents/skills/ en este proyecto
 ```
+
+Antigravity descubre los skills en una carpeta `skills/` dentro de un **customization root**, con esta precedencia:
+
+| Prioridad | Ubicación | Alcance |
+|-----------|-----------|---------|
+| 1 | `.agents/skills/` en la raíz del proyecto | este proyecto (commitéalo para compartir con el equipo) |
+| 2 | Rutas declaradas en `.agents/skills.json` | donde tú apuntes |
+| 3 | `~/.gemini/config/skills/` | todos los proyectos de tu máquina |
+| 4 | Skills built-in | vienen con la app |
+
+Las reglas van aparte y son jerárquicas — `GEMINI.md`, `AGENTS.md` y `.agents/rules/*.md`, cargadas subiendo desde el fichero que editas hasta la raíz del repo. El instalador te deja `GEMINI.md` y `AGENTS.md` en la raíz del proyecto.
+
+> **Cambio de ruta:** las versiones antiguas usaban `~/.gemini/antigravity/skills/`. Antigravity migró el root global a `~/.gemini/config/` y dejó un symlink de compatibilidad en las máquinas que actualizaron in situ. Las instalaciones nuevas no leen la ruta vieja, así que el kit ahora escribe en `~/.gemini/config/skills/`. Si instalaste una versión anterior del kit, ejecuta `npx ai-workflow-kit --antigravity --uninstall`: limpia las dos rutas.
 
 Una vez instalados, invoca los skills con `@` en el sidebar de Antigravity:
 - `@commit`, `@pr`, `@review`, `@plan`, `@debug`, `@vibe-audit`
 - `@frontend`, `@api`, `@test`, `@refactor`, `@docs`
+
+### Usar con OpenAI Codex
+
+Codex lee dos cosas: el `AGENTS.md` de la raíz del proyecto para las reglas, y `~/.codex/prompts/*.md` para los slash commands. El instalador hace ambas:
+
+```bash
+npx ai-workflow-kit --codex
+```
+
+Copia `codex-prompts/*.md` a `~/.codex/prompts/` (o `$CODEX_HOME/prompts/` si lo tienes definido) y deja el `AGENTS.md` en el proyecto actual. Reinicia Codex y tendrás:
+
+- `/ak-commit`, `/ak-pr`, `/ak-review`, `/ak-plan`, `/ak-debug`
+- `/ak-vibe-audit`, `/ak-handoff`, `/ak-memory`
+
+Codex usa `-` en vez de `:` en los nombres, así que es `/ak-commit`, no `/ak:commit`.
+
+Los agentes especializados (`/ak:frontend`, `/ak:api`, `/ak:test`, `/ak:refactor`, `/ak:docs`) **no** están portados: dependen de los subagentes de Claude Code, y Codex no tiene equivalente.
+
+Para desinstalarlos:
+
+```bash
+npx ai-workflow-kit --codex --uninstall
+```
 
 ## Versionado y Changelog
 
@@ -187,6 +251,6 @@ El script de release automáticamente:
 ## Filosofía
 
 - **Diagnosticar antes de actuar** — un plan aprobado vale más que código rápido
-- **Skills cross-tool** — los mismos patrones funcionan en Claude Code, Cursor, Copilot y Antigravity
+- **Skills cross-tool** — los mismos patrones funcionan en Claude Code, Cursor, Copilot, Antigravity y Codex
 - **Memoria persistente** — la IA debe recordar el contexto, no pedirlo cada vez
 - **Output predecible** — cada skill produce el mismo formato, siempre

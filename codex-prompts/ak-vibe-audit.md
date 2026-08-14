@@ -1,28 +1,28 @@
 ---
-name: vibe-audit
 description: Audit AI-generated apps for security, performance, and maintainability issues. Use when user says /vibe-audit or "I generated this with AI and want to know how bad it is".
+argument-hint: "[folder path, or leave empty for the current project]"
 ---
 
-# Skill: @vibe-audit
+# Skill: /ak-vibe-audit
 
 Audit of apps built with vibe coding. Detects the typical problems AI generated without anyone reviewing them: security, performance, maintainability, and accumulated technical debt.
 
 ## Target
 
-the path the user gave
+$ARGUMENTS
 
 If **Target** is empty, audit the current project root. If a folder path is provided, scope the audit to that folder only.
 
 ## When to use it
 
-When the user writes @vibe-audit on its own, or with a folder path.
+When the user writes /ak-vibe-audit on its own, or with a folder path.
 Also useful when someone says "I generated this with AI and want to know how bad it is".
 
 ## What this skill does first
 
 1. Scans the complete project structure (folders, main files) starting from **Target**
 2. Reads the most critical files: entry point, routes/endpoints, main components, config
-3. Checks each of the 20 risk patterns documented in `patterns.md`, next to this skill — load it before starting
+3. Checks each of the 20 risk patterns documented in `~/.codex/ak-workflow-kit/vibe-audit-patterns.md` (or `$CODEX_HOME/ak-workflow-kit/vibe-audit-patterns.md` if `CODEX_HOME` is set) — load it before starting
 4. Generates a report with severity, concrete evidence, and suggested fix
 
 ---
@@ -34,13 +34,13 @@ Also useful when someone says "I generated this with AI and want to know how bad
 Audited: [date]
 
 ## Summary
-- Critical: N  (block production or are security risks)
-- Important: N (affect stability or maintainability)
-- Improvements: N    (technical debt, quality)
+- 🔴 Critical: N  (block production or are security risks)
+- 🟡 Important: N (affect stability or maintainability)
+- 🔵 Improvements: N    (technical debt, quality)
 
 ---
 
-## Critical
+## 🔴 Critical
 
 ### [Problem name]
 **Where:** `path/file.ts` line X
@@ -52,12 +52,12 @@ Audited: [date]
 
 ---
 
-## Important
+## 🟡 Important
 [same format]
 
 ---
 
-## Improvements
+## 🔵 Improvements
 [same format]
 
 ---

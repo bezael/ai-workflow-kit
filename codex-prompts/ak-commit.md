@@ -1,15 +1,14 @@
 ---
-name: commit
 description: Generate a semantic commit message by reading the real staged diff. Use when the user says /commit, "make a commit", or "commit the changes". Never invents — reads the actual diff.
 ---
 
-# Skill: @commit
+# Skill: /ak-commit
 
 Generates a semantic commit message by reading the real diff. Don't invent — read the code.
 
 ## Context to gather first
 
-Run these and read the output before starting:
+Run these commands and read their output before starting:
 
 ```bash
 git diff --staged --name-only   # Staged files
@@ -19,7 +18,7 @@ git diff   # Unstaged diff (fallback when nothing is staged)
 
 ## When to use it
 
-When the user writes @commit or asks to "make a commit" / "commit the changes".
+When the user writes /ak-commit or asks to "make a commit" / "commit the changes".
 
 ## Steps
 

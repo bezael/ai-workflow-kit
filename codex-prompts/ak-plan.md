@@ -1,11 +1,9 @@
 ---
-name: ak:plan
 description: Plan before executing, and persist the plan as a resumable artifact. Use when a task touches 3+ files, requires new folder structure, involves DB or API changes, or has step dependencies. Waits for approval before writing code.
 argument-hint: <task description>
-disable-model-invocation: true
 ---
 
-# Skill: /ak:plan
+# Skill: /ak-plan
 
 Plan before executing, and leave the plan on disk so the next session — or the next agent — can pick it up where this one stopped.
 

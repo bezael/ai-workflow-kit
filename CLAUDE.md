@@ -3,7 +3,19 @@
 ## What this repo is
 
 A collection of skills, agents, and memory patterns to make working with AI coding tools faster and more consistent.
-Works with: **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravity**.
+Works with: **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravity**, **OpenAI Codex**.
+
+For Codex the same skills ship as flat slash commands in `codex-prompts/` (`/ak-commit` instead of `/ak:commit`) — install them with `npx ai-workflow-kit --codex`. Keep both copies in sync when editing a skill.
+
+### Where each tool reads skills from
+
+| Tool | Global | Project |
+|------|--------|---------|
+| Claude Code | `~/.claude/skills/<name>/SKILL.md` | `.claude/skills/` |
+| Antigravity | `~/.gemini/config/skills/<name>/SKILL.md` | `.agents/skills/` |
+| Codex | `~/.codex/prompts/<name>.md` (flat, no dirs) | — |
+
+Antigravity's global root moved from `~/.gemini/antigravity/` to `~/.gemini/config/`; the old path only still works on installs that migrated in place, via a compatibility symlink. Don't write to it. Rules for Antigravity are `GEMINI.md`, `AGENTS.md`, and `.agents/rules/*.md`.
 
 ## Available Skills
 
@@ -12,7 +24,8 @@ Works with: **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravit
 | `/ak:commit`                 | Generates commit message with real diff context     |
 | `/ak:pr`                     | Creates PR with description, test plan, and checklist |
 | `/ak:review`                 | Reviews code or PR with configurable criteria       |
-| `/ak:plan`                   | Plans before executing complex tasks                |
+| `/ak:plan`                   | Plans before executing, into a resumable `specs/<slug>/plan.md` |
+| `npx ai-workflow-kit verify` | Runs a plan's Verify commands, ticks only what passes |
 | `/ak:debug`                  | Structured debugging workflow                       |
 | `/ak:vibe-audit`             | Audit of apps generated with vibe coding            |
 | `/ak:handoff [focus]`        | Compact the conversation for a fresh agent to continue |

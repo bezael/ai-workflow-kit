@@ -1,8 +1,9 @@
 /**
  * Eval: /commit skill
  *
- * Tests that Claude, given the /commit skill prompt + a known diff,
- * produces a message following Conventional Commits format.
+ * The rubric and the cases come from `acceptance` in src/skills/commit.md —
+ * the same spec the distributions are built from. Nothing about what the
+ * skill must do is defined in this file.
  *
  * Run: node evals/skills/commit.eval.js
  */
@@ -12,13 +13,13 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import Anthropic from '@anthropic-ai/sdk'
 import { judge } from '../utils/llm-judge.js'
+import { loadSkill as loadSpec, resolveAcceptance, REPO_ROOT } from '../../scripts/lib/spec.js'
 
 const __dir = path.dirname(fileURLToPath(import.meta.url))
-const REPO_ROOT = path.resolve(__dir, '../..')
 
 const client = new Anthropic()
 
-function loadSkill(name) {
+function loadSkillPrompt(name) {
   return fs.readFileSync(path.join(REPO_ROOT, 'skills', name, 'SKILL.md'), 'utf8')
 }
 
@@ -26,10 +27,8 @@ function loadFixture(relativePath) {
   return fs.readFileSync(path.join(__dir, '..', 'fixtures', relativePath), 'utf8')
 }
 
-const CONVENTIONAL_COMMIT_TYPES = ['feat', 'fix', 'refactor', 'chore', 'docs', 'test', 'style']
-
-async function runCommitEval(name, diffContent, expectedType) {
-  const skillPrompt = loadSkill('commit')
+async function runCommitEval({ name, criteria, context }, diffContent, threshold) {
+  const skillPrompt = loadSkillPrompt('commit')
 
   const userMessage = `${skillPrompt}
 
@@ -51,28 +50,11 @@ Generate the commit message now.`
 
   const output = response.content[0].type === 'text' ? response.content[0].text : ''
 
-  const rubric = [
-    {
-      criterion: `Starts with a valid Conventional Commits type (${CONVENTIONAL_COMMIT_TYPES.join('/')}) followed by a colon`,
-    },
-    {
-      criterion: 'The first line (subject) is 72 characters or fewer',
-    },
-    {
-      criterion: 'The subject line uses the imperative mood (e.g., "add", "fix", "update") not past tense',
-    },
-    {
-      criterion: `The commit type matches the nature of the change — expected type is "${expectedType}"`,
-    },
-    {
-      criterion: 'The message accurately describes what the diff actually changes, not something generic',
-    },
-  ]
-
   const result = await judge({
     output,
-    rubric,
-    context: `The diff being committed:\n${diffContent}`,
+    rubric: criteria.map(criterion => ({ criterion })),
+    context: `${context}\n\nThe diff being committed:\n${diffContent}`.trim(),
+    threshold,
   })
 
   return { name, output, ...result }
@@ -81,24 +63,14 @@ Generate the commit message now.`
 export async function runAll() {
   console.log('\n📋 Eval: /commit skill\n')
 
-  const cases = [
-    {
-      name: 'feat: login form diff',
-      diff: loadFixture('sample-diffs/feat-login-form.diff'),
-      expectedType: 'feat',
-    },
-    {
-      name: 'fix: null check diff',
-      diff: loadFixture('sample-diffs/fix-null-check.diff'),
-      expectedType: 'fix',
-    },
-  ]
+  const { spec } = loadSpec('commit')
+  const { cases, threshold } = resolveAcceptance(spec)
 
   const results = []
 
   for (const tc of cases) {
     process.stdout.write(`  Running: ${tc.name}...`)
-    const r = await runCommitEval(tc.name, tc.diff, tc.expectedType)
+    const r = await runCommitEval(tc, loadFixture(tc.fixture), threshold)
     const status = r.passed ? '✅ PASS' : '❌ FAIL'
     console.log(` ${status} (${Math.round(r.score * 100)}%)`)
 

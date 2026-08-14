@@ -11,6 +11,7 @@
  *   npx ai-workflow-kit --cursor     → skip IDE prompt, use Cursor
  *   npx ai-workflow-kit --copilot    → skip IDE prompt, use GitHub Copilot
  *   npx ai-workflow-kit --antigravity → skip IDE prompt, use Antigravity
+ *   npx ai-workflow-kit --codex      → skip IDE prompt, use OpenAI Codex
  *   npx ai-workflow-kit --skills     → skills and agents only (Claude Code)
  *   npx ai-workflow-kit --hooks      → hooks only (Claude Code)
  *   npx ai-workflow-kit --uninstall  → remove what was installed
@@ -42,6 +43,16 @@ const dim  = (s) => console.log(`${c.dim}  ${s}${c.reset}`)
 
 // ─── Args ────────────────────────────────────────────────────────────────────
 const args          = process.argv.slice(2)
+
+// ─── `verify` subcommand ─────────────────────────────────────────────────────
+// Runs the Verify commands in a specs/<slug>/plan.md and ticks the boxes that
+// pass. Dispatched before anything else, so the installer's header and IDE
+// prompts stay out of the way — this is a different job from installing.
+if (args[0] === 'verify') {
+  const { runVerify } = await import('./plan-verify.js')
+  process.exit(await runVerify(args.slice(1)))
+}
+
 const SKILLS_ONLY   = args.includes('--skills')
 const HOOKS_ONLY    = args.includes('--hooks')
 const YES           = args.includes('--yes') || args.includes('-y')
@@ -53,10 +64,16 @@ const FORCE_CLAUDE  = args.includes('--claude')
 const FORCE_CURSOR  = args.includes('--cursor')
 const FORCE_COPILOT = args.includes('--copilot')
 const FORCE_AG      = args.includes('--antigravity')
+const FORCE_CODEX   = args.includes('--codex')
 
 // ─── Paths ───────────────────────────────────────────────────────────────────
 const __dir     = path.dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = path.resolve(__dir, '..')
+
+// Codex reads custom prompts from $CODEX_HOME/prompts (defaults to ~/.codex)
+const CODEX_HOME_DIR    = process.env.CODEX_HOME || path.join(os.homedir(), '.codex')
+const CODEX_PROMPTS_DST = path.join(CODEX_HOME_DIR, 'prompts')
+const CODEX_REF_DST     = path.join(CODEX_HOME_DIR, 'ak-workflow-kit')
 
 function resolvePaths(isLocal) {
   const base = isLocal
@@ -146,6 +163,7 @@ const IDES = [
   { key: 'cursor',      label: 'Cursor',           hint: '.cursorrules' },
   { key: 'copilot',     label: 'GitHub Copilot',   hint: '.github/copilot-instructions.md' },
   { key: 'antigravity', label: 'Antigravity',       hint: 'GEMINI.md + skills' },
+  { key: 'codex',       label: 'OpenAI Codex',      hint: '~/.codex/prompts/' },
 ]
 
 async function selectIDE() {
@@ -153,6 +171,7 @@ async function selectIDE() {
   if (FORCE_CURSOR)  return 'cursor'
   if (FORCE_COPILOT) return 'copilot'
   if (FORCE_AG)      return 'antigravity'
+  if (FORCE_CODEX)   return 'codex'
   if (YES || SKILLS_ONLY || HOOKS_ONLY || UNINSTALL) return 'claude'
 
   console.log(`  ${c.bold}Which IDE are you using?${c.reset}\n`)
@@ -272,7 +291,7 @@ async function selectAntigravitySkills(allSkills) {
 // ─── Header ──────────────────────────────────────────────────────────────────
 console.log()
 console.log(`${c.bold}  AI Workflow Kit${c.reset}  ${c.dim}v${JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'package.json'), 'utf8')).version}${c.reset}`)
-console.log(`  ${c.dim}Skills · Agents · Hooks for Claude Code, Cursor, Antigravity & Copilot${c.reset}`)
+console.log(`  ${c.dim}Skills · Agents · Hooks for Claude Code, Cursor, Antigravity, Copilot & Codex${c.reset}`)
 console.log()
 
 // ─── List ─────────────────────────────────────────────────────────────────────
@@ -300,6 +319,12 @@ if (LIST) {
   console.log(`  Skills (${agSkills.length}):`)
   agSkills.forEach(s => dim(`@${s.name}`))
   dim('GEMINI.md')
+
+  const cxPrompts = listFiles(path.join(REPO_ROOT, 'codex-prompts'), '.md')
+  console.log(`\n${c.bold}OpenAI Codex${c.reset}`)
+  console.log(`  Prompts (${cxPrompts.length}):`)
+  cxPrompts.forEach(f => dim(`/${path.basename(f, '.md')}`))
+  dim('AGENTS.md')
 
   console.log()
   process.exit(0)
@@ -369,6 +394,44 @@ if (ide === 'antigravity') {
   const geminiSrc   = path.join(REPO_ROOT, 'GEMINI.md')
   const agentsMdSrc = path.join(REPO_ROOT, 'AGENTS.md')
 
+  // Antigravity discovers skills from a `skills/` folder inside a customization
+  // root: `.agents/` at the project root, or `~/.gemini/config/` globally.
+  // The pre-migration `~/.gemini/antigravity/skills` is legacy — migrated
+  // installs keep it as a symlink, fresh ones don't read it at all.
+  let agIsLocal
+  if (FORCE_LOCAL)                    agIsLocal = true
+  else if (FORCE_GLOBAL || YES)       agIsLocal = false
+  else {
+    console.log(`  ${c.bold}Where do you want to install?${c.reset}\n`)
+    console.log(`  ${c.cyan}g${c.reset}  Global  ${c.dim}~/.gemini/config/skills/  — available in all projects${c.reset}`)
+    console.log(`  ${c.cyan}l${c.reset}  Local   ${c.dim}.agents/skills/ (here)    — this project only${c.reset}`)
+    console.log()
+    const scopeAns = await prompt(`  ${c.dim}[g/l]${c.reset} `)
+    agIsLocal = scopeAns.toLowerCase() === 'l'
+    console.log()
+  }
+
+  const agDst = agIsLocal
+    ? path.join(process.cwd(), '.agents', 'skills')
+    : path.join(os.homedir(), '.gemini', 'config', 'skills')
+
+  if (UNINSTALL) {
+    step('Uninstalling Antigravity skills...')
+    let removed = 0
+    const legacyDst = path.join(os.homedir(), '.gemini', 'antigravity', 'skills')
+    for (const skill of allAgSkills) {
+      for (const base of agIsLocal ? [agDst] : [agDst, legacyDst]) {
+        const dst = path.join(base, skill.name)
+        if (!fs.existsSync(dst)) continue
+        fs.rmSync(dst, { recursive: true, force: true })
+        removed++
+      }
+    }
+    ok(`Removed ${removed} items`)
+    console.log()
+    process.exit(0)
+  }
+
   let selectedSkills = allAgSkills
 
   if (!YES) {
@@ -380,7 +443,6 @@ if (ide === 'antigravity') {
     }
   }
 
-  const agDst = path.join(process.cwd(), 'antigravity-skills')
   let installedCount = 0
 
   step('Installing Antigravity skills...')
@@ -424,7 +486,113 @@ if (ide === 'antigravity') {
   console.log(`${c.bold}${c.green}  Installation complete${c.reset}  (${installedCount} items)`)
   console.log(`${c.bold}  ─────────────────────────────${c.reset}`)
   console.log()
-  console.log(`  ${c.dim}Skills:${c.reset}  ${selectedSkills.map(s => '@' + s.name).join('  ')}`)
+  console.log(`  ${c.dim}Skills:${c.reset}   ${selectedSkills.map(s => '@' + s.name).join('  ')}`)
+  console.log(`  ${c.dim}Location:${c.reset} ${agDst}`)
+  console.log()
+  console.log('  Restart Antigravity to apply changes.')
+  console.log()
+  process.exit(0)
+}
+
+// ─── OpenAI Codex ────────────────────────────────────────────────────────────
+if (ide === 'codex') {
+  const allPrompts   = listFiles(path.join(REPO_ROOT, 'codex-prompts'), '.md')
+  const patternsSrc  = path.join(REPO_ROOT, 'skills', 'vibe-audit', 'patterns.md')
+  const agentsMdSrc  = path.join(REPO_ROOT, 'AGENTS.md')
+
+  if (UNINSTALL) {
+    step('Uninstalling Codex prompts...')
+    let removed = 0
+    for (const src of allPrompts) {
+      const dst = path.join(CODEX_PROMPTS_DST, path.basename(src))
+      if (!fs.existsSync(dst)) continue
+      fs.unlinkSync(dst)
+      removed++
+    }
+    if (fs.existsSync(CODEX_REF_DST)) {
+      fs.rmSync(CODEX_REF_DST, { recursive: true, force: true })
+      removed++
+    }
+    ok(`Removed ${removed} items from ${CODEX_HOME_DIR}`)
+    console.log()
+    process.exit(0)
+  }
+
+  if (allPrompts.length === 0) {
+    warn('No prompts found in codex-prompts/.')
+    process.exit(1)
+  }
+
+  const codexInstalled = spawnSync('codex', ['--version'], { shell: true }).status === 0
+  if (!codexInstalled && !fs.existsSync(CODEX_HOME_DIR)) {
+    warn('Codex not found in PATH. Install it with:')
+    dim('npm install -g @openai/codex')
+  }
+
+  let selectedPrompts = allPrompts
+
+  if (!YES) {
+    console.log(`\n${c.bold}  Which prompts would you like to install?${c.reset}\n`)
+    console.log(`  ${c.dim}Enter numbers separated by spaces, or Enter for all.${c.reset}`)
+    selectedPrompts = await selectItemsInCategory(allPrompts, f => path.basename(f, '.md'))
+    if (selectedPrompts.length === 0) {
+      info('Nothing selected. Exiting.')
+      console.log()
+      process.exit(0)
+    }
+  }
+
+  let installedCount = 0
+
+  step('Installing Codex prompts...')
+  fs.mkdirSync(CODEX_PROMPTS_DST, { recursive: true })
+
+  for (const src of selectedPrompts) {
+    const name = path.basename(src, '.md')
+    const dst  = path.join(CODEX_PROMPTS_DST, path.basename(src))
+
+    if (fs.existsSync(dst) && !YES) {
+      const overwrite = await ask(`/${name} already exists. Overwrite?`)
+      if (!overwrite) { info(`Skipped: /${name}`); continue }
+    }
+
+    copyFile(src, dst)
+    ok(`prompt: /${name}`)
+    installedCount++
+  }
+
+  // /ak-vibe-audit reads this reference. It lives outside prompts/ so it
+  // doesn't register as a phantom slash command.
+  const installedVibeAudit = selectedPrompts.some(f => path.basename(f) === 'ak-vibe-audit.md')
+  if (installedVibeAudit && fs.existsSync(patternsSrc)) {
+    copyFile(patternsSrc, path.join(CODEX_REF_DST, 'vibe-audit-patterns.md'))
+    ok('reference: vibe-audit-patterns.md')
+    installedCount++
+  }
+
+  // AGENTS.md in the project root is what Codex reads for project rules
+  if (fs.existsSync(agentsMdSrc)) {
+    const dst = path.join(process.cwd(), 'AGENTS.md')
+    if (!fs.existsSync(dst) || YES) {
+      copyFile(agentsMdSrc, dst)
+      ok('AGENTS.md')
+      installedCount++
+    } else {
+      const overwrite = await ask('AGENTS.md already exists. Overwrite?')
+      if (overwrite) { copyFile(agentsMdSrc, dst); ok('AGENTS.md'); installedCount++ }
+      else info('Skipped: AGENTS.md')
+    }
+  }
+
+  console.log()
+  console.log(`${c.bold}  ─────────────────────────────${c.reset}`)
+  console.log(`${c.bold}${c.green}  Installation complete${c.reset}  (${installedCount} items)`)
+  console.log(`${c.bold}  ─────────────────────────────${c.reset}`)
+  console.log()
+  console.log(`  ${c.dim}Prompts:${c.reset}  ${selectedPrompts.map(f => '/' + path.basename(f, '.md')).join('  ')}`)
+  console.log(`  ${c.dim}Location:${c.reset} ${CODEX_PROMPTS_DST}`)
+  console.log()
+  console.log('  Restart Codex to apply changes.')
   console.log()
   process.exit(0)
 }
@@ -521,9 +689,38 @@ if (SKILLS_ONLY) {
   }
 }
 
+// ─── Clean up the pre-2.2 flat layout ────────────────────────────────────────
+// Skills used to install as `~/.claude/skills/<name>.md` and agents as
+// `~/.claude/skills/<name>.md` too. They now live in `skills/<name>/SKILL.md`
+// and `agents/<name>.md`, so an in-place upgrade leaves the old files behind,
+// still registered as duplicate slash commands pointing at stale prompts.
+function removeLegacyFlatFiles(entries) {
+  let cleaned = 0
+  for (const entry of entries) {
+    const legacy = path.join(SKILLS_DST, entry.name + '.md')
+    // Only when the new layout differs from the old one — a skill the kit
+    // still ships as a flat file is being written to that exact path.
+    if (entry.isDir === false) continue
+    if (!fs.existsSync(legacy) || !fs.statSync(legacy).isFile()) continue
+    fs.unlinkSync(legacy)
+    dim(`removed legacy ${path.basename(legacy)}`)
+    cleaned++
+  }
+  return cleaned
+}
+
 // ─── Install skills ───────────────────────────────────────────────────────────
 
 let installedCount = 0
+
+if (selectedSkills.length > 0 || selectedAgents.length > 0) {
+  // Agents have no isDir flag — they always moved from skills/ to agents/
+  const legacy = removeLegacyFlatFiles([
+    ...selectedSkills,
+    ...selectedAgents.map(a => ({ ...a, isDir: true })),
+  ])
+  if (legacy > 0) info(`Cleaned up ${legacy} file(s) from the old flat layout`)
+}
 
 if (selectedSkills.length > 0) {
   step('Installing skills...')

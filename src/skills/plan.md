@@ -1,17 +1,50 @@
 ---
-name: ak:plan
-description: Plan before executing, and persist the plan as a resumable artifact. Use when a task touches 3+ files, requires new folder structure, involves DB or API changes, or has step dependencies. Waits for approval before writing code.
-argument-hint: <task description>
-disable-model-invocation: true
+id: plan
+name: plan
+description: >-
+  Plan before executing, and persist the plan as a resumable artifact. Use when
+  a task touches 3+ files, requires new folder structure, involves DB or API
+  changes, or has step dependencies. Waits for approval before writing code.
+argument-hint: "<task description>"
+
+contract:
+  - The plan is written to specs/<slug>/plan.md, not only to the conversation
+  - An existing specs/<slug>/ is detected and resumed, never silently overwritten
+  - A task that is a new feature or product is redirected to the spec-first flow
+  - Goal is one line; every file that will change is listed with what changes in it
+  - Each step is a checkbox carrying the command that proves it done
+  - Risks, rejected alternatives, and out-of-scope items are stated explicitly
+  - No code is written before the user approves
+
+acceptance:
+  threshold: 0.8
+  pending: no fixture yet — needs a sample repo plus a task description and a seeded specs/ dir
+  criteria:
+    - Writes the plan to specs/<slug>/plan.md and reports the path
+    - Reads and resumes an existing specs/<slug>/ instead of overwriting it
+    - Redirects to the spec-first flow when the task describes a new feature rather than a change
+    - Produces all sections: Goal, Files to be touched, Steps, Risks, Not included
+    - Goal is a single sentence, not a restatement of the whole task
+    - Every listed file exists in the repo or is explicitly marked [new]
+    - Every step is a checkbox with a concrete Verify command
+    - Asks at most one clarifying question before proposing the plan
+    - Does not begin implementing before approval
+
+targets:
+  claude:
+    frontmatter:
+      disable-model-invocation: true
+  antigravity: {}
+  codex: {}
 ---
 
-# Skill: /ak:plan
+# Skill: {{invoke}}
 
 Plan before executing, and leave the plan on disk so the next session — or the next agent — can pick it up where this one stopped.
 
 ## Task to plan
 
-$ARGUMENTS
+{{args}}
 
 ## Step 0: Decide where this belongs
 
