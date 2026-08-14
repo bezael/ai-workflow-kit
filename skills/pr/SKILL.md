@@ -1,14 +1,18 @@
 ---
 name: ak:pr
 description: Create a Pull Request with description, test plan, and checklist. Use when the user says /pr, "create PR", or "open pull request". Reads real branch commits and diff.
+argument-hint: "[feat|fix|chore: title]"
 disable-model-invocation: true
-argument-hint: [feat|fix|chore: title]
 allowed-tools: Bash(git *) Bash(gh *)
 ---
 
-# Skill: /pr
+# Skill: /ak:pr
 
 Creates a Pull Request with a clear description, test plan, and checklist. Reads the real branch commits.
+
+## Requested title
+
+$ARGUMENTS
 
 ## Context
 
@@ -17,13 +21,15 @@ Creates a Pull Request with a clear description, test plan, and checklist. Reads
 - Changed files: !`git diff main..HEAD --name-only`
 - Diff summary: !`git diff main..HEAD --stat`
 
+If the base branch isn't `main`, substitute the real one (`master`, `develop`, …).
+
 ## When to use it
 
-When the user writes `/pr` or asks to "create PR" / "open pull request".
+When the user writes /ak:pr or asks to "create PR" / "open pull request".
 
 ## Steps
 
-1. Read the **Context** above — branch, commits, and changed files are already loaded.
+1. Read the context above — branch, commits, and changed files.
 2. With that information, build:
 
 ### PR structure
@@ -47,10 +53,13 @@ When the user writes `/pr` or asks to "create PR" / "open pull request".
 [Remove if no visual changes]
 ```
 
-6. Propose title and body. Ask if it's good before running `gh pr create`.
+3. Propose title and body. Ask if it's good before running `gh pr create`.
 
 ## Rules
 
 - PR title follows Conventional Commits: `feat(scope): description`
 - If the PR mixes multiple concerns, suggest splitting it.
 - If `gh` is not installed, generate the text to paste manually in GitHub.
+- `gh pr create` runs after your confirmation, i.e. in a later turn than the one
+  that invoked this skill. A frontmatter grant has already expired by then, so
+  the allow rule for it belongs in your permission settings.

@@ -18,14 +18,19 @@ jobs:
     name: Hook & CLI tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'npm'
 
       - run: npm ci
+
+      # The distributions are generated from src/skills/. This fails the build
+      # if someone hand-edited a generated SKILL.md instead of the source.
+      - name: Check distributions are in sync with src/skills/
+        run: npm run build:check
 
       - run: npm test
 
@@ -41,11 +46,11 @@ jobs:
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'npm'
 
       - run: npm ci

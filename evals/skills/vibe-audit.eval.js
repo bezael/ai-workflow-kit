@@ -1,8 +1,10 @@
 /**
  * Eval: /vibe-audit skill
  *
- * Tests that Claude, given the /vibe-audit skill prompt + a purposely vulnerable app,
- * detects >= 80% of the planted problems.
+ * The rubric comes from `acceptance` in src/skills/vibe-audit.md — the same
+ * spec the distributions are built from. The planted problems in the fixture
+ * and the criteria here are meant to stay in lockstep; changing one without
+ * the other is what this arrangement prevents.
  *
  * Run: node evals/skills/vibe-audit.eval.js
  */
@@ -12,19 +14,23 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import Anthropic from '@anthropic-ai/sdk'
 import { judge } from '../utils/llm-judge.js'
+import { loadSkill as loadSpec, resolveAcceptance, REPO_ROOT } from '../../scripts/lib/spec.js'
 
 const __dir = path.dirname(fileURLToPath(import.meta.url))
-const REPO_ROOT = path.resolve(__dir, '../..')
 const FIXTURES_DIR = path.join(__dir, '..', 'fixtures', 'vulnerable-app')
 
 const client = new Anthropic()
 
-function loadSkill(name) {
+function loadSkillPrompt(name) {
   return fs.readFileSync(path.join(REPO_ROOT, 'skills', name, 'SKILL.md'), 'utf8')
 }
 
 async function runVibeAuditEval() {
-  const skillPrompt = loadSkill('vibe-audit')
+  const { spec } = loadSpec('vibe-audit')
+  const { cases, threshold } = resolveAcceptance(spec)
+  const [testCase] = cases
+
+  const skillPrompt = loadSkillPrompt('vibe-audit')
   const serverCode = fs.readFileSync(path.join(FIXTURES_DIR, 'server.js'), 'utf8')
   const frontendCode = fs.readFileSync(path.join(FIXTURES_DIR, 'frontend.jsx'), 'utf8')
 
@@ -55,28 +61,14 @@ Perform a full vibe audit now.`
   const output = response.content[0].type === 'text' ? response.content[0].text : ''
 
   // Each criterion matches a planted problem from PLANTED_PROBLEMS.md
-  const rubric = [
-    { criterion: 'Detects hardcoded secrets (OPENAI_API_KEY or DB_PASSWORD in server.js)' },
-    { criterion: 'Detects CORS open to all origins (cors() with no config in server.js)' },
-    { criterion: 'Detects missing authentication on /admin routes' },
-    { criterion: 'Detects password stored in plain text (no hashing in /auth/register)' },
-    { criterion: 'Detects IDOR vulnerability (no ownership check in /api/orders/:id)' },
-    { criterion: 'Detects JWT without expiration (jwt.sign without expiresIn)' },
-    { criterion: 'Detects stack trace exposed to client in the error handler' },
-    { criterion: 'Detects XSS via dangerouslySetInnerHTML in frontend.jsx' },
-    { criterion: 'Detects missing rate limiting on the /api/generate OpenAI endpoint' },
-    { criterion: 'Uses structured severity format (Critical/Important or 🔴/🟡 categories)' },
-    { criterion: 'References specific file names or line numbers as evidence (not vague descriptions)' },
-    { criterion: 'Does NOT invent critical problems that are not in the code' },
-  ]
-
   const result = await judge({
     output,
-    rubric,
-    context: 'The app has these planted problems: hardcoded secrets, open CORS, no admin auth, plain-text passwords, IDOR, JWT without expiry, stack trace exposure, XSS via dangerouslySetInnerHTML, no rate limiting on AI endpoint.',
+    rubric: testCase.criteria.map(criterion => ({ criterion })),
+    context: testCase.context,
+    threshold,
   })
 
-  return { name: 'vibe-audit: vulnerable-app', output, ...result }
+  return { name: `vibe-audit: ${testCase.name}`, output, ...result }
 }
 
 export async function runAll() {

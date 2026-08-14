@@ -1,46 +1,31 @@
-# Skill: vibe-audit
+---
+name: vibe-audit
+description: Audit AI-generated apps for security, performance, and maintainability issues. Use when user says /vibe-audit or "I generated this with AI and want to know how bad it is".
+---
 
-Audit of apps built with vibe coding. Detects typical problems AI generated without anyone reviewing them: security, performance, maintainability, and accumulated technical debt.
+# Skill: @vibe-audit
 
-## Trigger
+Audit of apps built with vibe coding. Detects the typical problems AI generated without anyone reviewing them: security, performance, maintainability, and accumulated technical debt.
 
-When the user writes `@vibe-audit` or `@vibe-audit folder`.
+## Target
+
+the path the user gave
+
+If **Target** is empty, audit the current project root. If a folder path is provided, scope the audit to that folder only.
+
+## When to use it
+
+When the user writes @vibe-audit on its own, or with a folder path.
 Also useful when someone says "I generated this with AI and want to know how bad it is".
 
-## Steps
+## What this skill does first
 
-1. Scan the complete project structure (folders, main files)
-2. Read the most critical files: entry point, routes/endpoints, main components, config
-3. Look for the most common risk patterns in vibe-coded apps
-4. Generate a report with severity, concrete evidence, and suggested fix
+1. Scans the complete project structure (folders, main files) starting from **Target**
+2. Reads the most critical files: entry point, routes/endpoints, main components, config
+3. Checks each of the 20 risk patterns documented in `patterns.md`, next to this skill — load it before starting
+4. Generates a report with severity, concrete evidence, and suggested fix
 
-## Key patterns to detect
-
-### Critical (security risk or blocks production)
-- Hardcoded secrets and API keys in code
-- No input validation on API endpoints
-- CORS open to everyone (`origin: '*'`)
-- No authentication on protected routes
-- IDOR — access to other users' resources without ownership check
-- Passwords without hashing (or using MD5/SHA1)
-- XSS via innerHTML / dangerouslySetInnerHTML without sanitization
-- JWT tokens without expiration (`expiresIn`)
-- Stack traces exposed to the client
-
-### Important (affect stability or maintainability)
-- Development console.logs in production
-- Giant components (God Components) — 500+ lines
-- No loading or error states in frontend
-- Queries without pagination (`findMany()` without `take`/`limit`)
-- Third-party APIs without rate limiting
-- No async error handling (`async/await` without `try/catch`)
-
-### Improvements (technical debt)
-- No environment variables for configuration (hardcoded ports, URLs, DB names)
-- No security headers (Helmet missing in Express)
-- Dependencies with known vulnerabilities (`npm audit`)
-- node_modules or /dist committed to git
-- Unoptimized bundle (full lodash imports, no lazy loading)
+---
 
 ## Report format
 
@@ -51,7 +36,7 @@ Audited: [date]
 ## Summary
 - Critical: N  (block production or are security risks)
 - Important: N (affect stability or maintainability)
-- Improvements: N (technical debt, quality)
+- Improvements: N    (technical debt, quality)
 
 ---
 
@@ -88,7 +73,7 @@ Audited: [date]
 
 ## Rules
 
-- Be specific: cite the file and line, don't say "there's a security problem" without showing where.
-- One problem at a time if the user wants to fix them: don't generate 50 fixes at once. Offer to fix them in priority order.
-- Don't rewrite the app: the goal is to identify and fix existing problems, not redo everything with "best practices".
-- If the project is large: audit by module (auth, API, frontend) instead of everything at once.
+- **Be specific**: cite the file and line, don't say "there's a security problem" without showing where.
+- **One problem at a time if the user wants to fix them**: don't generate 50 fixes at once. Offer to fix them in priority order.
+- **Don't rewrite the app**: the goal is to identify and fix existing problems, not redo everything with "best practices".
+- **If the project is large**: audit by module (auth, API, frontend) instead of everything at once.

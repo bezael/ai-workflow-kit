@@ -1,15 +1,43 @@
 ---
-description: "Manage persistent memory across sessions. Subcommands: save [topic] captures session learnings, recall [question] retrieves relevant context before acting, clean removes stale entries."
-argument-hint: <save|recall|clean> [topic or question]
+id: memory
+name: memory
+description: >-
+  Manage persistent memory across sessions. Subcommands: save [topic] captures
+  session learnings, recall [question] retrieves relevant context before
+  acting, clean removes stale entries.
+argument-hint: "<save|recall|clean> [topic or question]"
+
+contract:
+  - Routes to save / recall / clean based on the first word of the invocation
+  - save writes to the file matching the kind of fact, and logs to memory/CHANGELOG.md
+  - recall reports only entries relevant to the current task, and says so when there are none
+  - clean flags rather than silently deletes anything it is unsure about
+  - Never writes secrets, credentials, or personal data to a memory file
+
+acceptance:
+  threshold: 0.8
+  pending: no fixture yet — needs a memory/ directory fixture with seeded entries
+  criteria:
+    - Routes to the correct subcommand from the first word of the invocation
+    - save picks the target file that matches the kind of fact being stored
+    - save refuses facts derivable from code or git history
+    - recall states plainly when no relevant memory exists instead of inventing context
+    - clean marks uncertain entries for review rather than deleting them
+    - No credentials or personal data are ever written
+
+targets:
+  claude: {}
+  antigravity: {}
+  codex: {}
 ---
 
-# Skill: /ak-memory
+# Skill: {{invoke}}
 
 Manages persistent memory across sessions. Captures, retrieves, and maintains what the AI needs to know to work effectively in this project without being told the same thing twice.
 
 ## Invocation
 
-$ARGUMENTS
+{{args}}
 
 Route to the correct subcommand based on the first word of **Invocation**:
 - Starts with `save` → run the **save** section

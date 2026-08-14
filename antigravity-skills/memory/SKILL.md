@@ -1,15 +1,15 @@
 ---
+name: memory
 description: "Manage persistent memory across sessions. Subcommands: save [topic] captures session learnings, recall [question] retrieves relevant context before acting, clean removes stale entries."
-argument-hint: <save|recall|clean> [topic or question]
 ---
 
-# Skill: /ak-memory
+# Skill: @memory
 
 Manages persistent memory across sessions. Captures, retrieves, and maintains what the AI needs to know to work effectively in this project without being told the same thing twice.
 
 ## Invocation
 
-$ARGUMENTS
+the path the user gave
 
 Route to the correct subcommand based on the first word of **Invocation**:
 - Starts with `save` → run the **save** section

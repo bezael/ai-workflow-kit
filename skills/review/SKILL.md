@@ -1,31 +1,34 @@
 ---
 name: ak:review
-description: Review code with real engineering criteria — logic bugs, security vulnerabilities, and technical debt. Use when user says /review @file or /review to review current PR changes.
-argument-hint: "[@file or leave empty for PR diff]"
+description: Review code with real engineering criteria — logic bugs, security vulnerabilities, and technical debt.
+argument-hint: "[file path, or leave empty for the branch diff]"
 context: fork
 agent: Explore
 allowed-tools: Read Grep Glob Bash(git *)
 ---
 
-# Skill: /review
+# Skill: /ak:review
 
 Reviews code with real engineering criteria. Not just style — detects bugs, security issues, and technical debt.
 
+## Target
+
+$ARGUMENTS
+
 ## Context
 
-- Target: $ARGUMENTS
-- PR diff (fallback if no file provided): !`git diff main..HEAD`
+- Branch diff (fallback when no file is given): !`git diff main..HEAD`
 - Changed files: !`git diff main..HEAD --name-only`
 
 ## When to use it
 
-When the user writes `/review @file` or `/review` (reviews current PR changes).
+When the user writes /ak:review with a file path, or /ak:review on its own to review the current branch changes.
 
 ## Steps
 
 1. **Read the code to review**:
-   - If `$ARGUMENTS` contains a file path, read that file completely — ignore the PR diff.
-   - If `$ARGUMENTS` is empty, use the **PR diff** already loaded above.
+   - If $ARGUMENTS names a file, read that file completely — ignore the branch diff.
+   - If it is empty, use the branch diff above.
 
 2. **Review in this priority order**:
 
@@ -58,7 +61,7 @@ When the user writes `/review @file` or `/review` (reviews current PR changes).
 ### 🟡 Important
 - **Line X**: [description]
 
-### 🔵 Suggestions
+### 🔵 Suggestion
 - **Line X**: [description]
 
 ### ✅ What's good

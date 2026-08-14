@@ -21,10 +21,10 @@ const client = new Anthropic()
 /**
  * Evaluate an LLM output against a list of criteria.
  *
- * @param {{ output: string, rubric: RubricItem[], context?: string }} params
+ * @param {{ output: string, rubric: RubricItem[], context?: string, threshold?: number }} params
  * @returns {Promise<JudgeResult>}
  */
-export async function judge({ output, rubric, context = '' }) {
+export async function judge({ output, rubric, context = '', threshold = 0.8 }) {
   const criteriaList = rubric
     .map((r, i) => `${i + 1}. ${r.criterion}`)
     .join('\n')
@@ -73,7 +73,7 @@ For each criterion, respond with exactly this JSON format (no extra text):
 
   const passedCount = details.filter(d => d.passed).length
   const score = details.length > 0 ? passedCount / details.length : 0
-  const passed = score >= 0.8
+  const passed = score >= threshold
 
-  return { passed, score, details }
+  return { passed, score, details, threshold }
 }

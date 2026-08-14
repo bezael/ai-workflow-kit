@@ -1,9 +1,9 @@
 ---
-description: Compact the current conversation into a handoff document so a fresh agent can continue the work.
+description: Compact the current conversation into a handoff document for a fresh agent to continue the work.
 argument-hint: "[focus of the next session]"
 ---
 
-# /ak-handoff
+# Skill: /ak-handoff
 
 Compact the current conversation into a handoff document so a fresh agent can continue without losing context.
 
@@ -34,9 +34,8 @@ $ARGUMENTS
 - `path/to/file.md` — [what it contains]
 - Issue #42 — [what it tracks]
 
-## Suggested prompts for next session
-- `/ak-plan` — [why it's relevant]
-- `/ak-debug` — [why it's relevant]
+## Suggested next steps
+- [Concrete action the next agent should take first]
 
 ## Context the next agent needs but isn't in the code
 [Anything non-obvious: constraints, stakeholder preferences, things tried and abandoned]

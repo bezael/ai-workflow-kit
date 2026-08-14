@@ -1,15 +1,46 @@
 ---
+id: plan
 name: plan
-description: Plan before executing. Use when task touches 3+ files, requires new folder structure, involves DB or API changes, or has step dependencies. Waits for approval before writing code.
+description: >-
+  Plan before executing. Use when task touches 3+ files, requires new folder
+  structure, involves DB or API changes, or has step dependencies. Waits for
+  approval before writing code.
+argument-hint: "<task description>"
+
+contract:
+  - Plan states the goal in one line
+  - Every file that will change is listed, with what changes in it
+  - Steps are ordered and concrete enough to execute without further questions
+  - Risks and rejected alternatives are named
+  - Out-of-scope items are stated explicitly
+  - No code is written before the user approves
+
+acceptance:
+  threshold: 0.8
+  pending: no fixture yet — needs a sample codebase plus a task description
+  criteria:
+    - Produces all five sections: Goal, Files to be touched, Steps, Risks, Not included
+    - Goal is a single sentence, not a restatement of the whole task
+    - Every listed file is one that actually exists or is explicitly marked [new]
+    - Steps are ordered and each names a concrete action
+    - Asks at most one clarifying question before proposing the plan
+    - Does not begin implementing before approval
+
+targets:
+  claude:
+    frontmatter:
+      disable-model-invocation: true
+  antigravity: {}
+  codex: {}
 ---
 
-# Skill: @plan
+# Skill: {{invoke}}
 
 Plan before executing. For complex tasks that touch multiple files or require architecture decisions.
 
 ## Task to plan
 
-the path the user gave
+{{args}}
 
 ## Steps
 

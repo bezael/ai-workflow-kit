@@ -1,26 +1,32 @@
 ---
-description: Create a Pull Request with description, test plan, and checklist. Reads real branch commits and diff.
+description: Create a Pull Request with description, test plan, and checklist. Use when the user says /pr, "create PR", or "open pull request". Reads real branch commits and diff.
 argument-hint: "[feat|fix|chore: title]"
 ---
 
-# /ak-pr
+# Skill: /ak-pr
 
 Creates a Pull Request with a clear description, test plan, and checklist. Reads the real branch commits.
 
-Requested title (may be empty): $ARGUMENTS
+## Requested title
+
+$ARGUMENTS
 
 ## Context to gather first
 
-Run these commands and read their output before writing the PR:
+Run these commands and read their output before starting:
 
 ```bash
-git branch --show-current        # current branch
-git log main..HEAD --oneline     # commits in this branch
-git diff main..HEAD --name-only  # changed files
-git diff main..HEAD --stat       # diff summary
+git branch --show-current   # Current branch
+git log main..HEAD --oneline   # Commits in this branch
+git diff main..HEAD --name-only   # Changed files
+git diff main..HEAD --stat   # Diff summary
 ```
 
 If the base branch isn't `main`, substitute the real one (`master`, `develop`, â€¦).
+
+## When to use it
+
+When the user writes /ak-pr or asks to "create PR" / "open pull request".
 
 ## Steps
 
@@ -55,3 +61,6 @@ If the base branch isn't `main`, substitute the real one (`master`, `develop`, â
 - PR title follows Conventional Commits: `feat(scope): description`
 - If the PR mixes multiple concerns, suggest splitting it.
 - If `gh` is not installed, generate the text to paste manually in GitHub.
+- `gh pr create` runs after your confirmation, i.e. in a later turn than the one
+  that invoked this skill. A frontmatter grant has already expired by then, so
+  the allow rule for it belongs in your permission settings.

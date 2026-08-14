@@ -1,24 +1,34 @@
 ---
 description: Review code with real engineering criteria — logic bugs, security vulnerabilities, and technical debt.
-argument-hint: "[path/to/file or leave empty for branch diff]"
+argument-hint: "[file path, or leave empty for the branch diff]"
 ---
 
-# /ak-review
+# Skill: /ak-review
 
 Reviews code with real engineering criteria. Not just style — detects bugs, security issues, and technical debt.
 
-Target: $ARGUMENTS
+## Target
+
+$ARGUMENTS
+
+## Context to gather first
+
+Run these commands and read their output before starting:
+
+```bash
+git diff main..HEAD   # Branch diff (fallback when no file is given)
+git diff main..HEAD --name-only   # Changed files
+```
+
+## When to use it
+
+When the user writes /ak-review with a file path, or /ak-review on its own to review the current branch changes.
 
 ## Steps
 
 1. **Read the code to review**:
-   - If a file path was provided above, read that file completely — ignore the branch diff.
-   - If nothing was provided, gather the diff yourself:
-     ```bash
-     git diff main..HEAD             # changes to review
-     git diff main..HEAD --name-only # changed files
-     ```
-     Substitute the real base branch if it isn't `main`.
+   - If $ARGUMENTS names a file, read that file completely — ignore the branch diff.
+   - If it is empty, use the branch diff above.
 
 2. **Review in this priority order**:
 
@@ -51,7 +61,7 @@ Target: $ARGUMENTS
 ### 🟡 Important
 - **Line X**: [description]
 
-### 🔵 Suggestions
+### 🔵 Suggestion
 - **Line X**: [description]
 
 ### ✅ What's good

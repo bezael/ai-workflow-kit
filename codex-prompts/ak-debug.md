@@ -1,9 +1,9 @@
 ---
-description: Structured debugging workflow — build a reproducible loop and form hypotheses before touching code.
+description: Structured debugging workflow — diagnose before proposing fixes. Use when user says /debug, reports a bug, an error, or unexpected behavior. Forms hypotheses before touching code.
 argument-hint: "[problem description]"
 ---
 
-# /ak-debug
+# Skill: /ak-debug
 
 Structured debugging. Build a **tight loop** before hypothesizing.
 
@@ -32,7 +32,7 @@ The loop is tight when it is:
 
 **Phase 1 is done when you have named this command and run it at least once.**
 
-Do not proceed to Phase 2 without a tight loop. Reading code to build a theory before this exists is the failure mode this prompt prevents.
+Do not proceed to Phase 2 without a tight loop. Reading code to build a theory before this exists is the failure mode this skill prevents.
 
 ### Phase 2: Hypotheses
 
@@ -66,12 +66,12 @@ Only when the cause is confirmed:
 ### Phase 5: Prevention (optional)
 
 If the bug reveals a systemic gap, suggest how to close it:
-- No clean test seam → flag for `/ak-review`
+- No clean test seam → flag for a review
 - Type gap → stricter TypeScript
-- Architectural issue → `/ak-plan` a refactor
+- Architectural issue → plan a refactor
 
 ## Rules
 
-- No Phase 2 without a tight loop. Theorizing before reproducing is the exact failure this prevents.
+- No Phase 2 without a tight loop. Theorizing before reproducing is the exact failure this skill prevents.
 - The simplest fix that makes the loop green is the right fix.
 - If in production: hotfix first, proper fix second — document the gap.

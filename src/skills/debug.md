@@ -1,16 +1,43 @@
 ---
-name: ak:debug
-description: Structured debugging workflow — diagnose before proposing fixes. Use when user says /debug, reports a bug, an error, or unexpected behavior. Forms hypotheses before touching code.
+id: debug
+name: debug
+description: >-
+  Structured debugging workflow — diagnose before proposing fixes. Use when
+  user says /debug, reports a bug, an error, or unexpected behavior. Forms
+  hypotheses before touching code.
 argument-hint: "[problem description]"
+
+contract:
+  - A reproducing command is named and run before any theory is formed
+  - Hypotheses are listed and ranked before code is changed
+  - One variable changes at a time, with the loop re-run after each change
+  - The fix is the smallest change that turns the loop green
+  - Debug instrumentation is removed before finishing
+
+acceptance:
+  threshold: 0.8
+  pending: no fixture yet — needs a repo with a reproducible failing test
+  criteria:
+    - Establishes a reproducing command before proposing any cause
+    - Does not propose a fix before the loop has been observed failing
+    - Lists at least two ranked hypotheses with explicit probability
+    - Changes one variable at a time rather than several at once
+    - Proposes a regression test before applying the fix
+    - States that debug logging must be removed afterwards
+
+targets:
+  claude: {}
+  antigravity: {}
+  codex: {}
 ---
 
-# Skill: /ak:debug
+# Skill: {{invoke}}
 
 Structured debugging. Build a **tight loop** before hypothesizing.
 
 ## Problem reported
 
-$ARGUMENTS
+{{args}}
 
 ## Steps
 

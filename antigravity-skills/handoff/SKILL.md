@@ -1,17 +1,15 @@
 ---
-name: ak:handoff
+name: handoff
 description: Compact the current conversation into a handoff document for a fresh agent to continue the work.
-argument-hint: "[focus of the next session]"
-disable-model-invocation: true
 ---
 
-# Skill: /ak:handoff
+# Skill: @handoff
 
 Compact the current conversation into a handoff document so a fresh agent can continue without losing context.
 
 ## Focus of next session
 
-$ARGUMENTS
+the path the user gave
 
 ## Steps
 

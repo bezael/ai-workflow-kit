@@ -1,16 +1,30 @@
-# Skill: review
+---
+name: review
+description: Review code with real engineering criteria — logic bugs, security vulnerabilities, and technical debt.
+---
+
+# Skill: @review
 
 Reviews code with real engineering criteria. Not just style — detects bugs, security issues, and technical debt.
 
-## Trigger
+## Context to gather first
 
-When the user writes `@review file` or `@review` (reviews current PR changes).
+Run these and read the output before starting:
+
+```bash
+git diff main..HEAD   # Branch diff (fallback when no file is given)
+git diff main..HEAD --name-only   # Changed files
+```
+
+## When to use it
+
+When the user writes @review with a file path, or @review on its own to review the current branch changes.
 
 ## Steps
 
 1. **Read the code to review**:
-   - If there's a specific file (`@review src/auth.ts`), read it completely.
-   - If no file, use `git diff main..HEAD` to review the branch changes.
+   - If the path the user gave names a file, read that file completely — ignore the branch diff.
+   - If it is empty, use the branch diff above.
 
 2. **Review in this priority order**:
 
@@ -43,7 +57,7 @@ When the user writes `@review file` or `@review` (reviews current PR changes).
 ### Important
 - **Line X**: [description]
 
-### Suggestions
+### Suggestion
 - **Line X**: [description]
 
 ### What's good
