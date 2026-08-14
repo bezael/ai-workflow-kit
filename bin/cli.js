@@ -679,9 +679,38 @@ if (SKILLS_ONLY) {
   }
 }
 
+// ─── Clean up the pre-2.2 flat layout ────────────────────────────────────────
+// Skills used to install as `~/.claude/skills/<name>.md` and agents as
+// `~/.claude/skills/<name>.md` too. They now live in `skills/<name>/SKILL.md`
+// and `agents/<name>.md`, so an in-place upgrade leaves the old files behind,
+// still registered as duplicate slash commands pointing at stale prompts.
+function removeLegacyFlatFiles(entries) {
+  let cleaned = 0
+  for (const entry of entries) {
+    const legacy = path.join(SKILLS_DST, entry.name + '.md')
+    // Only when the new layout differs from the old one — a skill the kit
+    // still ships as a flat file is being written to that exact path.
+    if (entry.isDir === false) continue
+    if (!fs.existsSync(legacy) || !fs.statSync(legacy).isFile()) continue
+    fs.unlinkSync(legacy)
+    dim(`removed legacy ${path.basename(legacy)}`)
+    cleaned++
+  }
+  return cleaned
+}
+
 // ─── Install skills ───────────────────────────────────────────────────────────
 
 let installedCount = 0
+
+if (selectedSkills.length > 0 || selectedAgents.length > 0) {
+  // Agents have no isDir flag — they always moved from skills/ to agents/
+  const legacy = removeLegacyFlatFiles([
+    ...selectedSkills,
+    ...selectedAgents.map(a => ({ ...a, isDir: true })),
+  ])
+  if (legacy > 0) info(`Cleaned up ${legacy} file(s) from the old flat layout`)
+}
 
 if (selectedSkills.length > 0) {
   step('Installing skills...')
