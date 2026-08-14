@@ -3,7 +3,7 @@
 ![AI Workflow Kit](./banner.png)
 
 Skills, agents, and hooks for working with AI coding tools consistently and professionally.
-Works with **Claude Code**, **Cursor**, **GitHub Copilot**, and **Google Antigravity**.
+Works with **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravity**, and **OpenAI Codex**.
 
 ## Installation
 
@@ -61,18 +61,30 @@ ai-workflow-kit/
 │   ├── test/SKILL.md               # @test — writes behavior-driven tests
 │   ├── refactor/SKILL.md           # @refactor — improves code without breaking anything
 │   └── docs/SKILL.md               # @docs — JSDoc, README, ADR
+├── codex-prompts/
+│   ├── ak-commit.md                # /ak-commit — generates semantic commit messages
+│   ├── ak-pr.md                    # /ak-pr — creates PRs with full description
+│   ├── ak-review.md                # /ak-review — reviews code with real engineering criteria
+│   ├── ak-plan.md                  # /ak-plan — plans before executing
+│   ├── ak-debug.md                 # /ak-debug — structured debugging workflow
+│   ├── ak-vibe-audit.md            # /ak-vibe-audit — audits vibe-coded apps
+│   ├── ak-handoff.md               # /ak-handoff — compacts the session for a fresh agent
+│   └── ak-memory.md                # /ak-memory — save / recall / clean project memory
 ├── skills/
-│   ├── commit.md                   # /ak:commit — generates semantic commit messages
-│   ├── pr.md                       # /ak:pr — creates PRs with full description
-│   ├── review.md                   # /ak:review — reviews code with real engineering criteria
-│   ├── plan.md                     # /ak:plan — plans before executing
-│   └── debug.md                    # /ak:debug — structured debugging workflow
+│   ├── commit/SKILL.md             # /ak:commit — generates semantic commit messages
+│   ├── pr/SKILL.md                 # /ak:pr — creates PRs with full description
+│   ├── review/SKILL.md             # /ak:review — reviews code with real engineering criteria
+│   ├── plan/SKILL.md               # /ak:plan — plans before executing
+│   ├── debug/SKILL.md              # /ak:debug — structured debugging workflow
+│   ├── vibe-audit/SKILL.md         # /ak:vibe-audit — audits vibe-coded apps
+│   ├── handoff/SKILL.md            # /ak:handoff — compacts the session for a fresh agent
+│   └── memory/SKILL.md             # /ak:memory — save / recall / clean project memory
 ├── agents/
-│   ├── frontend.md                 # /ak:frontend — generates UI components
-│   ├── api.md                      # /ak:api — generates endpoints with validation
-│   ├── test.md                     # /ak:test — writes behavior-driven tests
-│   ├── refactor.md                 # /ak:refactor — improves code without breaking anything
-│   └── docs.md                     # /ak:docs — JSDoc, README, ADR
+│   ├── frontend/AGENT.md           # /ak:frontend — generates UI components
+│   ├── api/AGENT.md                # /ak:api — generates endpoints with validation
+│   ├── test/AGENT.md               # /ak:test — writes behavior-driven tests
+│   ├── refactor/AGENT.md           # /ak:refactor — improves code without breaking anything
+│   └── docs/AGENT.md               # /ak:docs — JSDoc, README, ADR
 ├── hooks/
 │   ├── README.md                   # How to install and customize hooks
 │   ├── settings.template.json      # Ready-to-copy configuration
@@ -164,6 +176,29 @@ Once installed, invoke skills with `@` in the Antigravity sidebar:
 - `@commit`, `@pr`, `@review`, `@plan`, `@debug`, `@vibe-audit`
 - `@frontend`, `@api`, `@test`, `@refactor`, `@docs`
 
+### Use with OpenAI Codex
+
+Codex reads two things: `AGENTS.md` in your project root for the rules, and `~/.codex/prompts/*.md` for slash commands. The installer handles both:
+
+```bash
+npx ai-workflow-kit --codex
+```
+
+It copies `codex-prompts/*.md` to `~/.codex/prompts/` (or `$CODEX_HOME/prompts/` if set) and drops `AGENTS.md` in the current project. Restart Codex and you'll have:
+
+- `/ak-commit`, `/ak-pr`, `/ak-review`, `/ak-plan`, `/ak-debug`
+- `/ak-vibe-audit`, `/ak-handoff`, `/ak-memory`
+
+Codex uses `-` instead of `:` in command names, so it's `/ak-commit`, not `/ak:commit`.
+
+The specialized agents (`/ak:frontend`, `/ak:api`, `/ak:test`, `/ak:refactor`, `/ak:docs`) are **not** ported — they rely on Claude Code subagents, which Codex has no equivalent for.
+
+To remove them:
+
+```bash
+npx ai-workflow-kit --codex --uninstall
+```
+
 ## Versioning & Changelog
 
 This project follows [Semantic Versioning](https://semver.org/) and [Keep a Changelog](https://keepachangelog.com/).
@@ -197,6 +232,6 @@ The release script automatically:
 ## Philosophy
 
 - **Diagnose before acting** — an approved plan is worth more than fast code
-- **Cross-tool skills** — the same patterns work in Claude Code, Cursor, and Copilot
+- **Cross-tool skills** — the same patterns work in Claude Code, Cursor, Copilot, Antigravity, and Codex
 - **Persistent memory** — the AI should remember context, not ask for it every time
 - **Predictable output** — each skill produces the same format, every time

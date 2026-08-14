@@ -3,7 +3,9 @@
 ## What this repo is
 
 A collection of skills, agents, and memory patterns to make working with AI coding tools faster and more consistent.
-Works with: **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravity**.
+Works with: **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravity**, **OpenAI Codex**.
+
+For Codex the same skills ship as flat slash commands in `codex-prompts/` (`/ak-commit` instead of `/ak:commit`) — install them with `npx ai-workflow-kit --codex`. Keep both copies in sync when editing a skill.
 
 ## Available Skills
 

@@ -1,7 +1,8 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
 # AI Workflow Kit — Installer
-# Instala skills, agentes y hooks en Claude Code con un solo comando.
+# Instala skills, agentes y hooks para Claude Code, Antigravity y Codex
+# con un solo comando.
 #
 # Uso:
 #   bash install.sh              # instalación completa
@@ -67,6 +68,9 @@ HOOKS_DIR="$CLAUDE_DIR/hooks"
 SETTINGS_FILE="$CLAUDE_DIR/settings.json"
 GEMINI_DIR="$HOME/.gemini"
 ANTIGRAVITY_SKILLS_DIR="$GEMINI_DIR/antigravity/skills"
+CODEX_DIR="${CODEX_HOME:-$HOME/.codex}"
+CODEX_PROMPTS_DIR="$CODEX_DIR/prompts"
+CODEX_REF_DIR="$CODEX_DIR/ak-workflow-kit"
 
 # ─── DRY RUN wrapper ─────────────────────────────────────────────────────────
 run() {
@@ -92,12 +96,19 @@ echo ""
 if $UNINSTALL; then
   step "Desinstalando AI Workflow Kit..."
 
-  SKILLS_TO_REMOVE=(commit pr review plan debug vibe-audit)
+  SKILLS_TO_REMOVE=(commit pr review plan debug vibe-audit handoff memory)
   AGENTS_TO_REMOVE=(frontend api test refactor docs)
   HOOKS_TO_REMOVE=(pre-bash-safety pre-commit-secrets post-write-format post-edit-lint notify-done)
   ANTIGRAVITY_SKILLS_TO_REMOVE=(commit pr review plan debug vibe-audit frontend api test refactor docs)
+  CODEX_PROMPTS_TO_REMOVE=(ak-commit ak-pr ak-review ak-plan ak-debug ak-vibe-audit ak-handoff ak-memory)
 
   for skill in "${SKILLS_TO_REMOVE[@]}" "${AGENTS_TO_REMOVE[@]}"; do
+    # Layout actual (directorio) y layout antiguo (fichero suelto)
+    DIR="$SKILLS_DIR/$skill"
+    if [ -d "$DIR" ]; then
+      run "rm -rf '$DIR'"
+      success "Eliminado: $DIR"
+    fi
     FILE="$SKILLS_DIR/$skill.md"
     if [ -f "$FILE" ]; then
       run "rm '$FILE'"
@@ -120,6 +131,19 @@ if $UNINSTALL; then
       success "Eliminado Antigravity skill: $DIR"
     fi
   done
+
+  for prompt in "${CODEX_PROMPTS_TO_REMOVE[@]}"; do
+    FILE="$CODEX_PROMPTS_DIR/$prompt.md"
+    if [ -f "$FILE" ]; then
+      run "rm '$FILE'"
+      success "Eliminado Codex prompt: $FILE"
+    fi
+  done
+
+  if [ -d "$CODEX_REF_DIR" ]; then
+    run "rm -rf '$CODEX_REF_DIR'"
+    success "Eliminado Codex reference: $CODEX_REF_DIR"
+  fi
 
   warn "settings.json NO se eliminó automáticamente."
   warn "Si quieres eliminarlo: rm $SETTINGS_FILE"
@@ -168,6 +192,16 @@ else
   info "Google Antigravity no detectado (~/.gemini no existe). Los skills de Antigravity se instalarán de todas formas."
 fi
 
+# Detectar OpenAI Codex
+if command -v codex &>/dev/null; then
+  CODEX_VERSION=$(codex --version 2>/dev/null | head -1 || echo "desconocida")
+  success "Codex detectado: $CODEX_VERSION"
+elif [ -d "$CODEX_DIR" ]; then
+  success "Codex detectado: $CODEX_DIR"
+else
+  info "Codex no detectado ($CODEX_DIR no existe). Los prompts de Codex se instalarán de todas formas."
+fi
+
 # ─────────────────────────────────────────────────────────────────────────────
 # INSTALAR SKILLS Y AGENTES
 # ─────────────────────────────────────────────────────────────────────────────
@@ -178,58 +212,58 @@ if ! $HOOKS_ONLY; then
   INSTALLED_SKILLS=0
   SKIPPED_SKILLS=0
 
-  for skill_file in "$SCRIPT_DIR"/skills/*.md; do
-    skill_name=$(basename "$skill_file")
+  for skill_dir in "$SCRIPT_DIR"/skills/*/; do
+    skill_name=$(basename "$skill_dir")
     dest="$SKILLS_DIR/$skill_name"
 
-    if [ -f "$dest" ]; then
+    if [ -d "$dest" ]; then
       # El skill ya existe — preguntar si sobreescribir (salvo --dry-run)
       if $DRY_RUN; then
-        run "cp '$skill_file' '$dest'"
-        ((INSTALLED_SKILLS++))
+        run "cp -r '$skill_dir' '$SKILLS_DIR/'"
+        INSTALLED_SKILLS=$((INSTALLED_SKILLS + 1))
       else
         read -r -p "  El skill '$skill_name' ya existe. ¿Sobreescribir? [s/N] " confirm
         if [[ "$confirm" =~ ^[sS]$ ]]; then
-          cp "$skill_file" "$dest"
+          cp -r "$skill_dir" "$SKILLS_DIR/"
           success "Actualizado: $skill_name"
-          ((INSTALLED_SKILLS++))
+          INSTALLED_SKILLS=$((INSTALLED_SKILLS + 1))
         else
           info "Omitido: $skill_name"
-          ((SKIPPED_SKILLS++))
+          SKIPPED_SKILLS=$((SKIPPED_SKILLS + 1))
         fi
       fi
     else
-      run "cp '$skill_file' '$dest'"
+      run "cp -r '$skill_dir' '$SKILLS_DIR/'"
       success "Instalado skill: $skill_name"
-      ((INSTALLED_SKILLS++))
+      INSTALLED_SKILLS=$((INSTALLED_SKILLS + 1))
     fi
   done
 
   step "Instalando agentes..."
 
-  for agent_file in "$SCRIPT_DIR"/agents/*.md; do
-    agent_name=$(basename "$agent_file")
+  for agent_dir in "$SCRIPT_DIR"/agents/*/; do
+    agent_name=$(basename "$agent_dir")
     dest="$SKILLS_DIR/$agent_name"  # Los agentes van en la misma carpeta que skills
 
-    if [ -f "$dest" ]; then
+    if [ -d "$dest" ]; then
       if $DRY_RUN; then
-        run "cp '$agent_file' '$dest'"
-        ((INSTALLED_SKILLS++))
+        run "cp -r '$agent_dir' '$SKILLS_DIR/'"
+        INSTALLED_SKILLS=$((INSTALLED_SKILLS + 1))
       else
         read -r -p "  El agente '$agent_name' ya existe. ¿Sobreescribir? [s/N] " confirm
         if [[ "$confirm" =~ ^[sS]$ ]]; then
-          cp "$agent_file" "$dest"
+          cp -r "$agent_dir" "$SKILLS_DIR/"
           success "Actualizado: $agent_name"
-          ((INSTALLED_SKILLS++))
+          INSTALLED_SKILLS=$((INSTALLED_SKILLS + 1))
         else
           info "Omitido: $agent_name"
-          ((SKIPPED_SKILLS++))
+          SKIPPED_SKILLS=$((SKIPPED_SKILLS + 1))
         fi
       fi
     else
-      run "cp '$agent_file' '$dest'"
+      run "cp -r '$agent_dir' '$SKILLS_DIR/'"
       success "Instalado agente: $agent_name"
-      ((INSTALLED_SKILLS++))
+      INSTALLED_SKILLS=$((INSTALLED_SKILLS + 1))
     fi
   done
 
@@ -249,26 +283,67 @@ if ! $HOOKS_ONLY; then
     if [ -d "$dest" ]; then
       if $DRY_RUN; then
         run "cp -r '$skill_dir' '$ANTIGRAVITY_SKILLS_DIR/'"
-        ((INSTALLED_AG++))
+        INSTALLED_AG=$((INSTALLED_AG + 1))
       else
         read -r -p "  El skill de Antigravity '$skill_name' ya existe. ¿Sobreescribir? [s/N] " confirm
         if [[ "$confirm" =~ ^[sS]$ ]]; then
           cp -r "$skill_dir" "$ANTIGRAVITY_SKILLS_DIR/"
           success "Actualizado Antigravity skill: $skill_name"
-          ((INSTALLED_AG++))
+          INSTALLED_AG=$((INSTALLED_AG + 1))
         else
           info "Omitido: $skill_name"
-          ((SKIPPED_AG++))
+          SKIPPED_AG=$((SKIPPED_AG + 1))
         fi
       fi
     else
       run "cp -r '$skill_dir' '$ANTIGRAVITY_SKILLS_DIR/'"
       success "Instalado Antigravity skill: $skill_name"
-      ((INSTALLED_AG++))
+      INSTALLED_AG=$((INSTALLED_AG + 1))
     fi
   done
 
   info "Antigravity skills instalados: $INSTALLED_AG | Omitidos: $SKIPPED_AG"
+
+  # ─── Instalar prompts de OpenAI Codex ─────────────────────────────────────
+  step "Instalando prompts para Codex..."
+  run "mkdir -p '$CODEX_PROMPTS_DIR'"
+
+  INSTALLED_CX=0
+  SKIPPED_CX=0
+
+  for prompt_file in "$SCRIPT_DIR"/codex-prompts/*.md; do
+    prompt_name=$(basename "$prompt_file")
+    dest="$CODEX_PROMPTS_DIR/$prompt_name"
+
+    if [ -f "$dest" ]; then
+      if $DRY_RUN; then
+        run "cp '$prompt_file' '$dest'"
+        INSTALLED_CX=$((INSTALLED_CX + 1))
+      else
+        read -r -p "  El prompt de Codex '$prompt_name' ya existe. ¿Sobreescribir? [s/N] " confirm
+        if [[ "$confirm" =~ ^[sS]$ ]]; then
+          cp "$prompt_file" "$dest"
+          success "Actualizado Codex prompt: $prompt_name"
+          INSTALLED_CX=$((INSTALLED_CX + 1))
+        else
+          info "Omitido: $prompt_name"
+          SKIPPED_CX=$((SKIPPED_CX + 1))
+        fi
+      fi
+    else
+      run "cp '$prompt_file' '$dest'"
+      success "Instalado Codex prompt: $prompt_name"
+      INSTALLED_CX=$((INSTALLED_CX + 1))
+    fi
+  done
+
+  # /ak-vibe-audit lee este fichero de referencia (fuera de prompts/ para no
+  # generar un slash command fantasma)
+  run "mkdir -p '$CODEX_REF_DIR'"
+  run "cp '$SCRIPT_DIR/skills/vibe-audit/patterns.md' '$CODEX_REF_DIR/vibe-audit-patterns.md'"
+  success "Instalada referencia: $CODEX_REF_DIR/vibe-audit-patterns.md"
+
+  info "Codex prompts instalados: $INSTALLED_CX | Omitidos: $SKIPPED_CX"
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -410,12 +485,15 @@ echo ""
 
 if ! $HOOKS_ONLY; then
   echo -e "  ${GREEN}Claude Code:${RESET}  $SKILLS_DIR"
-  echo -e "  Comandos: /ak:commit /ak:pr /ak:review /ak:plan /ak:debug /ak:vibe-audit"
+  echo -e "  Comandos: /ak:commit /ak:pr /ak:review /ak:plan /ak:debug /ak:vibe-audit /ak:handoff /ak:memory"
   echo -e "  Agentes:  /ak:frontend /ak:api /ak:test /ak:refactor /ak:docs"
   echo ""
   echo -e "  ${GREEN}Antigravity:${RESET}  $ANTIGRAVITY_SKILLS_DIR"
   echo -e "  Skills:   @commit @pr @review @plan @debug @vibe-audit"
   echo -e "  Agentes:  @frontend @api @test @refactor @docs"
+  echo ""
+  echo -e "  ${GREEN}Codex:${RESET}        $CODEX_PROMPTS_DIR"
+  echo -e "  Comandos: /ak-commit /ak-pr /ak-review /ak-plan /ak-debug /ak-vibe-audit /ak-handoff /ak-memory"
   echo ""
 fi
 
@@ -425,7 +503,7 @@ if ! $SKILLS_ONLY; then
   echo ""
 fi
 
-echo -e "  Reinicia Claude Code para que los cambios surtan efecto."
+echo -e "  Reinicia Claude Code (y Codex) para que los cambios surtan efecto."
 echo ""
 
 if $DRY_RUN; then
