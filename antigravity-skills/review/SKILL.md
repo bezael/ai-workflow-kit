@@ -49,7 +49,29 @@ When the user writes @review with a file path, or @review on its own to review t
    An unchecked task that is unimplemented is remaining work, not a violation
    — only report it under compliance if something claims it is done.
 
-3. **Review in this priority order**:
+   Close the compliance layer with an **alignment verdict** — the PR-issue
+   alignment taxonomy from agentic code review research (Isik et al.):
+
+   - **Exact** — the change covers the requirements, nothing unrelated.
+   - **Tangling** — the change includes code no criterion asks for.
+   - **Missing** — the change fails to fully cover the requirements.
+   - **Missing and Tangling** — both at once.
+
+   Tangling code is noise that hides defects; Missing work is technical debt
+   wearing a green checkmark. Name the deviation and its evidence.
+
+3. **Prioritize with the risk signal.** Run `npx ai-workflow-kit risk` — it
+   ranks the changed files by churn and fix history from git, the two
+   strongest deterministic predictors of where defects cluster. Start the
+   deep review at the `HIGH` files. If `npx` is unavailable, approximate it:
+   `git log --since="6 months ago" --oneline -- <file>` per changed file, and
+   weigh files with many `fix:` commits heaviest. Two rules:
+
+   - A file with no history is **new code — unknown risk, not low risk**.
+   - The signal decides where review depth goes first; it is **never itself
+     a finding**. A `HIGH` label with no defect found is a clean result.
+
+4. **Review in this priority order**:
 
 ### Critical (blocks merge)
 - Logic bugs that produce incorrect behavior
@@ -69,7 +91,7 @@ When the user writes @review with a file path, or @review on its own to review t
 - Outdated or unnecessary comments
 - Readability improvements
 
-4. **Output format**:
+5. **Output format**:
 
 ```markdown
 ## Review: [file name or PR]
@@ -94,6 +116,7 @@ When the user writes @review with a file path, or @review on its own to review t
 ## Review: [feature slug]
 
 Status: PASS | CHANGES REQUIRED
+Alignment: Exact | Tangling | Missing | Missing and Tangling
 
 ### Requirements compliance
 - [AC-XX]: implemented / missing / diverges — [evidence]
@@ -108,7 +131,23 @@ Status: PASS | CHANGES REQUIRED
 ```
 
    `Status: PASS` only when every compliance point holds AND nothing Critical
-   was found. Anything else is `CHANGES REQUIRED`.
+   was found. Anything else is `CHANGES REQUIRED`. An alignment verdict other
+   than `Exact` cannot be `PASS` unless the user explicitly accepted the
+   deviation — out-of-scope code gets removed or specced, missing work gets
+   completed or descoped in writing.
+
+6. **Close the loop.** A review is not finished when the findings are written
+   — it is finished when the durable part of what it taught lives somewhere
+   the next session will read. If the review surfaced a durable learning:
+
+   - a decision confirmed or overturned,
+   - an alternative considered and rejected, with the reason,
+   - a risk that materialized (or was confirmed absent) in a specific module,
+
+   offer to persist it to `memory/decisions/` (the memory skill's `save`
+   flow). Pure code fixes stay in the review; only durable knowledge is
+   promoted. A review whose lessons evaporate forces the next review to
+   rediscover them.
 
 ## Rules
 

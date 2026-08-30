@@ -35,6 +35,16 @@ If a `specs/<slug>/` directory covers the change (an SDD feature — `spec.md` +
 
 The point is intention vs implementation: passing tests are evidence, not a verdict. A task list can be fully ticked and still not do what the spec says — this layer is where that gets caught. Without a `specs/` directory, nothing changes.
 
+The compliance layer closes with an **alignment verdict** — `Exact`, `Tangling` (code no criterion asks for), `Missing` (requirements not fully covered), or `Missing and Tangling` — the PR-issue alignment taxonomy from agentic code review research (Isik et al.). Only `Exact`, or a deviation the user explicitly accepted, can be part of a `PASS`.
+
+## Depth goes where history says defects cluster
+
+Before the severity pass, the review runs `npx ai-workflow-kit risk`: a deterministic ranking of the changed files by churn and fix history from git — no LLM, one `git log` aggregated per file. `HIGH` files get the deep read first. A file with no history shows as `new`, which means unknown risk, not low. The signal orders the review; it is never itself a finding — a `HIGH` label with no defect found is a clean result.
+
+## The review ends by remembering
+
+A review that surfaces a durable learning — a decision confirmed or overturned, an alternative rejected with its reason, a risk that materialized in a specific module — offers to persist it to `memory/decisions/` via [`/ak:memory`](memory.md). Pure code fixes stay in the review; only durable knowledge is promoted. The next review starts from what this one learned instead of rediscovering it.
+
 ## It's working if
 
 - Each finding names a line you can jump to.
