@@ -1,0 +1,166 @@
+<!doctype html>
+<!--
+  Source of banner.png. Regenerate after editing:
+  chrome --headless=new --disable-gpu --hide-scrollbars --force-device-scale-factor=1 \n    --window-size=2560,1280 --virtual-time-budget=10000 --screenshot=banner.png banner.html
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 2560px; height: 1280px; overflow: hidden; }
+  body {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background: #050a08;
+    position: relative;
+    color: #fff;
+  }
+  /* grid + glows */
+  .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(52,211,153,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(52,211,153,.045) 1px, transparent 1px);
+    background-size: 80px 80px;
+  }
+  .glow-tl {
+    position: absolute; left: -420px; top: -420px; width: 1500px; height: 1300px;
+    background: radial-gradient(closest-side, rgba(16,185,129,.17), transparent 70%);
+  }
+  .glow-br {
+    position: absolute; right: -300px; bottom: -500px; width: 1200px; height: 1100px;
+    background: radial-gradient(closest-side, rgba(99,102,241,.10), transparent 70%);
+  }
+
+  .left { position: absolute; left: 110px; top: 108px; width: 720px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 16px;
+    border: 1.5px solid rgba(52,211,153,.4); border-radius: 999px;
+    background: rgba(16,185,129,.07);
+    padding: 16px 34px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 26px; font-weight: 500; letter-spacing: 3px; color: #34d399;
+  }
+  .badge .dot { width: 14px; height: 14px; border-radius: 50%; background: #34d399; box-shadow: 0 0 14px rgba(52,211,153,.9); }
+
+  h1 { margin-top: 46px; font-size: 112px; line-height: 1.02; font-weight: 800; letter-spacing: -2px; }
+  h1 .accent { color: #34d399; }
+
+  .sub { margin-top: 40px; font-size: 31px; line-height: 1.55; color: #9aa5a0; font-weight: 500; max-width: 660px; }
+  .sub .hl { color: #cbd5d1; font-weight: 600; }
+
+  .pills { margin-top: 46px; display: flex; flex-wrap: wrap; gap: 18px; max-width: 700px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 14px;
+    background: rgba(19,26,22,.85); border: 1.5px solid #202b25; border-radius: 16px;
+    padding: 16px 26px; font-size: 25px; font-weight: 600; color: #e5e7eb;
+  }
+  .pill .ic { width: 32px; height: 32px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; }
+  .ic-claude { background: #d97706; }
+  .ic-cursor { background: #6366f1; }
+  .ic-copilot { background: #22c55e; }
+  .ic-anti { background: #3b82f6; }
+  .ic-codex { background: #64748b; }
+  .pill .ic span { color: rgba(255,255,255,.95); font-weight: 800; }
+
+  .stats { margin-top: 52px; display: flex; align-items: flex-start; }
+  .stat { padding-right: 44px; }
+  .stat + .stat { border-left: 2px solid #1d2823; padding-left: 44px; }
+  .stat .num { font-size: 58px; font-weight: 800; letter-spacing: -1px; }
+  .stat .num .plus { color: #34d399; }
+  .stat .lbl { margin-top: 8px; font-size: 21px; font-weight: 600; letter-spacing: 4px; color: #6b7671; }
+
+  /* terminal */
+  .term {
+    position: absolute; right: 90px; top: 118px; width: 1420px; height: 1044px;
+    background: #0a100d; border: 1.5px solid #1c2721; border-radius: 26px;
+    box-shadow: 0 40px 120px rgba(0,0,0,.55);
+    overflow: hidden;
+  }
+  .term-head {
+    height: 78px; display: flex; align-items: center; gap: 14px;
+    padding: 0 34px; background: #0d1310; border-bottom: 1.5px solid #17211c;
+  }
+  .term-head .b { width: 22px; height: 22px; border-radius: 50%; }
+  .term-head .r { background: #ef5350; } .term-head .y { background: #f5b942; } .term-head .g { background: #34c759; }
+  .term-head .title { margin-left: 20px; font-family: 'JetBrains Mono', monospace; font-size: 23px; color: #5b6660; }
+
+  .term-body { padding: 44px 52px; font-family: 'JetBrains Mono', monospace; font-size: 26px; line-height: 1.62; }
+  .cmd { display: flex; gap: 18px; }
+  .cmd .ps { color: #34d399; font-weight: 700; }
+  .cmd .c-white { color: #e5e7eb; font-weight: 700; }
+  .cmd .c-green { color: #34d399; font-weight: 700; }
+  .cmd .c-purple { color: #a78bfa; font-weight: 700; }
+  .cmd .c-yellow { color: #fbbf24; font-weight: 700; }
+  .cmd .c-blue { color: #60a5fa; font-weight: 700; }
+  .cmd .arg { color: #9aa5a0; font-weight: 500; }
+  .out {
+    margin: 16px 0 40px 40px; padding: 18px 30px;
+    border-left: 4px solid #166e4b; background: rgba(20,32,26,.55); border-radius: 6px;
+    color: #93a09a;
+  }
+  .out .ok { color: #34d399; }
+  .out .warn { color: #fbbf24; }
+  .out .em { color: #d1d9d5; }
+  .out .dim { color: #66736d; }
+  .out .pass { color: #34d399; font-weight: 700; }
+  .result-line { font-weight: 700; color: #d1d9d5; }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="glow-tl"></div>
+  <div class="glow-br"></div>
+
+  <div class="left">
+    <div class="badge"><span class="dot"></span>v2.4.0 &nbsp;·&nbsp; Open Source</div>
+    <h1>AI<br><span class="accent">Workflow</span><br>Kit</h1>
+    <div class="sub">Skills, agents &amp; hooks para trabajar con AI coding tools de forma consistente. <span class="hl">Ahora, harness de ejecución para Spec-Driven Development.</span></div>
+    <div class="pills">
+      <div class="pill"><span class="ic ic-claude"><span>C</span></span>Claude Code</div>
+      <div class="pill"><span class="ic ic-cursor"><span>⌗</span></span>Cursor</div>
+      <div class="pill"><span class="ic ic-copilot"><span>⬟</span></span>Copilot</div>
+      <div class="pill"><span class="ic ic-anti"><span>▲</span></span>Antigravity</div>
+      <div class="pill"><span class="ic ic-codex"><span>◈</span></span>Codex</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="num">11</div><div class="lbl">SKILLS</div></div>
+      <div class="stat"><div class="num">5</div><div class="lbl">AGENTS</div></div>
+      <div class="stat"><div class="num">5</div><div class="lbl">HOOKS</div></div>
+      <div class="stat"><div class="num">5<span class="plus">+</span></div><div class="lbl">TOOLS</div></div>
+    </div>
+  </div>
+
+  <div class="term">
+    <div class="term-head">
+      <span class="b r"></span><span class="b y"></span><span class="b g"></span>
+      <span class="title">claude — ai-workflow-kit</span>
+    </div>
+    <div class="term-body">
+      <div class="cmd"><span class="ps">$</span><span><span class="c-white">npx</span> <span class="c-green">ai-workflow-kit</span></span></div>
+      <div class="out">
+        <div><span class="ok">✓</span> Skills: commit, pr, review, plan, <span class="em">execute</span>, debug…</div>
+        <div><span class="ok">✓</span> Hooks activos &nbsp;·&nbsp; Reinicia Claude Code</div>
+      </div>
+
+      <div class="cmd"><span class="ps">&gt;</span><span><span class="c-purple">/ak:execute</span> <span class="arg">feedback-voting</span></span></div>
+      <div class="out">
+        <div><span class="em">task:</span> 🟢 Implement vote toggle <span class="dim">· spec.md §3 AC-01</span></div>
+        <div><span class="dim">$ npm test -- votes</span></div>
+        <div><span class="ok">✓</span> Ticked <span class="dim">· 7/8 tasks</span></div>
+      </div>
+
+      <div class="cmd"><span class="ps">$</span><span><span class="c-white">npx</span> <span class="c-green">ai-workflow-kit</span> <span class="c-yellow">verify</span> <span class="arg">feedback-voting</span> <span class="c-yellow">--final</span></span></div>
+      <div class="out">
+        <div>Tasks <span class="em">8/8</span> <span class="pass">PASS</span> <span class="dim">·</span> Tests <span class="pass">PASS</span> <span class="dim">·</span> Lint <span class="pass">PASS</span> <span class="dim">·</span> Build <span class="pass">PASS</span></div>
+        <div class="result-line"><span class="ok">✓</span> Result: <span class="pass">PASS</span></div>
+      </div>
+
+      <div class="cmd"><span class="ps">&gt;</span><span><span class="c-blue">/ak:pr</span> <span class="arg">feat: feedback voting — spec → tasks → verified</span></span></div>
+    </div>
+  </div>
+</body>
+</html>

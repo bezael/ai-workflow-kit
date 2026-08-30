@@ -101,6 +101,16 @@ ai-workflow-kit/
 ├── .cursorrules                     # Rules for Cursor
 ├── .github/
 │   └── copilot-instructions.md     # Instructions for GitHub Copilot
+├── .out-of-scope/                  # Features declined on design grounds, with reasoning
+├── bin/
+│   ├── cli.js                      # The npx installer + `verify` dispatch
+│   └── plan-verify.js              # The verify engine — plan.md + tasks.md, --recheck, --final
+├── src/
+│   └── skills/                     # Hand-written skill sources — the three distributions are generated from here
+├── docs/
+│   ├── authoring-skills.md         # Spec fields, build pipeline, and the gates CI enforces
+│   └── skills/                     # One human-facing page per skill
+├── evals/                          # Deterministic tests + LLM-graded skill evals
 ├── antigravity-skills/
 │   ├── help/SKILL.md               # @help — routes a task to the skill that fits
 │   ├── setup/SKILL.md              # @setup — records repo conventions in .ak/config.md
@@ -207,8 +217,13 @@ See `hooks/README.md` for installation instructions.
 ### Install the skills
 
 ```bash
-# Copy skills to Claude Code
-cp skills/*.md ~/.claude/skills/
+npx ai-workflow-kit            # asks global or project scope
+```
+
+Or copy by hand — each skill is a directory with a `SKILL.md`:
+
+```bash
+cp -r skills/* ~/.claude/skills/
 ```
 
 ### Use in any project
@@ -303,13 +318,16 @@ The release script automatically:
 ## How to Contribute
 
 1. Fork the repo
-2. Add your skill in `skills/name.md` following the existing pattern
-3. Document the trigger, steps, and rules
+2. Write your skill in `src/skills/<id>.md` — the one hand-written source; `skills/`, `antigravity-skills/`, and `codex-prompts/` are generated from it by `npm run build`. See [docs/authoring-skills.md](docs/authoring-skills.md) for the spec fields and the gates (docs page, eval coverage) the build enforces.
+3. Run `npm run build && npm test` — `build:check` fails on hand-edited distributions and missing docs.
 4. Open a PR with `/ak:pr`
+
+Before proposing a feature, check [`.out-of-scope/`](.out-of-scope/README.md) — one file per thing this repo has decided not to build, with the reasoning.
 
 ## Philosophy
 
 - **Diagnose before acting** — an approved plan is worth more than fast code
+- **Demonstrated progress** — a checkbox is ticked because its command exited 0, never because an agent asserted it
 - **Cross-tool skills** — the same patterns work in Claude Code, Cursor, Copilot, Antigravity, and Codex
 - **Persistent memory** — the AI should remember context, not ask for it every time
 - **Predictable output** — each skill produces the same format, every time
