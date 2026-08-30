@@ -25,6 +25,7 @@ When the user writes /ak-commit or asks to "make a commit" / "commit the changes
 ## Steps
 
 1. Read the **staged diff** above. If it's empty, use the **unstaged diff** and warn the user that nothing is staged yet.
+   Binary assets (images, fonts, compiled files) appear as `Binary files … differ` lines, or occasionally as unreadable content when git misdetects them as text — take the file name from the staged file list, skip the content, and never let it derail the message. A stage that is *only* binaries still gets a valid message from the file names (`chore(assets): …`).
 2. Read the full diff. Identify:
    - **What changed** (files, functions, logic)
    - **Why it probably changed** (new feature, fix, refactor, docs, etc.)
