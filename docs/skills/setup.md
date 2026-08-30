@@ -35,10 +35,14 @@ An existing `.ak/config.md` is read and updated, never overwritten. If you hand-
 | [`/ak:commit`](commit.md) | commit convention, message language |
 | [`/ak:pr`](pr.md) | base branch, git host, whether `gh` is available |
 | [`/ak:plan`](plan.md) | the commands a step's `Verify:` line should use |
+| [`/ak:execute`](execute.md) | the real commands a task's evidence runs against |
 | [`/ak:review`](review.md) | base branch to diff against; lint and typecheck commands |
 | [`/ak:debug`](debug.md) | the test command, as the fastest route to a red loop |
+| `verify --final` | the `Test` / `Lint` / `Typecheck` / `Build` / `E2E` entries under `## Commands`, executed as the global checks |
 
 Each of those falls back to a sensible default without the file. The defaults are right often enough to be dangerous and wrong often enough to matter, which is the argument for running this once.
+
+The last row is the one that makes `## Commands` a contract rather than prose: `npx ai-workflow-kit verify <slug> --final` executes those entries directly, skipping any marked `unknown`. What the file records is what the harness runs.
 
 ## It's working if
 

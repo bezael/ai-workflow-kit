@@ -13,6 +13,7 @@ Works with: **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravit
 | pr           | `@pr`             | Creates PR with description, test plan, and checklist |
 | review       | `@review`         | Reviews code or PR with configurable criteria       |
 | plan         | `@plan`           | Plans before executing complex tasks                |
+| execute      | `@execute`        | Executes the next pending SDD task from `specs/<slug>/tasks.md`, verified |
 | debug        | `@debug`          | Structured debugging workflow                       |
 | vibe-audit   | `@vibe-audit`     | Audit of apps generated with vibe coding            |
 

@@ -21,7 +21,7 @@ the request the user typed
 
 | What you find | What to do |
 |---|---|
-| `spec.md` exists | This feature is already under the spec-first flow. **Read `spec.md` and `tasks.md` and work the first unchecked task.** Do not write a competing plan. |
+| `spec.md` exists | This feature is already under the spec-first flow. **Recommend the execute skill, which works `tasks.md` one verified task at a time** (`npx ai-workflow-kit verify <slug>` does the ticking). Do not write a competing plan. |
 | only `plan.md` exists | Resume it. Report what is already checked off, then continue from the first unchecked step. |
 | nothing | Continue to Step 1 and create it. |
 
@@ -99,6 +99,7 @@ the one that produces something checkable.
    npx ai-workflow-kit verify <slug>            # next unchecked step
    npx ai-workflow-kit verify <slug> --all      # until one fails
    npx ai-workflow-kit verify <slug> --recheck  # re-run ticked steps
+   npx ai-workflow-kit verify <slug> --final    # every step + the global checks from .ak/config.md
    ```
 
 7. **When every box is ticked**: set `Status: done`, then run the review skill on the changed files before considering the task complete.

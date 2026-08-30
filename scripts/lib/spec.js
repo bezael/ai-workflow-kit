@@ -131,6 +131,10 @@ function interpolate(str, vars) {
  * Turn a spec's `acceptance` block into concrete eval cases, with `{{var}}`
  * placeholders in the criteria resolved per case. Evals call this instead of
  * hand-writing rubrics.
+ *
+ * A case may carry its own `criteria`, replacing the shared list for that case
+ * alone — for skills whose cases exercise different layers (a fixture-specific
+ * rubric can't hold across heterogeneous fixtures).
  */
 export function resolveAcceptance(spec) {
   const a = spec.acceptance
@@ -147,7 +151,7 @@ export function resolveAcceptance(spec) {
         fixture: c.fixture,
         input: c.input ? interpolate(c.input, vars) : undefined,
         context: interpolate(c.context ?? a.context ?? '', vars),
-        criteria: a.criteria.map(cr => interpolate(cr, vars)),
+        criteria: (c.criteria ?? a.criteria).map(cr => interpolate(cr, vars)),
       }
     }),
   }

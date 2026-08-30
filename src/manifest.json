@@ -16,6 +16,13 @@
       "description": "Structured debugging workflow — diagnose before proposing fixes. Use when user says /debug, reports a bug, an error, or unexpected behavior. Forms hypotheses before touching code."
     },
     {
+      "id": "execute",
+      "name": "execute",
+      "status": "stable",
+      "invocation": "user",
+      "description": "Execute the next pending task of a specs/<slug>/ SDD feature — implement it, run its Verify command, and let the engine tick the box only on proof."
+    },
+    {
       "id": "handoff",
       "name": "handoff",
       "status": "stable",

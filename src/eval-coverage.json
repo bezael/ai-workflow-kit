@@ -16,6 +16,7 @@
   ],
   "pending": [
     "debug",
+    "execute",
     "handoff",
     "memory",
     "plan",

@@ -24,6 +24,17 @@ Three buckets, and the boundary between them is what to *do*:
 
 Every Critical carries a concrete fix, not just a description of the problem. And the output ends with one or two things the code does well — not politeness, but calibration: a review that only ever finds fault stops being read carefully.
 
+## Requirements compliance, when a spec exists
+
+If a `specs/<slug>/` directory covers the change (an SDD feature — `spec.md` + `plan.md` + `tasks.md`, written by a spec tool such as sdd-creator), the review grows a first layer *above* the technical one. It reads the spec before judging a line, then opens with `Status: PASS | CHANGES REQUIRED` and a **Requirements compliance** section:
+
+- acceptance criteria implemented, missing, or diverging — with evidence
+- tasks marked `[x]` whose implementation doesn't actually satisfy their criterion
+- code no criterion asked for (out of scope)
+- criteria with no test or `Verify:` coverage
+
+The point is intention vs implementation: passing tests are evidence, not a verdict. A task list can be fully ticked and still not do what the spec says — this layer is where that gets caught. Without a `specs/` directory, nothing changes.
+
 ## It's working if
 
 - Each finding names a line you can jump to.

@@ -31,6 +31,12 @@ The body is always **What / Main changes / Test plan / Notes for the reviewer**,
 
 If the branch mixes concerns, the skill says so and suggests splitting rather than writing a "What" bullet with an *and* in it.
 
+## Traceability, when a spec exists
+
+If a `specs/<slug>/` directory covers the branch (an SDD feature), the body is enriched: a **Specification** link, the acceptance criteria this branch implements, a **Verification** section, and a **Traceability** line (Issue → Spec → Tasks → Implementation → Verification), plus **Risks / out of scope**.
+
+The Verification section only reports what actually ran — ideally the output of `npx ai-workflow-kit verify <slug> --final`. A check that wasn't executed appears as `not run`, never as an optimistic PASS. Ordinary branches without specs keep the four-section body unchanged.
+
 ## It's working if
 
 - Every entry under **Main changes** points at a file you recognise from the diff.

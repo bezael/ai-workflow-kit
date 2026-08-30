@@ -19,7 +19,7 @@ npm i -D ai-workflow-kit@2.3.0
 npx ai-workflow-kit
 ```
 
-Restart your AI tool. You'll have `/ak:api`, `/ak:commit`, `/ak:debug`, `/ak:docs`, `/ak:frontend`, `/ak:handoff`, `/ak:help`, `/ak:memory`, `/ak:plan`, `/ak:pr`, `/ak:refactor`, `/ak:review`, `/ak:setup`, `/ak:test`, `/ak:vibe-audit` available — plus 5 automatic hooks.
+Restart your AI tool. You'll have `/ak:api`, `/ak:commit`, `/ak:debug`, `/ak:docs`, `/ak:execute`, `/ak:frontend`, `/ak:handoff`, `/ak:help`, `/ak:memory`, `/ak:plan`, `/ak:pr`, `/ak:refactor`, `/ak:review`, `/ak:setup`, `/ak:test`, `/ak:vibe-audit` available — plus 5 automatic hooks.
 
 ```bash
 npx ai-workflow-kit --global   # install into ~/.claude/ — all projects (default)
@@ -53,6 +53,35 @@ several do. It prompts before each command unless you pass `--yes`.
 > directory from a repo you don't trust can run anything your shell can — read
 > a plan before verifying it, the same as any script.
 
+### Running an SDD feature
+
+The same engine drives Spec-Driven Development. When a spec tool (such as
+sdd-creator) has generated `specs/<slug>/spec.md` + `plan.md` + `tasks.md`,
+`verify` prefers `tasks.md` — the SDD execution artifact — and the division of
+labor is: the SDD tool owns Understand → Spec → Plan → Tasks; this kit runs
+Task → Verify → Fix → Review → Final Verify → PR.
+
+```bash
+npx ai-workflow-kit verify <slug>            # next unchecked task in tasks.md
+npx ai-workflow-kit verify <slug> --final    # every task's Verify + the global checks from .ak/config.md
+npx ai-workflow-kit verify <slug> --plan     # force plan.md when both files exist
+```
+
+A task is machine-checkable when it carries the same grammar plan steps use —
+one line, backticks required:
+
+```markdown
+- [ ] 🟢 **Implement vote toggle** — files: `src/votes/service.ts`. Criterion: `spec.md §3.2 AC-03`.
+      Verify: `npm test -- votes`
+```
+
+Tasks without a `Verify:` line are reported as unverifiable and never ticked.
+`--final` is read-only: it re-runs every task's Verify (catching regressions in
+ticked tasks), then the `Test` / `Lint` / `Typecheck` / `Build` / `E2E`
+commands recorded under `## Commands` in `.ak/config.md`, and prints a summary
+that ends in `Result: PASS` or `FAIL`. The `/ak:execute` skill drives this loop
+one task at a time.
+
 Or manually:
 
 ```bash
@@ -79,6 +108,7 @@ ai-workflow-kit/
 │   ├── pr/SKILL.md                 # @pr — creates PRs with full description
 │   ├── review/SKILL.md             # @review — reviews code with real criteria
 │   ├── plan/SKILL.md               # @plan — plans before executing
+│   ├── execute/SKILL.md            # @execute — works an SDD task list with proof
 │   ├── debug/SKILL.md              # @debug — structured debugging workflow
 │   ├── vibe-audit/SKILL.md         # @vibe-audit — audits vibe-coded apps
 │   ├── frontend/SKILL.md           # @frontend — generates UI components
@@ -93,6 +123,7 @@ ai-workflow-kit/
 │   ├── ak-pr.md                    # /ak-pr — creates PRs with full description
 │   ├── ak-review.md                # /ak-review — reviews code with real engineering criteria
 │   ├── ak-plan.md                  # /ak-plan — plans before executing
+│   ├── ak-execute.md               # /ak-execute — works an SDD task list with proof
 │   ├── ak-debug.md                 # /ak-debug — structured debugging workflow
 │   ├── ak-vibe-audit.md            # /ak-vibe-audit — audits vibe-coded apps
 │   ├── ak-handoff.md               # /ak-handoff — compacts the session for a fresh agent
@@ -104,6 +135,7 @@ ai-workflow-kit/
 │   ├── pr/SKILL.md                 # /ak:pr — creates PRs with full description
 │   ├── review/SKILL.md             # /ak:review — reviews code with real engineering criteria
 │   ├── plan/SKILL.md               # /ak:plan — plans before executing
+│   ├── execute/SKILL.md            # /ak:execute — works an SDD task list with proof
 │   ├── debug/SKILL.md              # /ak:debug — structured debugging workflow
 │   ├── vibe-audit/SKILL.md         # /ak:vibe-audit — audits vibe-coded apps
 │   ├── handoff/SKILL.md            # /ak:handoff — compacts the session for a fresh agent
@@ -140,6 +172,7 @@ One page per skill in [`docs/skills/`](docs/skills/README.md) — what it does, 
 | pr | `/ak:pr` | Creates PR with description, test plan, and checklist |
 | review | `/ak:review @file` | Reviews code: bugs, security, performance |
 | plan | `/ak:plan [task]` | Plans before executing, into a resumable `specs/<slug>/plan.md` |
+| execute | `/ak:execute [slug]` | Executes the next pending SDD task and lets `verify` prove it |
 | debug | `/ak:debug [problem]` | Diagnoses with hypotheses before proposing fixes |
 | vibe-audit | `/ak:vibe-audit` | Full audit of apps generated with vibe coding |
 | handoff | `/ak:handoff [focus]` | Compacts the session into a handoff for a fresh agent |
@@ -218,7 +251,7 @@ Rules are separate and hierarchical — `GEMINI.md`, `AGENTS.md`, and `.agents/r
 > **Path change:** older versions used `~/.gemini/antigravity/skills/`. Antigravity migrated the global root to `~/.gemini/config/`, leaving a compatibility symlink behind on machines that upgraded in place. Fresh installs don't read the old path, so the kit now writes to `~/.gemini/config/skills/`. If you installed an earlier version of the kit, run `npx ai-workflow-kit --antigravity --uninstall` — it cleans up both paths.
 
 Once installed, invoke skills with `@` in the Antigravity sidebar:
-- `@commit`, `@pr`, `@review`, `@plan`, `@debug`, `@vibe-audit`
+- `@commit`, `@pr`, `@review`, `@plan`, `@execute`, `@debug`, `@vibe-audit`
 - `@frontend`, `@api`, `@test`, `@refactor`, `@docs`
 
 ### Use with OpenAI Codex
@@ -231,7 +264,7 @@ npx ai-workflow-kit --codex
 
 It copies `codex-prompts/*.md` to `~/.codex/prompts/` (or `$CODEX_HOME/prompts/` if set) and drops `AGENTS.md` in the current project. Restart Codex and you'll have:
 
-- `/ak-commit`, `/ak-pr`, `/ak-review`, `/ak-plan`, `/ak-debug`
+- `/ak-commit`, `/ak-pr`, `/ak-review`, `/ak-plan`, `/ak-execute`, `/ak-debug`
 - `/ak-vibe-audit`, `/ak-handoff`, `/ak-memory`
 
 Codex uses `-` instead of `:` in command names, so it's `/ak-commit`, not `/ak:commit`.

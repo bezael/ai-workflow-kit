@@ -19,7 +19,7 @@ npm i -D ai-workflow-kit@2.3.0
 npx ai-workflow-kit
 ```
 
-Reinicia tu herramienta de AI. Tendrás disponibles `/ak:api`, `/ak:commit`, `/ak:debug`, `/ak:docs`, `/ak:frontend`, `/ak:handoff`, `/ak:help`, `/ak:memory`, `/ak:plan`, `/ak:pr`, `/ak:refactor`, `/ak:review`, `/ak:setup`, `/ak:test`, `/ak:vibe-audit` — más 5 hooks automáticos.
+Reinicia tu herramienta de AI. Tendrás disponibles `/ak:api`, `/ak:commit`, `/ak:debug`, `/ak:docs`, `/ak:execute`, `/ak:frontend`, `/ak:handoff`, `/ak:help`, `/ak:memory`, `/ak:plan`, `/ak:pr`, `/ak:refactor`, `/ak:review`, `/ak:setup`, `/ak:test`, `/ak:vibe-audit` — más 5 hooks automáticos.
 
 ```bash
 npx ai-workflow-kit --global   # instala en ~/.claude/ — todos los proyectos (por defecto)
@@ -53,6 +53,35 @@ varios. Pregunta antes de cada comando salvo que pases `--yes`.
 > un repo en el que no confías puede ejecutar cualquier cosa que ejecute tu
 > shell — lee un plan antes de verificarlo, como cualquier script.
 
+### Ejecutar una feature SDD
+
+El mismo motor sirve para Spec-Driven Development. Cuando una herramienta de
+specs (como sdd-creator) ha generado `specs/<slug>/spec.md` + `plan.md` +
+`tasks.md`, `verify` prefiere `tasks.md` — el artefacto de ejecución SDD — y el
+reparto es: la herramienta SDD posee Understand → Spec → Plan → Tasks; este kit
+ejecuta Task → Verify → Fix → Review → Final Verify → PR.
+
+```bash
+npx ai-workflow-kit verify <slug>            # siguiente task pendiente de tasks.md
+npx ai-workflow-kit verify <slug> --final    # el Verify de cada task + los checks globales de .ak/config.md
+npx ai-workflow-kit verify <slug> --plan     # fuerza plan.md cuando conviven ambos ficheros
+```
+
+Una task es verificable por máquina cuando lleva la misma gramática que los
+pasos de un plan — una línea, backticks obligatorios:
+
+```markdown
+- [ ] 🟢 **Implementar vote toggle** — files: `src/votes/service.ts`. Criterion: `spec.md §3.2 AC-03`.
+      Verify: `npm test -- votes`
+```
+
+Las tasks sin línea `Verify:` se reportan como no verificables y nunca se
+marcan. `--final` es de solo lectura: reejecuta el Verify de cada task
+(detectando regresiones en tasks ya marcadas) y después los comandos `Test` /
+`Lint` / `Typecheck` / `Build` / `E2E` registrados bajo `## Commands` en
+`.ak/config.md`, e imprime un resumen que termina en `Result: PASS` o `FAIL`.
+La skill `/ak:execute` conduce este bucle task a task.
+
 O manualmente:
 
 ```bash
@@ -79,6 +108,7 @@ ai-workflow-kit/
 │   ├── pr/SKILL.md                 # @pr — crea PRs con descripción completa
 │   ├── review/SKILL.md             # @review — revisa código con criterios reales
 │   ├── plan/SKILL.md               # @plan — planifica antes de ejecutar
+│   ├── execute/SKILL.md            # @execute — ejecuta una lista de tasks SDD con prueba
 │   ├── debug/SKILL.md              # @debug — workflow de debugging estructurado
 │   ├── vibe-audit/SKILL.md         # @vibe-audit — audita apps generadas con vibe coding
 │   ├── frontend/SKILL.md           # @frontend — genera componentes de UI
@@ -93,6 +123,7 @@ ai-workflow-kit/
 │   ├── ak-pr.md                    # /ak-pr — crea PRs con descripción completa
 │   ├── ak-review.md                # /ak-review — revisa código con criterios reales
 │   ├── ak-plan.md                  # /ak-plan — planifica antes de ejecutar
+│   ├── ak-execute.md               # /ak-execute — ejecuta una lista de tasks SDD con prueba
 │   ├── ak-debug.md                 # /ak-debug — workflow de debugging estructurado
 │   ├── ak-vibe-audit.md            # /ak-vibe-audit — audita apps generadas con vibe coding
 │   ├── ak-handoff.md               # /ak-handoff — compacta la sesión para un agente nuevo
@@ -104,6 +135,7 @@ ai-workflow-kit/
 │   ├── pr/SKILL.md                 # /ak:pr — crea PRs con descripción completa
 │   ├── review/SKILL.md             # /ak:review — revisa código con criterios reales de ingeniería
 │   ├── plan/SKILL.md               # /ak:plan — planifica antes de ejecutar
+│   ├── execute/SKILL.md            # /ak:execute — ejecuta una lista de tasks SDD con prueba
 │   ├── debug/SKILL.md              # /ak:debug — workflow de debugging estructurado
 │   ├── vibe-audit/SKILL.md         # /ak:vibe-audit — audita apps generadas con vibe coding
 │   ├── handoff/SKILL.md            # /ak:handoff — compacta la sesión para un agente nuevo
@@ -140,6 +172,7 @@ Una página por skill en [`docs/skills/`](docs/skills/README.md) — qué hace, 
 | pr | `/ak:pr` | Crea PR con descripción, plan de tests y checklist |
 | review | `/ak:review @file` | Revisa código: bugs, seguridad, performance |
 | plan | `/ak:plan [tarea]` | Planifica antes de ejecutar, en un `specs/<slug>/plan.md` reanudable |
+| execute | `/ak:execute [slug]` | Ejecuta la siguiente task SDD pendiente y deja que `verify` la demuestre |
 | debug | `/ak:debug [problema]` | Diagnostica con hipótesis antes de proponer fixes |
 | vibe-audit | `/ak:vibe-audit` | Auditoría completa de apps generadas con vibe coding |
 | handoff | `/ak:handoff [foco]` | Compacta la sesión en un handoff para un agente nuevo |
@@ -217,7 +250,7 @@ Las reglas van aparte y son jerárquicas — `GEMINI.md`, `AGENTS.md` y `.agents
 > **Cambio de ruta:** las versiones antiguas usaban `~/.gemini/antigravity/skills/`. Antigravity migró el root global a `~/.gemini/config/` y dejó un symlink de compatibilidad en las máquinas que actualizaron in situ. Las instalaciones nuevas no leen la ruta vieja, así que el kit ahora escribe en `~/.gemini/config/skills/`. Si instalaste una versión anterior del kit, ejecuta `npx ai-workflow-kit --antigravity --uninstall`: limpia las dos rutas.
 
 Una vez instalados, invoca los skills con `@` en el sidebar de Antigravity:
-- `@commit`, `@pr`, `@review`, `@plan`, `@debug`, `@vibe-audit`
+- `@commit`, `@pr`, `@review`, `@plan`, `@execute`, `@debug`, `@vibe-audit`
 - `@frontend`, `@api`, `@test`, `@refactor`, `@docs`
 
 ### Usar con OpenAI Codex
@@ -230,7 +263,7 @@ npx ai-workflow-kit --codex
 
 Copia `codex-prompts/*.md` a `~/.codex/prompts/` (o `$CODEX_HOME/prompts/` si lo tienes definido) y deja el `AGENTS.md` en el proyecto actual. Reinicia Codex y tendrás:
 
-- `/ak-commit`, `/ak-pr`, `/ak-review`, `/ak-plan`, `/ak-debug`
+- `/ak-commit`, `/ak-pr`, `/ak-review`, `/ak-plan`, `/ak-execute`, `/ak-debug`
 - `/ak-vibe-audit`, `/ak-handoff`, `/ak-memory`
 
 Codex usa `-` en vez de `:` en los nombres, así que es `/ak-commit`, no `/ak:commit`.

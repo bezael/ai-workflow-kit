@@ -101,11 +101,11 @@ echo ""
 if $UNINSTALL; then
   step "Desinstalando AI Workflow Kit..."
 
-  SKILLS_TO_REMOVE=(commit pr review plan debug vibe-audit handoff memory)
+  SKILLS_TO_REMOVE=(help setup commit pr review plan execute debug vibe-audit handoff memory)
   AGENTS_TO_REMOVE=(frontend api test refactor docs)
   HOOKS_TO_REMOVE=(pre-bash-safety pre-commit-secrets post-write-format post-edit-lint notify-done)
-  ANTIGRAVITY_SKILLS_TO_REMOVE=(commit pr review plan debug vibe-audit frontend api test refactor docs)
-  CODEX_PROMPTS_TO_REMOVE=(ak-commit ak-pr ak-review ak-plan ak-debug ak-vibe-audit ak-handoff ak-memory)
+  ANTIGRAVITY_SKILLS_TO_REMOVE=(help setup commit pr review plan execute debug vibe-audit handoff memory frontend api test refactor docs)
+  CODEX_PROMPTS_TO_REMOVE=(ak-help ak-setup ak-commit ak-pr ak-review ak-plan ak-execute ak-debug ak-vibe-audit ak-handoff ak-memory)
 
   for skill in "${SKILLS_TO_REMOVE[@]}" "${AGENTS_TO_REMOVE[@]}"; do
     # Layout actual (directorio) y layout antiguo (fichero suelto)
@@ -498,15 +498,15 @@ echo ""
 
 if ! $HOOKS_ONLY; then
   echo -e "  ${GREEN}Claude Code:${RESET}  $SKILLS_DIR"
-  echo -e "  Comandos: /ak:commit /ak:pr /ak:review /ak:plan /ak:debug /ak:vibe-audit /ak:handoff /ak:memory"
+  echo -e "  Comandos: /ak:help /ak:setup /ak:commit /ak:pr /ak:review /ak:plan /ak:execute /ak:debug /ak:vibe-audit /ak:handoff /ak:memory"
   echo -e "  Agentes:  /ak:frontend /ak:api /ak:test /ak:refactor /ak:docs"
   echo ""
   echo -e "  ${GREEN}Antigravity:${RESET}  $ANTIGRAVITY_SKILLS_DIR"
-  echo -e "  Skills:   @commit @pr @review @plan @debug @vibe-audit"
+  echo -e "  Skills:   @help @setup @commit @pr @review @plan @execute @debug @vibe-audit"
   echo -e "  Agentes:  @frontend @api @test @refactor @docs"
   echo ""
   echo -e "  ${GREEN}Codex:${RESET}        $CODEX_PROMPTS_DIR"
-  echo -e "  Comandos: /ak-commit /ak-pr /ak-review /ak-plan /ak-debug /ak-vibe-audit /ak-handoff /ak-memory"
+  echo -e "  Comandos: /ak-help /ak-setup /ak-commit /ak-pr /ak-review /ak-plan /ak-execute /ak-debug /ak-vibe-audit /ak-handoff /ak-memory"
   echo ""
 fi
 

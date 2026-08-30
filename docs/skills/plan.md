@@ -35,6 +35,7 @@ And the ticking isn't done on trust. The kit ships a runner:
 npx ai-workflow-kit verify <slug>            # next unchecked step
 npx ai-workflow-kit verify <slug> --all      # until one fails
 npx ai-workflow-kit verify <slug> --recheck  # re-run ticked steps
+npx ai-workflow-kit verify <slug> --final    # every step + the global checks from .ak/config.md
 ```
 
 It runs each step's command and ticks the box **only** when it exits 0. So the file records what was demonstrated rather than what was claimed. `--recheck` is worth running before you call the task done: it catches step 6 having broken step 2, which a plan you only ever append to will never notice.
@@ -45,7 +46,7 @@ Point it at a task whose slug already exists and it reads what's there first:
 
 | What it finds | What happens |
 |---|---|
-| `spec.md` | this feature is under the spec-first flow — it works the first unchecked task instead of writing a competing plan |
+| `spec.md` | this feature is under the spec-first flow — it points you at [`/ak:execute`](execute.md), which works `tasks.md` one verified task at a time, instead of writing a competing plan |
 | only `plan.md` | it reports what's ticked and continues from the first unchecked step |
 | nothing | it creates the directory |
 

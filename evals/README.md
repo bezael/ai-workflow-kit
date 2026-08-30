@@ -36,7 +36,7 @@ The coverage list fails in both directions. An unlisted skill without cases
 fails, and so does a listed skill that has since gained them — writing a
 fixture forces you to delete the entry, so the list can only shrink.
 
-Today 3 of 8 skills have executable cases. The other 5 declare their criteria
+Today 4 of 11 skills have executable cases. The other 7 declare their criteria
 and name the fixture they still need.
 
 ## Quick start

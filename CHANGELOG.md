@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **verify**: `specs/<slug>/tasks.md` support — the engine that ran `plan.md` steps now runs SDD task lists with the same checkbox + `` Verify: `cmd` `` grammar. When both files exist, `tasks.md` wins; `--plan` flips it back. The SDD tool (sdd-creator) owns spec/plan/tasks content; the kit only ticks what a command proved.
+- **verify**: `--final` — read-only final verification: re-runs every step's Verify (regressions in ticked tasks included), then the `Test` / `Lint` / `Typecheck` / `Build` / `E2E` commands from `.ak/config.md`'s `## Commands`, and prints a summary ending in `Result: PASS | FAIL`. `parseConfigCommands()` makes the config a contract the CLI actually executes.
+- `/ak:execute` — works an SDD feature one task at a time: announce (task, criterion, files, Verify), implement only that, let `verify` tick the box, at most three fix attempts on a red, and a hard stop on any spec gap — reflow belongs to the SDD tool, not to improvisation in code.
+- **review**: an SDD-aware layer — with `specs/<slug>/` present the review opens with `Status: PASS | CHANGES REQUIRED` and a Requirements compliance section (criteria implemented/missing, tasks ticked without a real implementation, out-of-scope code, uncovered criteria) before the usual severity buckets.
+- **pr**: SDD traceability — with specs present the body adds Specification, implemented acceptance criteria, a Verification section that only reports what actually ran (`not run` is an honest value), and an Issue → Spec → Tasks → Implementation → Verification line.
+- **evals**: `evals/cli/sdd-verify.test.js` (tasks.md discovery and preference, tick/fail/recheck on tasks, `--final`, config parsing) and `evals/fixtures/sdd-project/` — a spec whose implementation drifted from its task list, for the review compliance rubric.
+- **spec**: an acceptance case may carry its own `criteria`, replacing the shared list for that case alone (`resolveAcceptance`).
+
 - `/ak:help` — routes a task to the one skill that fits it, or says plainly that none does. Its catalogue of the set is generated from the specs, so it can't go stale.
 - `/ak:setup` — detects the repo's default branch, commands, git host and commit convention into `.ak/config.md`. `/ak:commit`, `/ak:pr`, `/ak:plan`, `/ak:review` and `/ak:debug` read it when it exists, and fall back to defaults when it doesn't.
 - **spec**: `invocation: user | model` on every skill. A user-invoked skill's description must not carry model-facing trigger phrasing, a model-invoked one must — both enforced by the schema. `disable-model-invocation` is now derived from it rather than hand-written.
@@ -19,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **evals**: `evals/skills/help.eval.js`, the first eval whose cases need no fixture, and `evals/cli/spec.test.js` covering the schema gates.
 
 ### Changed
+- **setup**: `.ak/config.md`'s `## Commands` gains `E2E` and `Formatter`, and is now documented as executable by `verify --final` — what the file records is what the harness runs.
+- **plan**: the `spec.md exists` branch of Step 0 now routes to `/ak:execute` instead of describing the task-working inline; the plan/spec boundary itself is unchanged.
+- **hooks**: README documents the guardrails-vs-Final-Verify split — hooks act at edit time, `--final` at completion time, and hooks deliberately don't participate in it.
 - **debug**: added a Redact section, a minimise-the-repro phase, and 3-5 falsifiable hypotheses with explicit predictions in place of bare probability labels.
 - **skills**: descriptions of user-invoked skills stripped of trigger phrasing; `/ak:memory` and `/ak:review` gained the triggers they needed to fire at all.
 - **build**: `npm run build` and `build:check` now also sync and verify the docs — install block, CLI flags, skill tables, and one docs page per skill.
@@ -26,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **release**: re-syncs the install block after the version bump, so the READMEs don't go stale in the release commit itself.
 
 ### Fixed
+- **verify**: `-y` was parsed as a slug instead of as the short form of `--yes`.
+- **verify**: commands ran in the process cwd, ignoring the `root` the engine was given.
+- **evals**: `review.eval.js` still destructured the pre-`cases` acceptance shape and crashed on run; it now resolves cases through `resolveAcceptance()` like every other eval.
 - README.md pinned `2.2.0-beta.1` as the example version.
 - README.es.md documented neither `--global` nor `--local`, which the CLI has long accepted.
 - Both READMEs' skill tables predated `/ak:handoff` and `/ak:memory`.

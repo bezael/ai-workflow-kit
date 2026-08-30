@@ -53,6 +53,8 @@ The point is to be able to ship something unfinished, and to retire something, *
 
 `contract` states what the skill must produce regardless of which tool runs it. `acceptance` is the executable form of the same thing — `evals/skills/<id>.eval.js` reads it through `resolveAcceptance()`, so the criteria have one home rather than a copy per eval.
 
+The shared `acceptance.criteria` list applies to every case. A case whose fixture exercises a different layer may carry its own `criteria`, which replace the shared list for that case alone (see the `sdd requirements compliance` case in `src/skills/review.md`).
+
 A skill may declare `acceptance.criteria` before anyone has built a fixture to run them against. It then needs `acceptance.pending: <reason>` **and** an entry in `src/eval-coverage.json`, or the coverage ratchet in `npm run build:check` fails. The ratchet fails in both directions: writing the fixture forces you to delete the entry, which is what stops the allowlist rotting into a permanent excuse.
 
 ## Install commands and the skill tables

@@ -81,3 +81,20 @@ Output:
 Hooks have full system access. Review each script before installing.
 The hooks in this repo only read information — they never write or modify files
 except `post-write-format.sh` which formats the file just written.
+
+## Guardrails vs Final Verify
+
+Hooks and `npx ai-workflow-kit verify <slug> --final` are complementary layers
+of the same harness, acting at different moments:
+
+- **Hooks are edit-time guardrails.** They fire while the agent works — block
+  a destructive command, stop a secret from being committed, format and lint
+  what was just written. They belong to the tool session, not to the feature.
+- **Final Verify is completion-time evidence.** It re-runs every task's
+  `Verify:` command plus the global Test / Lint / Typecheck / Build / E2E
+  checks from `.ak/config.md`, and rules on the feature as a whole.
+
+Hooks deliberately do not participate in `--final`: a hook depends on which
+tool (and whose machine) is running, while a final verification must mean the
+same thing in CI, on a teammate's laptop, or under a different agent. Keep the
+guardrails installed; let `--final` be the completion gate.

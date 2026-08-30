@@ -17,6 +17,7 @@ what the user said they are trying to do
 |---|---|---|
 | @commit | user | Write a Conventional Commits message from the real staged diff, never from a guess at what changed. |
 | @debug | model | Structured debugging workflow — diagnose before proposing fixes. Use when user says /debug, reports a bug, an error, or unexpected behavior. Forms hypotheses before touching code. |
+| @execute | user | Execute the next pending task of a specs/<slug>/ SDD feature — implement it, run its Verify command, and let the engine tick the box only on proof. |
 | @handoff | user | Compact the current conversation into a handoff document for a fresh agent to continue the work. |
 | @help | user | Point at the one skill that fits the task in hand, or say plainly that none of them does. |
 | @memory | model | Manage persistent memory across sessions. Subcommands: save [topic] captures session learnings, recall [question] retrieves relevant context before acting, clean removes stale entries. Use when the user says /memory, asks what was decided earlier, or when a session produces a learning worth keeping. |
