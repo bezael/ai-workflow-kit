@@ -1,6 +1,6 @@
 {
   "name": "ai-workflow-kit",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Skills, agents & hooks for Claude Code, Cursor, GitHub Copilot, Google Antigravity, and OpenAI Codex",
   "type": "module",
   "bin": {

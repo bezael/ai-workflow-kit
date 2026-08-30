@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.4.0] - 2026-08-30
+
 ### Added
 - **verify**: `specs/<slug>/tasks.md` support — the engine that ran `plan.md` steps now runs SDD task lists with the same checkbox + `` Verify: `cmd` `` grammar. When both files exist, `tasks.md` wins; `--plan` flips it back. The SDD tool (sdd-creator) owns spec/plan/tasks content; the kit only ticks what a command proved.
 - **verify**: `--final` — read-only final verification: re-runs every step's Verify (regressions in ticked tasks included), then the `Test` / `Lint` / `Typecheck` / `Build` / `E2E` commands from `.ak/config.md`'s `## Commands`, and prints a summary ending in `Result: PASS | FAIL`. `parseConfigCommands()` makes the config a contract the CLI actually executes.
@@ -15,7 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **pr**: SDD traceability — with specs present the body adds Specification, implemented acceptance criteria, a Verification section that only reports what actually ran (`not run` is an honest value), and an Issue → Spec → Tasks → Implementation → Verification line.
 - **evals**: `evals/cli/sdd-verify.test.js` (tasks.md discovery and preference, tick/fail/recheck on tasks, `--final`, config parsing) and `evals/fixtures/sdd-project/` — a spec whose implementation drifted from its task list, for the review compliance rubric.
 - **spec**: an acceptance case may carry its own `criteria`, replacing the shared list for that case alone (`resolveAcceptance`).
-
+- **plan/verify**: `/ak:plan` persists plans as resumable `specs/<slug>/plan.md`, and `npx ai-workflow-kit verify` runs each step's `Verify:` command and ticks the box only on exit 0 — with `--all`, `--recheck`, and `--dry-run`.
+- **build**: every distribution (`skills/`, `antigravity-skills/`, `codex-prompts/`) is rendered from a single `src/skills/<id>.md` source; editing a generated file fails `build:check`.
+- **build**: CI eval-coverage ratchet — a skill ships either executable acceptance cases or a listed, reasoned `pending` entry, and the allowlist only shrinks.
+- **install**: OpenAI Codex support — the same skills ship as flat `/ak-*` prompts in `codex-prompts/`, installed with `npx ai-workflow-kit --codex`.
+- **install**: Antigravity's global root moved to `~/.gemini/config/skills/`; the installer writes there, and uninstall cleans both the old path and the legacy flat skill layout.
 - `/ak:help` — routes a task to the one skill that fits it, or says plainly that none does. Its catalogue of the set is generated from the specs, so it can't go stale.
 - `/ak:setup` — detects the repo's default branch, commands, git host and commit convention into `.ak/config.md`. `/ak:commit`, `/ak:pr`, `/ak:plan`, `/ak:review` and `/ak:debug` read it when it exists, and fall back to defaults when it doesn't.
 - **spec**: `invocation: user | model` on every skill. A user-invoked skill's description must not carry model-facing trigger phrasing, a model-invoked one must — both enforced by the schema. `disable-model-invocation` is now derived from it rather than hand-written.
@@ -120,5 +128,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Eval framework with Vitest + LLM-based evals via Anthropic SDK
 - Spanish README (`README.es.md`)[1.1.0]: https://github.com/bezael/ai-workflow-kit/compare/...v1.1.0[2.0.0]: https://github.com/bezael/ai-workflow-kit/compare/v1.1.0...v2.0.0
 [2.2.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.1.0...v2.2.0
-[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.2.0...v2.3.0
