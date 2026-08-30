@@ -15,7 +15,7 @@ npx ai-workflow-kit
 O fija una versión como dependencia de desarrollo (es una herramienta de desarrollo, no una dependencia de runtime):
 
 ```bash
-npm i -D ai-workflow-kit@2.4.0
+npm i -D ai-workflow-kit@2.5.0
 npx ai-workflow-kit
 ```
 

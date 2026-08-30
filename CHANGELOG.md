@@ -7,12 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.5.0] - 2026-08-30
+
 ### Added
 - **risk**: `npx ai-workflow-kit risk [files...]` — a deterministic churn / fix-history risk signal for the files under review (the honest version of the "bug proneness" stage from agentic code review research: Nagappan & Ball on churn, Kim et al. on fix hotspots). One `git log` aggregated per file into `HIGH` / `MEDIUM` / `low` — or `new` for files with no history, which is unknown risk, not low. `--base`, `--window Nd/Nw/Nm/Ny`, `--json`; sparse history is reported as a weak signal. `/ak:review` runs it to decide where review depth goes first; the signal orders the review and is never itself a finding.
 - **review**: the SDD compliance layer now closes with an explicit PR-issue **alignment verdict** — `Exact` / `Tangling` / `Missing` / `Missing and Tangling` (taxonomy from Isik et al., via "Rethinking Code Review in the Age of AI"). A verdict other than `Exact` cannot be `PASS` unless the user explicitly accepted the deviation.
 - **review**: a closing **"Close the loop"** step — durable learnings a review surfaces (decision confirmed or overturned, alternative rejected with its reason, risk that materialized) are offered to `memory/decisions/` so the next review starts from them instead of rediscovering them.
 - **memory**: review retrospectives are a first-class `save` category routed to `memory/decisions/`.
 - **evals**: `evals/cli/risk.test.js` — fix-subject detection, window parsing, aggregation/classification, and integration cases against a real temp git repository; the review acceptance case now also requires the `Missing and Tangling` alignment verdict on the drifted fixture.
+
+### Changed
+- **readme**: refreshed the v2.4.0 cover and fixed stale install/contribute sections.
+- **out-of-scope**: declined scaffold and changelog skills (#1, #3), with the reasoning on record.
+
+### Fixed
+- **commit**: binary assets no longer derail the generated message (#2).
 
 ---
 
@@ -135,6 +146,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Eval framework with Vitest + LLM-based evals via Anthropic SDK
 - Spanish README (`README.es.md`)[1.1.0]: https://github.com/bezael/ai-workflow-kit/compare/...v1.1.0[2.0.0]: https://github.com/bezael/ai-workflow-kit/compare/v1.1.0...v2.0.0
 [2.2.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.1.0...v2.2.0
-[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v2.5.0...HEAD
+[2.5.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.2.0...v2.3.0
