@@ -82,6 +82,25 @@ commands recorded under `## Commands` in `.ak/config.md`, and prints a summary
 that ends in `Result: PASS` or `FAIL`. The `/ak:execute` skill drives this loop
 one task at a time.
 
+### Prioritizing a review
+
+The `risk` subcommand ranks the changed files by churn and fix history from
+git — the two strongest deterministic predictors of where defects cluster
+(Nagappan & Ball, 2005; Kim et al., 2007). No LLM: one `git log`, aggregated
+per file. `/ak:review` runs it to decide where review depth goes first.
+
+```bash
+npx ai-workflow-kit risk                     # score the files changed against the base branch
+npx ai-workflow-kit risk src/auth.ts         # score these files instead of the diff
+npx ai-workflow-kit risk --window 12m --json # wider history window, machine-readable output
+```
+
+Each file gets `HIGH` / `MEDIUM` / `low` from its commits, fix-commits, churn
+and author count — or `new` when it has no history in the window, which means
+unknown risk, not low. The signal orders the review; it is never itself a
+finding, and sparse history is reported as a weak signal rather than a
+confident low.
+
 Or manually:
 
 ```bash
@@ -103,8 +122,9 @@ ai-workflow-kit/
 │   └── copilot-instructions.md     # Instructions for GitHub Copilot
 ├── .out-of-scope/                  # Features declined on design grounds, with reasoning
 ├── bin/
-│   ├── cli.js                      # The npx installer + `verify` dispatch
-│   └── plan-verify.js              # The verify engine — plan.md + tasks.md, --recheck, --final
+│   ├── cli.js                      # The npx installer + `verify` / `risk` dispatch
+│   ├── plan-verify.js              # The verify engine — plan.md + tasks.md, --recheck, --final
+│   └── risk.js                     # The churn / fix-history risk signal behind `risk`
 ├── src/
 │   └── skills/                     # Hand-written skill sources — the three distributions are generated from here
 ├── docs/

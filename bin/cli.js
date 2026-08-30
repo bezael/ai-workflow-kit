@@ -16,6 +16,10 @@
  *   npx ai-workflow-kit --hooks      → hooks only (Claude Code)
  *   npx ai-workflow-kit --uninstall  → remove what was installed
  *   npx ai-workflow-kit --list       → show what would be installed
+ *
+ * Subcommands (dispatched before the installer):
+ *   npx ai-workflow-kit verify [slug]   → run the Verify commands of a specs/<slug>/ plan or task list
+ *   npx ai-workflow-kit risk [files...] → churn / fix-history risk signal for the changed files
  */
 
 import { spawnSync } from 'child_process'
@@ -51,6 +55,14 @@ const args          = process.argv.slice(2)
 if (args[0] === 'verify') {
   const { runVerify } = await import('./plan-verify.js')
   process.exit(await runVerify(args.slice(1)))
+}
+
+// ─── `risk` subcommand ───────────────────────────────────────────────────────
+// Churn / fix-history hotspots for the files under review — the deterministic
+// bug-proneness signal /ak:review uses to decide where review depth goes.
+if (args[0] === 'risk') {
+  const { runRisk } = await import('./risk.js')
+  process.exit(runRisk(args.slice(1)))
 }
 
 const SKILLS_ONLY   = args.includes('--skills')

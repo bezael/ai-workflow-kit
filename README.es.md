@@ -82,6 +82,26 @@ marcan. `--final` es de solo lectura: reejecuta el Verify de cada task
 `.ak/config.md`, e imprime un resumen que termina en `Result: PASS` o `FAIL`.
 La skill `/ak:execute` conduce este bucle task a task.
 
+### Priorizar un review
+
+El subcomando `risk` ordena los ficheros cambiados por churn e historial de
+fixes según git — los dos predictores deterministas más fuertes de dónde se
+concentran los defectos (Nagappan & Ball, 2005; Kim et al., 2007). Sin LLM: un
+`git log`, agregado por fichero. `/ak:review` lo ejecuta para decidir dónde va
+primero la profundidad del review.
+
+```bash
+npx ai-workflow-kit risk                     # puntúa los ficheros cambiados contra la rama base
+npx ai-workflow-kit risk src/auth.ts         # puntúa estos ficheros en lugar del diff
+npx ai-workflow-kit risk --window 12m --json # ventana de historial más amplia, salida para máquinas
+```
+
+Cada fichero recibe `HIGH` / `MEDIUM` / `low` según sus commits, commits de
+fix, churn y número de autores — o `new` cuando no tiene historial en la
+ventana, que significa riesgo desconocido, no bajo. La señal ordena el review;
+nunca es un hallazgo por sí misma, y un historial escaso se reporta como señal
+débil en lugar de como un "low" confiado.
+
 O manualmente:
 
 ```bash
@@ -103,8 +123,9 @@ ai-workflow-kit/
 │   └── copilot-instructions.md     # Instrucciones para GitHub Copilot
 ├── .out-of-scope/                  # Features declinadas por diseño, con el razonamiento
 ├── bin/
-│   ├── cli.js                      # El instalador npx + dispatch de `verify`
-│   └── plan-verify.js              # El motor verify — plan.md + tasks.md, --recheck, --final
+│   ├── cli.js                      # El instalador npx + dispatch de `verify` / `risk`
+│   ├── plan-verify.js              # El motor verify — plan.md + tasks.md, --recheck, --final
+│   └── risk.js                     # La señal de riesgo churn / fix-history detrás de `risk`
 ├── src/
 │   └── skills/                     # Fuentes de skills escritas a mano — las tres distribuciones se generan desde aquí
 ├── docs/
