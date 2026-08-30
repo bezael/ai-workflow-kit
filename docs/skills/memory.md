@@ -4,7 +4,7 @@
 
 Three subcommands over a `memory/` directory: `save` persists what a session taught, `recall` surfaces what's relevant before you start, `clean` prunes what's gone stale.
 
-It filters ruthlessly on the way in. Anything derivable from reading the code or the git history does not get saved — that isn't memory, it's a stale duplicate of something already true elsewhere. What earns a place is the non-obvious: a decision and its reasoning, an approach that worked, an anti-pattern the team hit once already.
+It filters ruthlessly on the way in. Anything derivable from reading the code or the git history does not get saved — that isn't memory, it's a stale duplicate of something already true elsewhere. What earns a place is the non-obvious: a decision and its reasoning, an approach that worked, an anti-pattern the team hit once already, or what a code review taught — a decision confirmed or overturned, an alternative rejected with its reason, a risk that materialized (the review retrospective [`/ak:review`](review.md) offers at its close).
 
 ## When to reach for it
 

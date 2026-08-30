@@ -27,6 +27,11 @@ Persist useful context from the current session to the right memory file.
 
 1. **Identify what's worth saving.** Ask:
    - Was a non-obvious decision made? → `memory/decisions/`
+   - Did a code review surface a durable learning — a decision confirmed or
+     overturned, an alternative rejected with its reason, a risk that
+     materialized in a specific module? → `memory/decisions/` (review
+     retrospective; a lesson left in the review forces the next review to
+     rediscover it)
    - Did a preferred approach or anti-pattern emerge? → `memory/feedback.md`
    - Was new business/domain context revealed? → `memory/project.md`
    - Did you learn something about the team's expertise or style? → `memory/user.md`
