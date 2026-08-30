@@ -38,3 +38,5 @@ Add the `Prior requests` entry as each one arrives; a request filed twice is a s
 | [generated-skill-files-are-committed](generated-skill-files-are-committed.md) | The three distributions stay in git; they are not built at install time |
 | [codex-assets-beside-the-prompt](codex-assets-beside-the-prompt.md) | Codex asset files cannot live next to the prompt that references them |
 | [one-way-eval-coverage-allowlist](one-way-eval-coverage-allowlist.md) | The coverage allowlist fails in both directions, and will keep doing so |
+| [scaffold-skill](scaffold-skill.md) | Boilerplate generation belongs to the spec-first flow (Phase 0 tasks) and ecosystem generators, not to a skill |
+| [changelog-skill](changelog-skill.md) | Changelog generation is deterministic — `scripts/release.js` and release tooling own it, not a prompt |
