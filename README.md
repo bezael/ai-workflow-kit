@@ -93,6 +93,7 @@ per file. `/ak:review` runs it to decide where review depth goes first.
 npx ai-workflow-kit risk                     # score the files changed against the base branch
 npx ai-workflow-kit risk src/auth.ts         # score these files instead of the diff
 npx ai-workflow-kit risk --window 12m --json # wider history window, machine-readable output
+npx ai-workflow-kit risk --focus             # per-file review need (HIGH / MEDIUM / LOW) + reason, for /ak:pr
 ```
 
 Each file gets `HIGH` / `MEDIUM` / `low` from its commits, fix-commits, churn
@@ -100,6 +101,13 @@ and author count — or `new` when it has no history in the window, which means
 unknown risk, not low. The signal orders the review; it is never itself a
 finding, and sparse history is reported as a weak signal rather than a
 confident low.
+
+`--focus` turns that into the **Review focus** table `/ak:pr` puts in the PR
+body: every changed file with a review need and the reason. A file under a
+sensitive path declared in `.ak/config.md` by `/ak:setup` (`src/auth/**`,
+`db/migrations/**`, …) is always HIGH; docs, lockfiles and fixtures are LOW;
+the rest take their history level, with `new` as MEDIUM. One PR with the map
+inside it — not one PR per level.
 
 Or manually:
 

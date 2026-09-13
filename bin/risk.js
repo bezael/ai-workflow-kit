@@ -11,6 +11,9 @@
  *     --base <branch>   diff base for the changed-files set
  *                       (default: .ak/config.md → Default branch, else main)
  *     --window <6m>     history window: Nd / Nw / Nm / Ny (default 6m)
+ *     --focus           review focus: per-file NEED (HIGH / MEDIUM / LOW) and
+ *                       the reason, for /ak:pr — history plus the sensitive
+ *                       paths declared in .ak/config.md and the file kind
  *     --json            machine-readable output
  *
  * The signal is evidence, not a verdict: a HIGH file is where the review
@@ -54,20 +57,42 @@ export function parseWindow(spec) {
   return `${Math.round(n * days)} days ago`
 }
 
-/** `.ak/config.md` § Repo → `- Default branch: X`, or null. */
-export function readDefaultBranch(root) {
+/**
+ * `.ak/config.md` § <section> → `- <key>: value`, or null when the file, the
+ * section or the entry is missing, or the value is marked unknown / none.
+ */
+function readConfigEntry(root, section, key) {
   const file = path.join(root, '.ak', 'config.md')
   if (!fs.existsSync(file)) return null
 
-  let inRepo = false
+  let inSection = false
   for (const line of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
     const heading = line.match(/^##\s+(.+?)\s*$/)
-    if (heading) { inRepo = /^repo$/i.test(heading[1]); continue }
-    if (!inRepo) continue
-    const m = line.match(/^\s*-\s*Default branch:\s*(.+?)\s*$/i)
-    if (m && !/^unknown\b/i.test(m[1])) return m[1].replace(/^`(.+)`$/, '$1')
+    if (heading) { inSection = heading[1].toLowerCase() === section.toLowerCase(); continue }
+    if (!inSection) continue
+    const m = line.match(new RegExp(`^\\s*-\\s*${key}:\\s*(.+?)\\s*$`, 'i'))
+    if (m && !/^(unknown|none)\b/i.test(m[1])) return m[1]
   }
   return null
+}
+
+const unquote = (s) => s.replace(/^`(.+)`$/, '$1')
+
+/** `.ak/config.md` § Repo → `- Default branch: X`, or null. */
+export function readDefaultBranch(root) {
+  const value = readConfigEntry(root, 'Repo', 'Default branch')
+  return value === null ? null : unquote(value)
+}
+
+/**
+ * `.ak/config.md` § Review → `- Sensitive paths: a/**, b/**` as a list of
+ * globs; empty when nothing is declared. Written by /ak:setup — a file
+ * matching one of these needs a human regardless of its history.
+ */
+export function readSensitivePaths(root) {
+  const value = readConfigEntry(root, 'Review', 'Sensitive paths')
+  if (value === null) return []
+  return value.split(',').map(s => unquote(s.trim())).filter(Boolean)
 }
 
 // ─── Git plumbing ────────────────────────────────────────────────────────────
@@ -172,6 +197,93 @@ export function aggregate(commits, files) {
     .sort((a, b) => b.score - a.score)
 }
 
+// ─── Review focus ────────────────────────────────────────────────────────────
+
+/**
+ * Dependency-free glob → RegExp for the patterns /ak:setup writes: `**` spans
+ * directories, `*` and `?` stay inside one segment. A pattern with no
+ * wildcard names a file or a directory, and a directory covers everything
+ * beneath it — `src/auth` reads as `src/auth/**`.
+ */
+export function globToRegExp(pattern) {
+  const p = pattern.replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/$/, '')
+  let re = ''
+  for (let i = 0; i < p.length; i++) {
+    const ch = p[i]
+    if (ch === '*' && p[i + 1] === '*') {
+      if (p[i + 2] === '/') { re += '(?:.*/)?'; i += 2 } else { re += '.*'; i += 1 }
+    } else if (ch === '*') {
+      re += '[^/]*'
+    } else if (ch === '?') {
+      re += '[^/]'
+    } else {
+      re += ch.replace(/[.+^${}()|[\]\\]/g, '\\$&')
+    }
+  }
+  if (!/[*?]/.test(p)) re += '(?:/.*)?'
+  return new RegExp(`^${re}$`)
+}
+
+const DOCS_EXT     = new Set(['.md', '.mdx', '.markdown', '.rst', '.adoc'])
+const DOCS_NAMES   = new Set(['license', 'changelog', 'readme', 'contributing', 'authors', 'notice'])
+const LOCKFILES    = new Set([
+  'package-lock.json', 'npm-shrinkwrap.json', 'pnpm-lock.yaml', 'yarn.lock',
+  'bun.lockb', 'bun.lock', 'cargo.lock', 'poetry.lock', 'uv.lock', 'pipfile.lock',
+  'composer.lock', 'gemfile.lock', 'go.sum', 'flake.lock', 'packages.lock.json',
+])
+const FIXTURE_DIRS = /(^|\/)(fixtures?|__snapshots__|__fixtures__)\//i
+const TEST_FILE    = /(^|\/)(__tests__|tests?|spec)\/|\.(test|spec)\.[^/]+$|_test\.go$|(^|\/)test_[^/]+\.py$/i
+
+/** docs / lockfile / fixture / test / code — from the path alone. */
+export function fileKind(file) {
+  const norm = file.replace(/\\/g, '/')
+  const base = norm.slice(norm.lastIndexOf('/') + 1)
+  const lower = base.toLowerCase()
+  const ext = lower.includes('.') ? lower.slice(lower.lastIndexOf('.')) : ''
+  const stem = ext ? lower.slice(0, -ext.length) : lower
+
+  if (LOCKFILES.has(lower)) return 'lockfile'
+  if (DOCS_EXT.has(ext) || DOCS_NAMES.has(stem)) return 'docs'
+  if (FIXTURE_DIRS.test(norm) || ext === '.snap') return 'fixture'
+  if (TEST_FILE.test(norm)) return 'test'
+  return 'code'
+}
+
+const KIND_REASON = { docs: 'docs only', lockfile: 'generated lockfile', fixture: 'test fixture data' }
+
+function historyReason(row, window) {
+  const inWindow = window ? `in ${window}` : 'in the window'
+  const fixes = `${row.fixes} fix commit${row.fixes === 1 ? '' : 's'}`
+  switch (row.risk) {
+    case 'high':   return row.fixes >= 3 ? `${fixes} ${inWindow}` : `hot file: ${row.commits} commits ${inWindow}`
+    case 'medium': return row.fixes >= 1 ? `${fixes} ${inWindow}` : `${row.commits} commits ${inWindow}`
+    case 'new':    return 'new code, unknown risk'
+    default:       return `quiet history: ${row.commits} commit${row.commits === 1 ? '' : 's'}, no fixes ${inWindow}`
+  }
+}
+
+/**
+ * How much human attention one file needs — HIGH / MEDIUM / LOW with the
+ * reasons spelled out. Rule order: a declared sensitive path is always HIGH;
+ * docs, lockfiles and fixtures are LOW; everything else takes its history
+ * level, where `new` is MEDIUM because no history is unknown risk. Tests keep
+ * their history level — a weakened assertion is a real risk.
+ */
+export function reviewNeed(row, { sensitive = [], window } = {}) {
+  const kind = fileKind(row.file)
+  const matched = sensitive.filter(p => globToRegExp(p).test(row.file.replace(/\\/g, '/')))
+
+  if (matched.length > 0) {
+    const reasons = [`sensitive path: ${matched.join(', ')}`]
+    if (row.risk === 'high') reasons.push(historyReason(row, window))
+    return { need: 'high', kind, reasons }
+  }
+  if (KIND_REASON[kind]) return { need: 'low', kind, reasons: [KIND_REASON[kind]] }
+
+  const need = { high: 'high', medium: 'medium', low: 'low', new: 'medium' }[row.risk] || 'medium'
+  return { need, kind, reasons: [historyReason(row, window)] }
+}
+
 // ─── Main computation ────────────────────────────────────────────────────────
 
 /**
@@ -181,7 +293,7 @@ export function aggregate(commits, files) {
  */
 const SPARSE_THRESHOLD = 20
 
-export function computeRisk({ root = process.cwd(), base, files, window: windowSpec = '6m' } = {}) {
+export function computeRisk({ root = process.cwd(), base, files, window: windowSpec = '6m', sensitive } = {}) {
   const since = parseWindow(windowSpec)
   if (!since) return { error: `Invalid --window "${windowSpec}" — use Nd, Nw, Nm or Ny (e.g. 90d, 6m, 1y).` }
 
@@ -206,13 +318,23 @@ export function computeRisk({ root = process.cwd(), base, files, window: windowS
   if (!log.ok) return { error: 'git log failed — cannot build the risk signal.' }
 
   const history = parseHistory(log.out)
+  const sensitivePaths = sensitive || readSensitivePaths(root)
+  const rows = aggregate(history, targets).map(row => ({
+    ...row, ...reviewNeed(row, { sensitive: sensitivePaths, window: windowSpec }),
+  }))
+  const count = (need) => rows.filter(r => r.need === need).length
+  const focus = { high: count('high'), medium: count('medium'), low: count('low') }
+  focus.humanReviewRequired = focus.high > 0
+
   return {
     base: resolvedBase,
     window: windowSpec,
     since,
     source,
     sparse: history.length < SPARSE_THRESHOLD,
-    files: aggregate(history, targets),
+    sensitive: sensitivePaths,
+    files: rows,
+    focus,
   }
 }
 
@@ -226,15 +348,57 @@ const RISK_LABEL = {
   new:    `${c.cyan}new${c.reset}     `,
 }
 
+const NEED_LABEL = {
+  high:   `${c.red}${c.bold}HIGH${c.reset}    `,
+  medium: `${c.yellow}MEDIUM${c.reset}  `,
+  low:    `${c.dim}low${c.reset}     `,
+}
+const NEED_ORDER = { high: 0, medium: 1, low: 2 }
+
+/** The `--focus` view: NEED + reason per file, most attention first. */
+function printFocus(result) {
+  const rows = [...result.files].sort((a, b) =>
+    NEED_ORDER[a.need] - NEED_ORDER[b.need] || b.score - a.score)
+  const width = Math.max(4, ...rows.map(r => r.file.length))
+
+  console.log()
+  console.log(`${c.bold}  focus${c.reset}  ${c.dim}base ${result.base} · window ${result.window} · ${rows.length} file(s) from ${result.source === 'args' ? 'arguments' : 'diff'}${c.reset}`)
+  console.log()
+  console.log(`${c.dim}  NEED    ${'FILE'.padEnd(width)}  WHY${c.reset}`)
+  for (const f of rows) {
+    console.log(`  ${NEED_LABEL[f.need]}${f.file.padEnd(width)}  ${f.reasons.join('; ')}`)
+  }
+  console.log()
+
+  const { focus } = result
+  const summary = `${focus.high} HIGH · ${focus.medium} MEDIUM · ${focus.low} LOW`
+  if (focus.humanReviewRequired) {
+    console.log(`  ${c.red}${c.bold}Human review required: yes${c.reset}  ${c.dim}${summary}${c.reset}`)
+  } else {
+    console.log(`  ${c.green}Human review required: no${c.reset}  ${c.dim}${summary}${c.reset}`)
+  }
+  console.log()
+
+  if (result.sensitive.length === 0) {
+    dim('No sensitive paths declared — run /ak:setup to record them in .ak/config.md § Review.')
+  }
+  if (result.sparse) {
+    warn('Sparse history in this window — the history part of the signal is weak. Widen it: --window 12m.')
+  }
+  info('The level orders the reviewer\'s attention; it is never itself a finding.')
+  console.log()
+}
+
 export function runRisk(argv, { root = process.cwd() } = {}) {
   const files = []
-  let base, windowSpec = '6m', json = false
+  let base, windowSpec = '6m', json = false, focus = false
 
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]
     if (a === '--base') base = argv[++i]
     else if (a === '--window') windowSpec = argv[++i]
     else if (a === '--json') json = true
+    else if (a === '--focus') focus = true
     else if (!a.startsWith('-')) files.push(a)
   }
 
@@ -247,6 +411,11 @@ export function runRisk(argv, { root = process.cwd() } = {}) {
 
   if (json) {
     console.log(JSON.stringify(result, null, 2))
+    return 0
+  }
+
+  if (focus) {
+    printFocus(result)
     return 0
   }
 

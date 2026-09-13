@@ -94,6 +94,7 @@ primero la profundidad del review.
 npx ai-workflow-kit risk                     # puntúa los ficheros cambiados contra la rama base
 npx ai-workflow-kit risk src/auth.ts         # puntúa estos ficheros en lugar del diff
 npx ai-workflow-kit risk --window 12m --json # ventana de historial más amplia, salida para máquinas
+npx ai-workflow-kit risk --focus             # necesidad de review por fichero (HIGH / MEDIUM / LOW) + motivo, para /ak:pr
 ```
 
 Cada fichero recibe `HIGH` / `MEDIUM` / `low` según sus commits, commits de
@@ -101,6 +102,13 @@ fix, churn y número de autores — o `new` cuando no tiene historial en la
 ventana, que significa riesgo desconocido, no bajo. La señal ordena el review;
 nunca es un hallazgo por sí misma, y un historial escaso se reporta como señal
 débil en lugar de como un "low" confiado.
+
+`--focus` convierte eso en la tabla **Review focus** que `/ak:pr` incluye en el
+cuerpo de la PR: cada fichero cambiado con su necesidad de review y el motivo.
+Un fichero bajo una ruta sensible declarada en `.ak/config.md` por `/ak:setup`
+(`src/auth/**`, `db/migrations/**`, …) es siempre HIGH; docs, lockfiles y
+fixtures son LOW; el resto toma su nivel de historial, con `new` como MEDIUM.
+Una sola PR con el mapa dentro — no una PR por nivel.
 
 O manualmente:
 

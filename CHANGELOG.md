@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **risk**: `--focus` — a per-file **review need** (`HIGH` / `MEDIUM` / `LOW`) with its reasons as text, built on the existing history signal plus two new sources: the sensitive paths declared in `.ak/config.md` (`## Review` → `Sensitive paths`, always HIGH, the reason names the glob) and the file kind (docs, lockfiles and fixtures are LOW; tests keep their history level). `new` maps to MEDIUM — no history is unknown risk. The plain `risk` table is byte-identical without the flag; `--json` always carries `need`, `reasons`, `kind` and a `focus` summary with `humanReviewRequired`. Dependency-free `**` / `*` / `?` globs.
+- **pr**: a **Review focus** section in both PR body structures — one row per changed file with its need and reason, HIGH first — and a `Human review required: yes | no` line; a `needs-human-review` / `low-risk` label suggestion applied only when `gh label list` shows the label exists. Splitting the PR is now an *offer* gated on independence (whole files, no LOW file referencing a symbol the HIGH files change), never the default: one PR with the attention map inside it.
+- **setup**: detects candidate sensitive directories (`auth`, `billing`, `migrations`, `permissions`, `crypto`, …) that actually exist, confirms them in the same batched round, and records them under `## Review` as globs.
+- **review**: files matching a sensitive path start the deep review alongside the `HIGH` files, whatever their history.
+- **evals**: unit cases for `readSensitivePaths`, `globToRegExp`, `fileKind`, `reviewNeed`, and `--focus --json` / plain-table integration cases against a temp repo declaring `src/auth/**`.
+
 ---
 
 ## [2.5.0] - 2026-08-30

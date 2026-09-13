@@ -7,14 +7,15 @@
  * recorded, not a mocked transcript.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
 import { spawnSync } from 'child_process'
 import {
-  isFixSubject, parseWindow, readDefaultBranch, parseHistory,
+  isFixSubject, parseWindow, readDefaultBranch, readSensitivePaths, parseHistory,
   scoreFile, classify, aggregate, changedFiles, computeRisk,
+  globToRegExp, fileKind, reviewNeed, runRisk,
 } from '../../bin/risk.js'
 
 let root
@@ -91,6 +92,105 @@ describe('readDefaultBranch', () => {
     expect(readDefaultBranch(root)).toBeNull()
     write('.ak/config.md', '## Repo\n- Default branch: unknown — no remote\n')
     expect(readDefaultBranch(root)).toBeNull()
+  })
+})
+
+describe('readSensitivePaths', () => {
+  it('reads the comma-separated globs of the Review section', () => {
+    write('.ak/config.md', [
+      '## Repo', '- Default branch: main', '',
+      '## Review', '- Sensitive paths: src/auth/**, `db/migrations/**`,src/billing/**', '',
+      '## Commands', '- Test: npm test',
+    ].join('\n'))
+    expect(readSensitivePaths(root)).toEqual(['src/auth/**', 'db/migrations/**', 'src/billing/**'])
+  })
+
+  it('is empty without a file, a section, or with a none / unknown value', () => {
+    expect(readSensitivePaths(root)).toEqual([])
+    write('.ak/config.md', '## Repo\n- Default branch: main\n')
+    expect(readSensitivePaths(root)).toEqual([])
+    write('.ak/config.md', '## Review\n- Sensitive paths: none — flat repo\n')
+    expect(readSensitivePaths(root)).toEqual([])
+  })
+})
+
+describe('globToRegExp', () => {
+  const matches = (pattern, file) => globToRegExp(pattern).test(file)
+
+  it('** spans directories, * and ? stay inside one segment', () => {
+    expect(matches('src/auth/**', 'src/auth/session.ts')).toBe(true)
+    expect(matches('src/auth/**', 'src/auth/oauth/google.ts')).toBe(true)
+    expect(matches('src/auth/**', 'src/authors.ts')).toBe(false)
+    expect(matches('**/migrations/**', 'migrations/001.sql')).toBe(true)
+    expect(matches('**/migrations/**', 'db/migrations/001.sql')).toBe(true)
+    expect(matches('*.md', 'README.md')).toBe(true)
+    expect(matches('*.md', 'docs/README.md')).toBe(false)
+    expect(matches('src/*/index.ts', 'src/auth/index.ts')).toBe(true)
+    expect(matches('src/*/index.ts', 'src/auth/v2/index.ts')).toBe(false)
+    expect(matches('config.??', 'config.js')).toBe(true)
+    expect(matches('config.??', 'config.json')).toBe(false)
+  })
+
+  it('a bare path names a file or a directory subtree, and dots are literal', () => {
+    expect(matches('src/auth', 'src/auth/session.ts')).toBe(true)
+    expect(matches('src/auth/', 'src/auth/session.ts')).toBe(true)
+    expect(matches('src/auth', 'src/auth')).toBe(true)
+    expect(matches('src/auth', 'src/authors.ts')).toBe(false)
+    expect(matches('.env.example', '.env.example')).toBe(true)
+    expect(matches('.env.example', 'xenvxexample')).toBe(false)
+  })
+})
+
+describe('fileKind', () => {
+  it('tells docs, lockfiles, fixtures and tests from code by path alone', () => {
+    for (const f of ['README.md', 'docs/skills/pr.md', 'LICENSE', 'CHANGELOG', 'guide.mdx']) {
+      expect(fileKind(f), f).toBe('docs')
+    }
+    for (const f of ['package-lock.json', 'pnpm-lock.yaml', 'yarn.lock', 'Cargo.lock', 'go.sum']) {
+      expect(fileKind(f), f).toBe('lockfile')
+    }
+    for (const f of ['evals/fixtures/buggy-code/user.ts', 'src/__snapshots__/a.snap', 'test/fixture/data.json']) {
+      expect(fileKind(f), f).toBe('fixture')
+    }
+    for (const f of ['evals/cli/risk.test.js', 'src/__tests__/a.js', 'pkg/x_test.go', 'tests/test_api.py', 'spec/user.spec.ts']) {
+      expect(fileKind(f), f).toBe('test')
+    }
+    for (const f of ['bin/risk.js', 'src/auth/session.ts', 'Makefile', 'scripts/build.sh', 'requirements.txt', 'CMakeLists.txt']) {
+      expect(fileKind(f), f).toBe('code')
+    }
+  })
+})
+
+describe('reviewNeed', () => {
+  const row = (file, risk, extra = {}) => ({ file, risk, commits: 0, fixes: 0, churn: 0, ...extra })
+
+  it('a sensitive path is HIGH regardless of history or kind, naming the pattern', () => {
+    const r = reviewNeed(row('src/auth/session.ts', 'low', { commits: 1 }), { sensitive: ['src/auth/**'] })
+    expect(r.need).toBe('high')
+    expect(r.reasons).toEqual(['sensitive path: src/auth/**'])
+    // sensitive wins over docs-only
+    const d = reviewNeed(row('docs/auth/threat-model.md', 'low'), { sensitive: ['docs/auth/**'] })
+    expect(d).toMatchObject({ need: 'high', kind: 'docs' })
+    // a hot sensitive file carries both reasons
+    const h = reviewNeed(row('src/auth/session.ts', 'high', { commits: 6, fixes: 4 }), { sensitive: ['src/auth/**'], window: '6m' })
+    expect(h.reasons).toEqual(['sensitive path: src/auth/**', '4 fix commits in 6m'])
+  })
+
+  it('docs, lockfiles and fixtures are LOW whatever their history', () => {
+    expect(reviewNeed(row('README.md', 'high', { commits: 20, fixes: 5 }))).toMatchObject({ need: 'low', reasons: ['docs only'] })
+    expect(reviewNeed(row('package-lock.json', 'high', { commits: 20 }))).toMatchObject({ need: 'low', reasons: ['generated lockfile'] })
+    expect(reviewNeed(row('evals/fixtures/a.json', 'medium', { commits: 3, fixes: 1 }))).toMatchObject({ need: 'low', reasons: ['test fixture data'] })
+  })
+
+  it('code and tests take their history level; new maps to MEDIUM', () => {
+    expect(reviewNeed(row('a.js', 'high', { commits: 5, fixes: 3 }), { window: '6m' }))
+      .toMatchObject({ need: 'high', kind: 'code', reasons: ['3 fix commits in 6m'] })
+    expect(reviewNeed(row('a.js', 'high', { commits: 16, fixes: 0 }), { window: '6m' }).reasons)
+      .toEqual(['hot file: 16 commits in 6m'])
+    expect(reviewNeed(row('a.js', 'medium', { commits: 2, fixes: 1 })).reasons).toEqual(['1 fix commit in the window'])
+    expect(reviewNeed(row('a.js', 'low', { commits: 2 }))).toMatchObject({ need: 'low' })
+    expect(reviewNeed(row('a.js', 'new'))).toMatchObject({ need: 'medium', reasons: ['new code, unknown risk'] })
+    expect(reviewNeed(row('a.test.js', 'high', { commits: 5, fixes: 3 }))).toMatchObject({ need: 'high', kind: 'test' })
   })
 })
 
@@ -183,6 +283,56 @@ describe('computeRisk (integration)', () => {
     write('a.js', 'let a = 99\n') // uncommitted change on main
     const result = computeRisk({ root, base: 'main' })
     expect(result.files.map(f => f.file)).toEqual(['a.js'])
+  })
+
+  it('attaches need + reasons per file and a focus summary (--focus --json)', () => {
+    seedHistory()
+    write('.ak/config.md', '## Repo\n- Default branch: main\n\n## Review\n- Sensitive paths: src/auth/**\n')
+    write('src/auth/login.js', 'export const login = () => {}\n') // brand new, no history
+
+    const lines = []
+    const spy = vi.spyOn(console, 'log').mockImplementation((...a) => lines.push(a.join(' ')))
+    let code
+    try {
+      code = runRisk(['--focus', '--json', 'a.js', 'c.md', 'src/auth/login.js'], { root })
+    } finally {
+      spy.mockRestore()
+    }
+    expect(code).toBe(0)
+    const result = JSON.parse(lines.join('\n'))
+
+    expect(result.sensitive).toEqual(['src/auth/**'])
+    const byFile = Object.fromEntries(result.files.map(f => [f.file, f]))
+    expect(byFile['c.md']).toMatchObject({ need: 'low', kind: 'docs', reasons: ['docs only'] })
+    expect(byFile['src/auth/login.js']).toMatchObject({ risk: 'new', need: 'high', reasons: ['sensitive path: src/auth/**'] })
+    expect(byFile['a.js']).toMatchObject({ risk: 'high', need: 'high' })
+    expect(byFile['a.js'].reasons[0]).toMatch(/3 fix commits/)
+    expect(result.focus).toEqual({ high: 2, medium: 0, low: 1, humanReviewRequired: true })
+  })
+
+  it('needs no human when nothing is HIGH, and the plain table is unchanged', () => {
+    seedHistory()
+    const result = computeRisk({ root, base: 'main', files: ['b.js', 'c.md'] })
+    expect(result.sensitive).toEqual([])
+    expect(result.focus).toEqual({ high: 0, medium: 1, low: 1, humanReviewRequired: false })
+    expect(result.files.map(f => f.file)).toEqual(['b.js', 'c.md']) // still sorted by score
+
+    const lines = []
+    const spy = vi.spyOn(console, 'log').mockImplementation((...a) => lines.push(a.join(' ')))
+    try {
+      runRisk(['b.js', 'c.md'], { root })
+      const plain = lines.join('\n')
+      expect(plain).toMatch(/RISK\s+COMMITS\s+FIXES\s+CHURN\s+AUTHORS\s+FILE/)
+      expect(plain).not.toMatch(/Human review required/)
+      lines.length = 0
+      runRisk(['--focus', 'b.js', 'c.md'], { root })
+      const focus = lines.join('\n')
+      expect(focus).toMatch(/NEED\s+FILE\s+WHY/)
+      expect(focus).toMatch(/Human review required: no/)
+      expect(focus).toMatch(/docs only/)
+    } finally {
+      spy.mockRestore()
+    }
   })
 
   it('reports errors instead of guessing', () => {

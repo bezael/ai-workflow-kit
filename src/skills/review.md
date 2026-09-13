@@ -148,6 +148,14 @@ When the user writes {{invoke}} with a file path, or {{invoke}} on its own to re
    - The signal decides where review depth goes first; it is **never itself
      a finding**. A `HIGH` label with no defect found is a clean result.
 
+   Sensitive paths join the top of the queue. If `.ak/config.md` has a
+   `## Review` section with `- Sensitive paths:` (auth, billing, migrations —
+   whatever `/ak:setup` recorded), every changed file matching one of those
+   globs starts the deep review alongside the `HIGH` files, whatever its
+   history says: a quiet `src/auth/` file is quiet, not safe. `npx
+   ai-workflow-kit risk --focus` already folds them in as HIGH review need
+   with the matched glob as the reason.
+
 4. **Review in this priority order**:
 
 ### {{sev:critical}} (blocks merge)

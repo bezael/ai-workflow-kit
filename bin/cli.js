@@ -20,6 +20,7 @@
  * Subcommands (dispatched before the installer):
  *   npx ai-workflow-kit verify [slug]   → run the Verify commands of a specs/<slug>/ plan or task list
  *   npx ai-workflow-kit risk [files...] → churn / fix-history risk signal for the changed files
+ *   npx ai-workflow-kit risk --focus    → per-file review need (HIGH / MEDIUM / LOW) + reason, for /ak:pr
  */
 
 import { spawnSync } from 'child_process'

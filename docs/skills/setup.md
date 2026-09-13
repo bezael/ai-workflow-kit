@@ -6,6 +6,15 @@ Works out how this repo actually does things — default branch, git host, test 
 
 It detects before it asks. Every question it puts to you is one the repo has already answered somewhere, so it reads the lockfile, the `package.json` scripts, the git remote and the last thirty commit subjects first, and only then asks about what's genuinely left — in one batched round, not an interview.
 
+That round includes the repo's **sensitive paths**: it looks for directories whose name says a change there always needs a human (`auth`, `login`, `session`, `billing`, `payment`, `checkout`, `migrations`, `permissions`, `rbac`, `crypto`, `secrets`), keeps only the ones that exist, and asks you to confirm, drop or add. They land under `## Review` as globs:
+
+```markdown
+## Review
+- Sensitive paths: src/auth/**, db/migrations/**
+```
+
+A path is recorded only if it exists in the repo. Sensitive *paths* are fine in a committed file — they name where the secrets are handled, not the secrets.
+
 ## When to reach for it
 
 You invoke this by typing `/ak:setup` — the agent won't reach for it on its own.
@@ -33,16 +42,17 @@ An existing `.ak/config.md` is read and updated, never overwritten. If you hand-
 | Skill | What it takes from the config |
 |---|---|
 | [`/ak:commit`](commit.md) | commit convention, message language |
-| [`/ak:pr`](pr.md) | base branch, git host, whether `gh` is available |
+| [`/ak:pr`](pr.md) | base branch, git host, whether `gh` is available; the sensitive paths that make a file HIGH in the Review focus table |
 | [`/ak:plan`](plan.md) | the commands a step's `Verify:` line should use |
 | [`/ak:execute`](execute.md) | the real commands a task's evidence runs against |
 | [`/ak:review`](review.md) | base branch to diff against; lint and typecheck commands |
 | [`/ak:debug`](debug.md) | the test command, as the fastest route to a red loop |
 | `verify --final` | the `Test` / `Lint` / `Typecheck` / `Build` / `E2E` entries under `## Commands`, executed as the global checks |
+| `risk --focus` | the `Sensitive paths` globs under `## Review` — any changed file matching one is HIGH review need whatever its history; [`/ak:review`](review.md) starts its deep pass there too |
 
 Each of those falls back to a sensible default without the file. The defaults are right often enough to be dangerous and wrong often enough to matter, which is the argument for running this once.
 
-The last row is the one that makes `## Commands` a contract rather than prose: `npx ai-workflow-kit verify <slug> --final` executes those entries directly, skipping any marked `unknown`. What the file records is what the harness runs.
+The last two rows are the ones that make the file a contract rather than prose: `npx ai-workflow-kit verify <slug> --final` executes the `## Commands` entries directly, skipping any marked `unknown`, and `npx ai-workflow-kit risk --focus` matches the `## Review` globs against every changed file. What the file records is what the harness runs.
 
 ## It's working if
 
