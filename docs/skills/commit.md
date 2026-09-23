@@ -1,4 +1,4 @@
-# /ak:commit
+# /ak-commit
 
 ## What it does
 
@@ -8,11 +8,11 @@ It never writes from a guess. The diff is loaded into the skill before it starts
 
 ## When to reach for it
 
-You invoke this by typing `/ak:commit` — the agent won't reach for it on its own.
+You invoke this by typing `/ak-commit` — the agent won't reach for it on its own.
 
 Reach for it once you have staged the change you want to record. If nothing is staged it falls back to the unstaged diff and tells you so, which is useful for drafting but means you're seeing a message for work that isn't committed yet.
 
-For the message that goes on a *branch* rather than a commit, use [`/ak:pr`](pr.md).
+For the message that goes on a *branch* rather than a commit, use [`/ak-pr`](pr.md).
 
 ## The diff is the evidence
 
@@ -32,8 +32,8 @@ Both are only possible because the diff is there. A commit skill that asks you w
 
 ## Where it fits
 
-A reach-for-it-anytime standalone, and the last step of most other flows: [`/ak:plan`](plan.md) → work → `/ak:commit` → [`/ak:pr`](pr.md).
+A reach-for-it-anytime standalone, and the last step of most other flows: [`/ak-plan`](plan.md) → work → `/ak-commit` → [`/ak-pr`](pr.md).
 
-If [`/ak:setup`](setup.md) has run, the commit convention and the language of the message come from `.ak/config.md` instead of the defaults.
+If [`/ak-setup`](setup.md) has run, the commit convention and the language of the message come from `.ak/config.md` instead of the defaults.
 
-[`/ak:help`](help.md) routes across the whole set when you're not sure which skill a task wants.
+[`/ak-help`](help.md) routes across the whole set when you're not sure which skill a task wants.

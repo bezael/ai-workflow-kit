@@ -13,7 +13,7 @@
       "name": "debug",
       "status": "stable",
       "invocation": "model",
-      "description": "Structured debugging workflow — diagnose before proposing fixes. Use when user says /debug, reports a bug, an error, or unexpected behavior. Forms hypotheses before touching code."
+      "description": "Structured debugging workflow — diagnose before proposing fixes. Use when user says /ak-debug, reports a bug, an error, or unexpected behavior. Forms hypotheses before touching code."
     },
     {
       "id": "execute",
@@ -41,7 +41,7 @@
       "name": "memory",
       "status": "stable",
       "invocation": "model",
-      "description": "Manage persistent memory across sessions. Subcommands: save [topic] captures session learnings, recall [question] retrieves relevant context before acting, clean removes stale entries. Use when the user says /memory, asks what was decided earlier, or when a session produces a learning worth keeping."
+      "description": "Manage persistent memory across sessions. Subcommands: save [topic] captures session learnings, recall [question] retrieves relevant context before acting, clean removes stale entries. Use when the user says /ak-memory, asks what was decided earlier, or when a session produces a learning worth keeping."
     },
     {
       "id": "plan",
@@ -62,7 +62,7 @@
       "name": "review",
       "status": "stable",
       "invocation": "model",
-      "description": "Review code with real engineering criteria — logic bugs, security vulnerabilities, and technical debt. Use when the user says /review, asks for a code review, or wants the branch diff checked before opening a PR."
+      "description": "Review code with real engineering criteria — logic bugs, security vulnerabilities, and technical debt. Use when the user says /ak-review, asks for a code review, or wants the branch diff checked before opening a PR."
     },
     {
       "id": "setup",

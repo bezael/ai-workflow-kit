@@ -1,4 +1,4 @@
-# /ak:pr
+# /ak-pr
 
 ## What it does
 
@@ -8,9 +8,9 @@ Nothing in the body may describe a change that isn't in the diff. A PR descripti
 
 ## When to reach for it
 
-You invoke this by typing `/ak:pr` — the agent won't reach for it on its own. An optional argument becomes the title: `/ak:pr feat: add JWT refresh`.
+You invoke this by typing `/ak-pr` — the agent won't reach for it on its own. An optional argument becomes the title: `/ak-pr feat: add JWT refresh`.
 
-Reach for it when the branch is finished and pushed. For a single commit's message rather than a branch's, use [`/ak:commit`](commit.md); to have the code looked at before you open the PR, [`/ak:review`](review.md) first.
+Reach for it when the branch is finished and pushed. For a single commit's message rather than a branch's, use [`/ak-commit`](commit.md); to have the code looked at before you open the PR, [`/ak-review`](review.md) first.
 
 ## Prerequisites
 
@@ -43,7 +43,7 @@ Not every file in a PR deserves the same attention: four `.md` files and one aut
 
 The level comes from `npx ai-workflow-kit risk --focus`, which is deterministic and unit-tested, so it is the same in Claude Code, Antigravity and Codex. Three sources feed it, in priority order:
 
-1. **Sensitive paths** declared under `## Review` in `.ak/config.md` by [`/ak:setup`](setup.md) — always HIGH, and the reason names the glob that matched. A threat-model `.md` under `docs/auth/**` is HIGH even though it's documentation.
+1. **Sensitive paths** declared under `## Review` in `.ak/config.md` by [`/ak-setup`](setup.md) — always HIGH, and the reason names the glob that matched. A threat-model `.md` under `docs/auth/**` is HIGH even though it's documentation.
 2. **File kind** — docs, lockfiles and fixtures are LOW. Tests are *not* forced LOW: a weakened assertion is a real risk, so they keep their history level.
 3. **Fix history** — the `risk` signal's `high` / `medium` / `low` map straight across, and `new` maps to MEDIUM: no history is unknown risk, not low.
 
@@ -74,8 +74,8 @@ The Verification section only reports what actually ran — ideally the output o
 
 ## Where it fits
 
-A chain step, and normally the last one: [`/ak:plan`](plan.md) → work → [`/ak:commit`](commit.md) → [`/ak:review`](review.md) → `/ak:pr`.
+A chain step, and normally the last one: [`/ak-plan`](plan.md) → work → [`/ak-commit`](commit.md) → [`/ak-review`](review.md) → `/ak-pr`.
 
-If [`/ak:setup`](setup.md) has run, the base branch and the git host come from `.ak/config.md` rather than assuming `main` on GitHub — and so do the sensitive paths that make a file HIGH in the focus table.
+If [`/ak-setup`](setup.md) has run, the base branch and the git host come from `.ak/config.md` rather than assuming `main` on GitHub — and so do the sensitive paths that make a file HIGH in the focus table.
 
-[`/ak:help`](help.md) routes across the whole set when you're not sure which skill a task wants.
+[`/ak-help`](help.md) routes across the whole set when you're not sure which skill a task wants.

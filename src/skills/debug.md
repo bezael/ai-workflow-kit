@@ -3,7 +3,7 @@ id: debug
 name: debug
 description: >-
   Structured debugging workflow — diagnose before proposing fixes. Use when
-  user says /debug, reports a bug, an error, or unexpected behavior. Forms
+  user says /ak-debug, reports a bug, an error, or unexpected behavior. Forms
   hypotheses before touching code.
 invocation: model
 argument-hint: "[problem description]"

@@ -1,4 +1,4 @@
-# /ak:execute
+# /ak-execute
 
 ## What it does
 
@@ -24,13 +24,13 @@ When a task exposes a gap in the spec — a missing criterion, a contradiction �
 
 ## When to reach for it
 
-You invoke this by typing `/ak:execute <slug>` — the agent won't reach for it on its own.
+You invoke this by typing `/ak-execute <slug>` — the agent won't reach for it on its own.
 
-Reach for it when a feature already has its `specs/<slug>/` directory generated and you want the task list worked through with proof at every step. If there is no spec yet, this is the wrong door: write the spec first, or use [`/ak:plan`](plan.md) for a lightweight change to existing code.
+Reach for it when a feature already has its `specs/<slug>/` directory generated and you want the task list worked through with proof at every step. If there is no spec yet, this is the wrong door: write the spec first, or use [`/ak-plan`](plan.md) for a lightweight change to existing code.
 
 ## One task, then stop
 
-Default mode is human-in-the-loop: one task per invocation. `/ak:execute <slug> continue` chains tasks, but still halts at the first failing Verify, spec gap, or end of list — it never pushes through a red.
+Default mode is human-in-the-loop: one task per invocation. `/ak-execute <slug> continue` chains tasks, but still halts at the first failing Verify, spec gap, or end of list — it never pushes through a red.
 
 A failing Verify gets diagnosed and a minimal fix, **at most three times**. After that the skill stops with what it tried and what the output says. A loop that isn't converging needs you, not a fourth attempt.
 
@@ -57,7 +57,7 @@ re-runs every task's Verify (catching regressions) plus the Test / Lint / Typech
 
 ## Cross-tool notes
 
-The skill body is fully portable: the same workflow ships for Claude Code (`/ak:execute`), Codex (`/ak-execute`), and Antigravity (`@execute`). It leans on no Claude-specific features — no subagents, no forked context — because the engine doing the real work is the `npx ai-workflow-kit verify` CLI, which is identical everywhere.
+The skill body is fully portable: the same workflow ships for Claude Code and Codex (`/ak-execute`) and Antigravity (`@execute`). It leans on no Claude-specific features — no subagents, no forked context — because the engine doing the real work is the `npx ai-workflow-kit verify` CLI, which is identical everywhere.
 
 ## It's working if
 
@@ -68,4 +68,4 @@ The skill body is fully portable: the same workflow ships for Claude Code (`/ak:
 
 ## Where it fits
 
-The SDD chain: spec tool writes `specs/<slug>/` → `/ak:execute` per task → [`/ak:review`](review.md) checks the diff against the spec → `verify --final` → [`/ak:pr`](pr.md) with traceability. [`/ak:setup`](setup.md) gives `--final` its global commands.
+The SDD chain: spec tool writes `specs/<slug>/` → `/ak-execute` per task → [`/ak-review`](review.md) checks the diff against the spec → `verify --final` → [`/ak-pr`](pr.md) with traceability. [`/ak-setup`](setup.md) gives `--final` its global commands.

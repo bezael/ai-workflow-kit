@@ -8,7 +8,7 @@ The installers read the distributions directly, and several of the install paths
 
 - `install.sh` copies files out of a cloned or downloaded tree.
 - `npx ai-workflow-kit` runs against the published tarball, where `devDependencies` (including the `yaml` parser the builder needs) are not installed.
-- A user browsing `skills/commit/SKILL.md` on GitHub is reading the artifact they will actually get. That is the point of committing it.
+- A user browsing `skills/ak-commit/SKILL.md` on GitHub is reading the artifact they will actually get. That is the point of committing it.
 
 Generating at install time would mean shipping the builder and its dependencies to every consumer to reproduce a file that is deterministic anyway.
 

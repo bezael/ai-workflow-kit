@@ -1,6 +1,6 @@
 # The 20 typical vibe coding problems
 
-Reference for `/ak:vibe-audit`. For each pattern: what to look for, the risk, and the fix.
+Reference for `/ak-vibe-audit`. For each pattern: what to look for, the risk, and the fix.
 
 ---
 

@@ -1,16 +1,16 @@
-# /ak:memory
+# /ak-memory
 
 ## What it does
 
 Three subcommands over a `memory/` directory: `save` persists what a session taught, `recall` surfaces what's relevant before you start, `clean` prunes what's gone stale.
 
-It filters ruthlessly on the way in. Anything derivable from reading the code or the git history does not get saved — that isn't memory, it's a stale duplicate of something already true elsewhere. What earns a place is the non-obvious: a decision and its reasoning, an approach that worked, an anti-pattern the team hit once already, or what a code review taught — a decision confirmed or overturned, an alternative rejected with its reason, a risk that materialized (the review retrospective [`/ak:review`](review.md) offers at its close).
+It filters ruthlessly on the way in. Anything derivable from reading the code or the git history does not get saved — that isn't memory, it's a stale duplicate of something already true elsewhere. What earns a place is the non-obvious: a decision and its reasoning, an approach that worked, an anti-pattern the team hit once already, or what a code review taught — a decision confirmed or overturned, an alternative rejected with its reason, a risk that materialized (the review retrospective [`/ak-review`](review.md) offers at its close).
 
 ## When to reach for it
 
-Type `/ak:memory save`, `/ak:memory recall <question>`, or `/ak:memory clean`. The agent can also reach for it — recalling before acting, or offering to save when a session produces something worth keeping.
+Type `/ak-memory save`, `/ak-memory recall <question>`, or `/ak-memory clean`. The agent can also reach for it — recalling before acting, or offering to save when a session produces something worth keeping.
 
-Reach for `recall` at the start of anything non-trivial in an unfamiliar area, and `save` at the end of a session that changed how you'd do something. Bare `/ak:memory` shows the three options and asks.
+Reach for `recall` at the start of anything non-trivial in an unfamiliar area, and `save` at the end of a session that changed how you'd do something. Bare `/ak-memory` shows the three options and asks.
 
 ## Prerequisites
 
@@ -46,6 +46,6 @@ Every write is logged to `memory/CHANGELOG.md` with the reason it was worth pers
 
 A reach-for-it-anytime standalone that brackets the others — `recall` before, `save` after.
 
-The line against [`/ak:handoff`](handoff.md): a handoff is *this* piece of work right now, written to temp, thrown away when it's picked up. Memory is what stays true across sessions and lives in the repo.
+The line against [`/ak-handoff`](handoff.md): a handoff is *this* piece of work right now, written to temp, thrown away when it's picked up. Memory is what stays true across sessions and lives in the repo.
 
-[`/ak:help`](help.md) routes across the whole set when you're not sure which skill a task wants.
+[`/ak-help`](help.md) routes across the whole set when you're not sure which skill a task wants.

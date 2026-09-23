@@ -1,4 +1,4 @@
-# /ak:debug
+# /ak-debug
 
 ## What it does
 
@@ -8,9 +8,9 @@ The **tight loop** is the skill. Everything after Phase 1 is mechanical once you
 
 ## When to reach for it
 
-Type `/ak:debug <what's wrong>`, or the agent reaches for it automatically when you report something broken, throwing, failing, or slow.
+Type `/ak-debug <what's wrong>`, or the agent reaches for it automatically when you report something broken, throwing, failing, or slow.
 
-Reach for it on a bug you can't see the cause of. For a bug whose cause is obvious, this is overhead — just fix it. For problems in code nobody reviewed, [`/ak:vibe-audit`](vibe-audit.md) sweeps for whole classes of issue rather than chasing one.
+Reach for it on a bug you can't see the cause of. For a bug whose cause is obvious, this is overhead — just fix it. For problems in code nobody reviewed, [`/ak-vibe-audit`](vibe-audit.md) sweeps for whole classes of issue rather than chasing one.
 
 ## A loop that is tight, not just present
 
@@ -48,8 +48,8 @@ The skill has you show commands, their output, and captured artifacts — and HA
 
 ## Where it fits
 
-A reach-for-it-anytime standalone. Where the fix reveals that there was no good seam to test at, it hands that finding on rather than swallowing it — which is usually a [`/ak:review`](review.md) or a [`/ak:plan`](plan.md) for a refactor.
+A reach-for-it-anytime standalone. Where the fix reveals that there was no good seam to test at, it hands that finding on rather than swallowing it — which is usually a [`/ak-review`](review.md) or a [`/ak-plan`](plan.md) for a refactor.
 
-If [`/ak:setup`](setup.md) has run, Phase 1 starts from the test command `.ak/config.md` recorded.
+If [`/ak-setup`](setup.md) has run, Phase 1 starts from the test command `.ak/config.md` recorded.
 
-[`/ak:help`](help.md) routes across the whole set when you're not sure which skill a task wants.
+[`/ak-help`](help.md) routes across the whole set when you're not sure which skill a task wants.

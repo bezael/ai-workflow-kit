@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **BREAKING — command names**: skills and agents are now `/ak-<name>` instead of `/ak:<name>` (`/ak-commit`, `/ak-pr`, `/ak-api`, …), the same names Codex already used. Claude Code accepts only lowercase letters, digits and hyphens in a skill or agent `name`, so `name: ak:<id>` was not honoured: skills showed up under their bare directory name (`/review`) and the agents did not load at all.
+- **install layout**: Claude Code skills install to `skills/ak-<id>/` and agents to `agents/ak-<id>.md`. On upgrade and on `--uninstall`, the installer removes the copies left under the old names (`skills/<id>/`, `agents/<id>.md`), but only those whose frontmatter carries the kit's `name: ak:<id>` — a user's own skill with the same directory name is left alone.
+
 ---
 
 ## [2.6.0] - 2026-09-13

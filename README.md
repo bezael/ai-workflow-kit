@@ -19,7 +19,7 @@ npm i -D ai-workflow-kit@2.6.0
 npx ai-workflow-kit
 ```
 
-Restart your AI tool. You'll have `/ak:api`, `/ak:commit`, `/ak:debug`, `/ak:docs`, `/ak:execute`, `/ak:frontend`, `/ak:handoff`, `/ak:help`, `/ak:memory`, `/ak:plan`, `/ak:pr`, `/ak:refactor`, `/ak:review`, `/ak:setup`, `/ak:test`, `/ak:vibe-audit` available — plus 5 automatic hooks.
+Restart your AI tool. You'll have `/ak-ak-api`, `/ak-ak-docs`, `/ak-ak-frontend`, `/ak-ak-refactor`, `/ak-ak-test`, `/ak-commit`, `/ak-debug`, `/ak-execute`, `/ak-handoff`, `/ak-help`, `/ak-memory`, `/ak-plan`, `/ak-pr`, `/ak-review`, `/ak-setup`, `/ak-vibe-audit` available — plus 5 automatic hooks.
 
 ```bash
 npx ai-workflow-kit --global   # install into ~/.claude/ — all projects (default)
@@ -30,11 +30,11 @@ npx ai-workflow-kit --yes      # no confirmations
 npx ai-workflow-kit --list     # see what would be installed
 npx ai-workflow-kit --uninstall
 ```
-<!-- /ak:block -->
+<!-- /ak-block -->
 
 ## Running a plan
 
-`/ak:plan` writes `specs/<slug>/plan.md` with a checkbox per step, each carrying
+`/ak-plan` writes `specs/<slug>/plan.md` with a checkbox per step, each carrying
 the command that proves it done. The `verify` subcommand runs those commands and
 ticks a box only when its command exits 0, so what the file records is what was
 demonstrated rather than what was claimed:
@@ -79,7 +79,7 @@ Tasks without a `Verify:` line are reported as unverifiable and never ticked.
 `--final` is read-only: it re-runs every task's Verify (catching regressions in
 ticked tasks), then the `Test` / `Lint` / `Typecheck` / `Build` / `E2E`
 commands recorded under `## Commands` in `.ak/config.md`, and prints a summary
-that ends in `Result: PASS` or `FAIL`. The `/ak:execute` skill drives this loop
+that ends in `Result: PASS` or `FAIL`. The `/ak-execute` skill drives this loop
 one task at a time.
 
 ### Prioritizing a review
@@ -87,13 +87,13 @@ one task at a time.
 The `risk` subcommand ranks the changed files by churn and fix history from
 git — the two strongest deterministic predictors of where defects cluster
 (Nagappan & Ball, 2005; Kim et al., 2007). No LLM: one `git log`, aggregated
-per file. `/ak:review` runs it to decide where review depth goes first.
+per file. `/ak-review` runs it to decide where review depth goes first.
 
 ```bash
 npx ai-workflow-kit risk                     # score the files changed against the base branch
 npx ai-workflow-kit risk src/auth.ts         # score these files instead of the diff
 npx ai-workflow-kit risk --window 12m --json # wider history window, machine-readable output
-npx ai-workflow-kit risk --focus             # per-file review need (HIGH / MEDIUM / LOW) + reason, for /ak:pr
+npx ai-workflow-kit risk --focus             # per-file review need (HIGH / MEDIUM / LOW) + reason, for /ak-pr
 ```
 
 Each file gets `HIGH` / `MEDIUM` / `low` from its commits, fix-commits, churn
@@ -102,9 +102,9 @@ unknown risk, not low. The signal orders the review; it is never itself a
 finding, and sparse history is reported as a weak signal rather than a
 confident low.
 
-`--focus` turns that into the **Review focus** table `/ak:pr` puts in the PR
+`--focus` turns that into the **Review focus** table `/ak-pr` puts in the PR
 body: every changed file with a review need and the reason. A file under a
-sensitive path declared in `.ak/config.md` by `/ak:setup` (`src/auth/**`,
+sensitive path declared in `.ak/config.md` by `/ak-setup` (`src/auth/**`,
 `db/migrations/**`, …) is always HIGH; docs, lockfiles and fixtures are LOW;
 the rest take their history level, with `new` as MEDIUM. One PR with the map
 inside it — not one PR per level.
@@ -169,23 +169,23 @@ ai-workflow-kit/
 │   ├── ak-handoff.md               # /ak-handoff — compacts the session for a fresh agent
 │   └── ak-memory.md                # /ak-memory — save / recall / clean project memory
 ├── skills/
-│   ├── help/SKILL.md               # /ak:help — routes a task to the skill that fits
-│   ├── setup/SKILL.md              # /ak:setup — records repo conventions in .ak/config.md
-│   ├── commit/SKILL.md             # /ak:commit — generates semantic commit messages
-│   ├── pr/SKILL.md                 # /ak:pr — creates PRs with full description
-│   ├── review/SKILL.md             # /ak:review — reviews code with real engineering criteria
-│   ├── plan/SKILL.md               # /ak:plan — plans before executing
-│   ├── execute/SKILL.md            # /ak:execute — works an SDD task list with proof
-│   ├── debug/SKILL.md              # /ak:debug — structured debugging workflow
-│   ├── vibe-audit/SKILL.md         # /ak:vibe-audit — audits vibe-coded apps
-│   ├── handoff/SKILL.md            # /ak:handoff — compacts the session for a fresh agent
-│   └── memory/SKILL.md             # /ak:memory — save / recall / clean project memory
+│   ├── help/SKILL.md               # /ak-help — routes a task to the skill that fits
+│   ├── setup/SKILL.md              # /ak-setup — records repo conventions in .ak/config.md
+│   ├── commit/SKILL.md             # /ak-commit — generates semantic commit messages
+│   ├── pr/SKILL.md                 # /ak-pr — creates PRs with full description
+│   ├── review/SKILL.md             # /ak-review — reviews code with real engineering criteria
+│   ├── plan/SKILL.md               # /ak-plan — plans before executing
+│   ├── execute/SKILL.md            # /ak-execute — works an SDD task list with proof
+│   ├── debug/SKILL.md              # /ak-debug — structured debugging workflow
+│   ├── vibe-audit/SKILL.md         # /ak-vibe-audit — audits vibe-coded apps
+│   ├── handoff/SKILL.md            # /ak-handoff — compacts the session for a fresh agent
+│   └── memory/SKILL.md             # /ak-memory — save / recall / clean project memory
 ├── agents/
-│   ├── frontend/AGENT.md           # /ak:frontend — generates UI components
-│   ├── api/AGENT.md                # /ak:api — generates endpoints with validation
-│   ├── test/AGENT.md               # /ak:test — writes behavior-driven tests
-│   ├── refactor/AGENT.md           # /ak:refactor — improves code without breaking anything
-│   └── docs/AGENT.md               # /ak:docs — JSDoc, README, ADR
+│   ├── frontend/AGENT.md           # /ak-frontend — generates UI components
+│   ├── api/AGENT.md                # /ak-api — generates endpoints with validation
+│   ├── test/AGENT.md               # /ak-test — writes behavior-driven tests
+│   ├── refactor/AGENT.md           # /ak-refactor — improves code without breaking anything
+│   └── docs/AGENT.md               # /ak-docs — JSDoc, README, ADR
 ├── hooks/
 │   ├── README.md                   # How to install and customize hooks
 │   ├── settings.template.json      # Ready-to-copy configuration
@@ -206,27 +206,27 @@ One page per skill in [`docs/skills/`](docs/skills/README.md) — what it does, 
 
 | Skill | Command | What it does |
 |-------|---------|--------------|
-| help | `/ak:help [task]` | Points at the one skill that fits what you're doing |
-| setup | `/ak:setup` | Records this repo's branch, commands, and conventions in `.ak/config.md` |
-| commit | `/ak:commit` | Reads the real diff and generates a semantic commit message |
-| pr | `/ak:pr` | Creates PR with description, test plan, and checklist |
-| review | `/ak:review @file` | Reviews code: bugs, security, performance |
-| plan | `/ak:plan [task]` | Plans before executing, into a resumable `specs/<slug>/plan.md` |
-| execute | `/ak:execute [slug]` | Executes the next pending SDD task and lets `verify` prove it |
-| debug | `/ak:debug [problem]` | Diagnoses with hypotheses before proposing fixes |
-| vibe-audit | `/ak:vibe-audit` | Full audit of apps generated with vibe coding |
-| handoff | `/ak:handoff [focus]` | Compacts the session into a handoff for a fresh agent |
-| memory | `/ak:memory <save\|recall\|clean>` | Persists, retrieves, and prunes what the project has learned |
+| help | `/ak-help [task]` | Points at the one skill that fits what you're doing |
+| setup | `/ak-setup` | Records this repo's branch, commands, and conventions in `.ak/config.md` |
+| commit | `/ak-commit` | Reads the real diff and generates a semantic commit message |
+| pr | `/ak-pr` | Creates PR with description, test plan, and checklist |
+| review | `/ak-review @file` | Reviews code: bugs, security, performance |
+| plan | `/ak-plan [task]` | Plans before executing, into a resumable `specs/<slug>/plan.md` |
+| execute | `/ak-execute [slug]` | Executes the next pending SDD task and lets `verify` prove it |
+| debug | `/ak-debug [problem]` | Diagnoses with hypotheses before proposing fixes |
+| vibe-audit | `/ak-vibe-audit` | Full audit of apps generated with vibe coding |
+| handoff | `/ak-handoff [focus]` | Compacts the session into a handoff for a fresh agent |
+| memory | `/ak-memory <save\|recall\|clean>` | Persists, retrieves, and prunes what the project has learned |
 
 ## Specialized Agents
 
 | Agent | Command | What it does |
 |-------|---------|--------------|
-| frontend | `/ak:frontend [description]` | Generates components following the project's design system |
-| api | `/ak:api [description]` | Generates endpoints with validation, auth, and error handling |
-| test | `/ak:test @file` | Writes tests by behavior, not by implementation |
-| refactor | `/ak:refactor @file` | Improves code without changing behavior |
-| docs | `/ak:docs @file` | Generates JSDoc, README, or ADR as needed |
+| frontend | `/ak-frontend [description]` | Generates components following the project's design system |
+| api | `/ak-api [description]` | Generates endpoints with validation, auth, and error handling |
+| test | `/ak-test @file` | Writes tests by behavior, not by implementation |
+| refactor | `/ak-refactor @file` | Improves code without changing behavior |
+| docs | `/ak-docs @file` | Generates JSDoc, README, or ADR as needed |
 
 ## Available Hooks
 
@@ -312,9 +312,9 @@ It copies `codex-prompts/*.md` to `~/.codex/prompts/` (or `$CODEX_HOME/prompts/`
 - `/ak-commit`, `/ak-pr`, `/ak-review`, `/ak-plan`, `/ak-execute`, `/ak-debug`
 - `/ak-vibe-audit`, `/ak-handoff`, `/ak-memory`
 
-Codex uses `-` instead of `:` in command names, so it's `/ak-commit`, not `/ak:commit`.
+The commands are the same as in Claude Code: `/ak-commit`, `/ak-pr`, and so on.
 
-The specialized agents (`/ak:frontend`, `/ak:api`, `/ak:test`, `/ak:refactor`, `/ak:docs`) are **not** ported — they rely on Claude Code subagents, which Codex has no equivalent for.
+The specialized agents (`/ak-frontend`, `/ak-api`, `/ak-test`, `/ak-refactor`, `/ak-docs`) are **not** ported — they rely on Claude Code subagents, which Codex has no equivalent for.
 
 To remove them:
 
@@ -350,7 +350,7 @@ The release script automatically:
 1. Fork the repo
 2. Write your skill in `src/skills/<id>.md` — the one hand-written source; `skills/`, `antigravity-skills/`, and `codex-prompts/` are generated from it by `npm run build`. See [docs/authoring-skills.md](docs/authoring-skills.md) for the spec fields and the gates (docs page, eval coverage) the build enforces.
 3. Run `npm run build && npm test` — `build:check` fails on hand-edited distributions and missing docs.
-4. Open a PR with `/ak:pr`
+4. Open a PR with `/ak-pr`
 
 Before proposing a feature, check [`.out-of-scope/`](.out-of-scope/README.md) — one file per thing this repo has decided not to build, with the reasoning.
 

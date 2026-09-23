@@ -1,6 +1,6 @@
 /**
  * Tests for the risk signal — the churn / fix-history hotspot ranking that
- * tells /ak:review where to spend its depth.
+ * tells /ak-review where to spend its depth.
  *
  * The integration cases run real git against a real temp repository: history
  * is created commit by commit, so what the signal reads is what git actually

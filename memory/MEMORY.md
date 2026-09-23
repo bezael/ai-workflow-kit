@@ -15,8 +15,8 @@ Each entry points to a specific memory file — read the relevant ones based on 
 
 - Before starting any non-trivial task: read `project.md` and `feedback.md`
 - Before making architecture decisions: check `decisions/` for prior art
-- After a session with significant learnings: run `/ak:memory save` to persist them
-- If a memory seems outdated: run `/ak:memory clean` to remove or update it
+- After a session with significant learnings: run `/ak-memory save` to persist them
+- If a memory seems outdated: run `/ak-memory clean` to remove or update it
 
 ## Memory principles
 

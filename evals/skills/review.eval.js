@@ -26,7 +26,7 @@ const FIXTURES_DIR = path.join(__dir, '..', 'fixtures')
 const client = new Anthropic()
 
 function loadSkillPrompt(name) {
-  return fs.readFileSync(path.join(REPO_ROOT, 'skills', name, 'SKILL.md'), 'utf8')
+  return fs.readFileSync(path.join(REPO_ROOT, 'skills', `ak-${name}`, 'SKILL.md'), 'utf8')
 }
 
 function listFiles(dir, base = dir) {

@@ -1,4 +1,4 @@
-# A /ak:scaffold skill that generates project boilerplate from a stack description
+# A /ak-scaffold skill that generates project boilerplate from a stack description
 
 Out of scope: a skill that takes "React + TypeScript + Tailwind + Vitest" and
 produces a ready-to-use folder structure, `package.json`, and starter config.
@@ -25,9 +25,9 @@ nothing.
 Start the feature in your spec tool — the task list it emits scaffolds the
 project as verified Phase 0 tasks, and `npx ai-workflow-kit verify <slug>`
 proves each one. For bare boilerplate with no spec, use the ecosystem's own
-generator (`npm create vite@latest`, …) and then `/ak:setup` to record the
+generator (`npm create vite@latest`, …) and then `/ak-setup` to record the
 resulting conventions in `.ak/config.md`.
 
 ## Prior requests
 
-- #1 — "Add a new `/ak:scaffold` skill that generates project boilerplate based on a stack description"
+- #1 — "Add a new `/ak-scaffold` skill that generates project boilerplate based on a stack description"

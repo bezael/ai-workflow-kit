@@ -1,4 +1,4 @@
-# A /ak:changelog skill that generates CHANGELOG entries from git history
+# A /ak-changelog skill that generates CHANGELOG entries from git history
 
 Out of scope: a skill that reads the commits since the last tag and writes a
 grouped `## [version] - date` section into `CHANGELOG.md`.
@@ -23,10 +23,10 @@ point, and shallower than the tools teams already run.
 
 In this repo: `npm run release:patch|minor|major` — the changelog entry is
 part of the release. In your own project: adopt the ecosystem's release
-tooling; if you just want prose written from a diff or log once, `/ak:commit`
-and `/ak:pr` already turn real git history into text where judgment (not
+tooling; if you just want prose written from a diff or log once, `/ak-commit`
+and `/ak-pr` already turn real git history into text where judgment (not
 formatting) is the work.
 
 ## Prior requests
 
-- #3 — "Add a `/ak:changelog` skill that reads the git log since the last tag and generates a structured `CHANGELOG.md` entry"
+- #3 — "Add a `/ak-changelog` skill that reads the git log since the last tag and generates a structured `CHANGELOG.md` entry"

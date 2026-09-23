@@ -1,4 +1,4 @@
-# /ak:plan
+# /ak-plan
 
 ## What it does
 
@@ -8,7 +8,7 @@ The plan lives on disk, not in the conversation. That is the whole difference be
 
 ## When to reach for it
 
-You invoke this by typing `/ak:plan <task>` — the agent won't reach for it on its own.
+You invoke this by typing `/ak-plan <task>` — the agent won't reach for it on its own.
 
 Reach for it when a task touches three or more files, needs new structure, changes a schema or an API, or has steps that depend on each other. Below that bar, planning costs more than it saves.
 
@@ -46,7 +46,7 @@ Point it at a task whose slug already exists and it reads what's there first:
 
 | What it finds | What happens |
 |---|---|
-| `spec.md` | this feature is under the spec-first flow — it points you at [`/ak:execute`](execute.md), which works `tasks.md` one verified task at a time, instead of writing a competing plan |
+| `spec.md` | this feature is under the spec-first flow — it points you at [`/ak-execute`](execute.md), which works `tasks.md` one verified task at a time, instead of writing a competing plan |
 | only `plan.md` | it reports what's ticked and continues from the first unchecked step |
 | nothing | it creates the directory |
 
@@ -59,8 +59,8 @@ Point it at a task whose slug already exists and it reads what's there first:
 
 ## Where it fits
 
-The first chain step: `/ak:plan` → work → [`/ak:commit`](commit.md) → [`/ak:review`](review.md) → [`/ak:pr`](pr.md).
+The first chain step: `/ak-plan` → work → [`/ak-commit`](commit.md) → [`/ak-review`](review.md) → [`/ak-pr`](pr.md).
 
-If a session ends mid-plan, [`/ak:handoff`](handoff.md) points the next agent at the plan file rather than re-listing its steps. If [`/ak:setup`](setup.md) has run, the `Verify:` commands come from the ones `.ak/config.md` recorded as actually existing in this repo.
+If a session ends mid-plan, [`/ak-handoff`](handoff.md) points the next agent at the plan file rather than re-listing its steps. If [`/ak-setup`](setup.md) has run, the `Verify:` commands come from the ones `.ak/config.md` recorded as actually existing in this repo.
 
-[`/ak:help`](help.md) routes across the whole set when you're not sure which skill a task wants.
+[`/ak-help`](help.md) routes across the whole set when you're not sure which skill a task wants.

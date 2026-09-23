@@ -5,14 +5,14 @@
  * code review research describes: relative code churn predicts defect density
  * (Nagappan & Ball, 2005) and past fixes mark future fault hotspots (Kim et
  * al., 2007). No LLM and no scoring service — one `git log`, aggregated per
- * file, so /ak:review can spend its depth where history says defects cluster.
+ * file, so /ak-review can spend its depth where history says defects cluster.
  *
  *   npx ai-workflow-kit risk [files...]   score the changed files (or these)
  *     --base <branch>   diff base for the changed-files set
  *                       (default: .ak/config.md → Default branch, else main)
  *     --window <6m>     history window: Nd / Nw / Nm / Ny (default 6m)
  *     --focus           review focus: per-file NEED (HIGH / MEDIUM / LOW) and
- *                       the reason, for /ak:pr — history plus the sensitive
+ *                       the reason, for /ak-pr — history plus the sensitive
  *                       paths declared in .ak/config.md and the file kind
  *     --json            machine-readable output
  *
@@ -86,7 +86,7 @@ export function readDefaultBranch(root) {
 
 /**
  * `.ak/config.md` § Review → `- Sensitive paths: a/**, b/**` as a list of
- * globs; empty when nothing is declared. Written by /ak:setup — a file
+ * globs; empty when nothing is declared. Written by /ak-setup — a file
  * matching one of these needs a human regardless of its history.
  */
 export function readSensitivePaths(root) {
@@ -200,7 +200,7 @@ export function aggregate(commits, files) {
 // ─── Review focus ────────────────────────────────────────────────────────────
 
 /**
- * Dependency-free glob → RegExp for the patterns /ak:setup writes: `**` spans
+ * Dependency-free glob → RegExp for the patterns /ak-setup writes: `**` spans
  * directories, `*` and `?` stay inside one segment. A pattern with no
  * wildcard names a file or a directory, and a directory covers everything
  * beneath it — `src/auth` reads as `src/auth/**`.
@@ -380,7 +380,7 @@ function printFocus(result) {
   console.log()
 
   if (result.sensitive.length === 0) {
-    dim('No sensitive paths declared — run /ak:setup to record them in .ak/config.md § Review.')
+    dim('No sensitive paths declared — run /ak-setup to record them in .ak/config.md § Review.')
   }
   if (result.sparse) {
     warn('Sparse history in this window — the history part of the signal is weak. Widen it: --window 12m.')
