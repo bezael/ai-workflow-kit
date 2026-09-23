@@ -95,19 +95,9 @@ router.post('/users', authenticate, createUser)
 - **Don't expose stack traces** in error responses in production
 - **Rate limiting** on public or authentication endpoints
 
-## Correct HTTP status codes
+## HTTP status codes
 
-| Situation | Status |
-|-----------|--------|
-| Created successfully | 201 |
-| OK / read | 200 |
-| No content (delete) | 204 |
-| Invalid input | 400 |
-| Not authenticated | 401 |
-| No permissions | 403 |
-| Not found | 404 |
-| Conflict (already exists) | 409 |
-| Server error | 500 |
+Use the status codes the project's existing endpoints already return for the same situations (validation errors, conflicts, missing auth); if there is no precedent, use the standard code for the situation.
 
 ## Always delivers
 

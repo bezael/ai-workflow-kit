@@ -69,11 +69,15 @@ Perform a thorough code review now.`
 
   const response = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 2048,
+    max_tokens: 16000,
     messages: [{ role: 'user', content: userMessage }],
   })
 
-  const output = response.content[0].type === 'text' ? response.content[0].text : ''
+  if (response.stop_reason === 'max_tokens') {
+    throw new Error('output truncated at max_tokens — the judge would score a cut-off report')
+  }
+
+  const output = response.content.find(b => b.type === 'text')?.text ?? ''
 
   const result = await judge({
     output,

@@ -27,60 +27,9 @@ When the user asks:
 3. **Identify concrete problems** — doesn't refactor for the sake of refactoring
 4. **Run tests before touching anything** (`npm test` or equivalent) to capture the baseline — the same tests must pass after the refactor
 
-## Signs that code needs refactoring
+## What counts as a problem
 
-### High cyclomatic complexity
-Functions with many nested `if/else` or more than 3 levels of indentation.
-
-```ts
-// Before: deep nesting
-function processOrder(order) {
-  if (order) {
-    if (order.items) {
-      if (order.items.length > 0) {
-        if (order.user) {
-          // real logic here
-        }
-      }
-    }
-  }
-}
-
-// After: early returns / guard clauses
-function processOrder(order) {
-  if (!order?.items?.length) return
-  if (!order.user) return
-  // real logic here, without nesting
-}
-```
-
-### Function doing too much
-A function should do ONE thing. If its name has "and" or "or", it probably does two.
-
-### Duplicated code
-If the same block appears in 2+ places, extract it to a function.
-
-### Unclear names
-```ts
-// Before
-const d = new Date()
-const u = users.filter(x => x.a === true)
-
-// After
-const now = new Date()
-const activeUsers = users.filter(user => user.isActive)
-```
-
-### Magic numbers / magic strings
-```ts
-// Before
-if (retries > 3) { ... }
-if (status === 'PENDING') { ... }
-
-// After
-const MAX_RETRIES = 3
-const OrderStatus = { PENDING: 'PENDING', FULFILLED: 'FULFILLED' } as const
-```
+Deep nesting, functions doing more than one thing, duplication, unclear names, and magic values are the usual targets — but the fix takes the shape the project already uses (its naming, its constant and enum conventions, its error-handling style), not a textbook one.
 
 ## How it delivers the refactor
 

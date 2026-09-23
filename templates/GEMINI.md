@@ -5,37 +5,9 @@
 A collection of skills, agents, and memory patterns to make working with AI coding tools faster and more consistent.
 Works with: **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravity**.
 
-## Available Skills
+## Skills and agents
 
-| Skill        | Trigger           | Description                                         |
-|--------------|-------------------|-----------------------------------------------------|
-| commit       | `@commit`         | Generates commit message with real diff context     |
-| pr           | `@pr`             | Creates PR with description, test plan, and checklist |
-| review       | `@review`         | Reviews code or PR with configurable criteria       |
-| plan         | `@plan`           | Plans before executing complex tasks                |
-| execute      | `@execute`        | Executes the next pending SDD task from `specs/<slug>/tasks.md`, verified |
-| debug        | `@debug`          | Structured debugging workflow                       |
-| vibe-audit   | `@vibe-audit`     | Audit of apps generated with vibe coding            |
-
-## Specialized Agents
-
-| Agent    | Trigger        | When to use                                         |
-|----------|----------------|-----------------------------------------------------|
-| frontend | `@frontend`    | Create UI components following the design system    |
-| api      | `@api`         | Create endpoints with validation and error handling |
-| test     | `@test`        | Write tests that verify real behavior               |
-| refactor | `@refactor`    | Improve code without changing behavior              |
-| docs     | `@docs`        | Generate useful documentation (JSDoc, README, ADR)  |
-
-## How to use a skill
-
-```
-@commit
-@pr feat: new feature
-@review src/components/Button.tsx
-@plan add JWT authentication
-@debug submit button not responding on mobile
-```
+The kit's skills are installed under `.agents/skills/` (project) or `~/.gemini/config/skills/` (global) and are the source of truth for what exists. Type `@help` with a task to be pointed at the one that fits.
 
 ## Project conventions
 
