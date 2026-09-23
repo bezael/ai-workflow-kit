@@ -455,7 +455,7 @@ if (ide === 'copilot') {
 // ─── Antigravity ─────────────────────────────────────────────────────────────
 if (ide === 'antigravity') {
   const allAgSkills = listSkills(path.join(REPO_ROOT, 'antigravity-skills'))
-  const geminiSrc   = path.join(REPO_ROOT, 'GEMINI.md')
+  const geminiSrc   = path.join(REPO_ROOT, 'templates', 'GEMINI.md')
   const agentsMdSrc = path.join(REPO_ROOT, 'templates', 'AGENTS.md')
 
   // Antigravity discovers skills from a `skills/` folder inside a customization
