@@ -117,6 +117,6 @@ Remove or update memories that are outdated, wrong, or no longer useful.
 ## Rules
 
 - Memory is only as useful as it is accurate. A wrong memory is worse than no memory.
-- When in doubt about whether to save something, ask: "Would a future session benefit from knowing this?" If yes, save it.
+- Unsure whether something is worth saving? Apply step 2's filter: save it only if it would change how a future session acts.
 - Never save secrets, credentials, or sensitive data to memory files.
 - Memory files are committed to the repo — treat them as shared team knowledge.

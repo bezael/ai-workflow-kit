@@ -55,9 +55,10 @@ Write concise notes — future sessions use this to skip re-reading existing tes
 // BAD — tests the name of the internal method
 expect(userService.hashPassword).toHaveBeenCalled()
 
-// GOOD — tests the observable result
-const user = await createUser({ email: 'a@b.com', password: '123' })
-expect(user.password).not.toBe('123') // password was hashed
+// GOOD — tests the observable result: the stored password works, a wrong one doesn't
+await createUser({ email: 'a@b.com', password: 'correct-horse' })
+await expect(login('a@b.com', 'correct-horse')).resolves.toBeDefined()
+await expect(login('a@b.com', 'wrong')).rejects.toThrow()
 ```
 
 ## Structure of a well-written test

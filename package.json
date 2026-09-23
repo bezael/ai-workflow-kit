@@ -20,7 +20,7 @@
     "release:beta": "npx node scripts/release.js beta"
   },
   "devDependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
+    "@anthropic-ai/sdk": "^0.128.0",
     "vitest": "^3.1.1",
     "yaml": "^2.9.0"
   },
