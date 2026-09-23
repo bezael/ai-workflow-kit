@@ -3,7 +3,7 @@
  * AI Workflow Kit — docs sync
  *
  * The install commands used to be written out by hand in `README.md`,
- * `README.es.md` and `CLAUDE.md`. Three copies of the same thing drift: the
+ * `README.es.md` and `AGENTS.md`. Three copies of the same thing drift: the
  * English README pinned a version that shipped months ago, and the Spanish one
  * was missing two flags the CLI has accepted since.
  *
@@ -36,7 +36,7 @@ const SOURCE = path.join(REPO_ROOT, 'src', 'install-block.md')
 const CLI    = path.join(REPO_ROOT, 'bin', 'cli.js')
 
 /** Files scanned for `npx ai-workflow-kit --flag` mentions. */
-const LINTED = ['README.md', 'README.es.md', 'CLAUDE.md', 'docs/authoring-skills.md']
+const LINTED = ['README.md', 'README.es.md', 'AGENTS.md', 'docs/authoring-skills.md']
 
 // ─── Canonical blocks ────────────────────────────────────────────────────────
 
