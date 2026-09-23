@@ -123,9 +123,11 @@ chmod +x ~/.claude/hooks/*.sh
 
 ```
 ai-workflow-kit/
-├── CLAUDE.md                        # Instrucciones para Claude Code
+├── AGENTS.md                        # Instrucciones para agentes que trabajan en este repo
+├── CLAUDE.md                        # Importa AGENTS.md para Claude Code
 ├── GEMINI.md                        # Instrucciones para Google Antigravity
-├── AGENTS.md                        # Reglas cross-tool (todas las herramientas AI)
+├── templates/
+│   └── AGENTS.md                   # Reglas cross-tool que se instalan en tu proyecto
 ├── .cursorrules                     # Reglas para Cursor
 ├── .github/
 │   └── copilot-instructions.md     # Instrucciones para GitHub Copilot

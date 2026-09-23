@@ -456,7 +456,7 @@ if (ide === 'copilot') {
 if (ide === 'antigravity') {
   const allAgSkills = listSkills(path.join(REPO_ROOT, 'antigravity-skills'))
   const geminiSrc   = path.join(REPO_ROOT, 'GEMINI.md')
-  const agentsMdSrc = path.join(REPO_ROOT, 'AGENTS.md')
+  const agentsMdSrc = path.join(REPO_ROOT, 'templates', 'AGENTS.md')
 
   // Antigravity discovers skills from a `skills/` folder inside a customization
   // root: `.agents/` at the project root, or `~/.gemini/config/` globally.
@@ -562,7 +562,7 @@ if (ide === 'antigravity') {
 if (ide === 'codex') {
   const allPrompts   = listFiles(path.join(REPO_ROOT, 'codex-prompts'), '.md')
   const patternsSrc  = path.join(REPO_ROOT, 'skills', 'vibe-audit', 'patterns.md')
-  const agentsMdSrc  = path.join(REPO_ROOT, 'AGENTS.md')
+  const agentsMdSrc  = path.join(REPO_ROOT, 'templates', 'AGENTS.md')
 
   if (UNINSTALL) {
     step('Uninstalling Codex prompts...')
