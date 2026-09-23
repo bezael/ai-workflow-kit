@@ -18,6 +18,29 @@ const client = new Anthropic()
  * @typedef {{ passed: boolean, score: number, details: EvalDetail[] }} JudgeResult
  */
 
+// The response shape is enforced by the API (structured outputs), so the
+// prompt describes the task and the schema describes the format.
+const VERDICT_SCHEMA = {
+  type: 'object',
+  properties: {
+    results: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          criterion: { type: 'string' },
+          passed: { type: 'boolean' },
+          note: { type: 'string' },
+        },
+        required: ['criterion', 'passed', 'note'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['results'],
+  additionalProperties: false,
+}
+
 /**
  * Evaluate an LLM output against a list of criteria.
  *
@@ -29,7 +52,7 @@ export async function judge({ output, rubric, context = '', threshold = 0.8 }) {
     .map((r, i) => `${i + 1}. ${r.criterion}`)
     .join('\n')
 
-  const prompt = `You are an impartial evaluator. Assess whether the following output satisfies each criterion.
+  const prompt = `You are an impartial evaluator. Assess whether the following output satisfies each criterion, one result per criterion, in order, with a brief note explaining each verdict.
 
 ${context ? `## Context\n${context}\n\n` : ''}## Output to evaluate
 \`\`\`
@@ -38,37 +61,26 @@ ${output}
 
 ## Criteria
 ${criteriaList}
-
-## Instructions
-For each criterion, respond with exactly this JSON format (no extra text):
-{
-  "results": [
-    { "criterion": "...", "passed": true/false, "note": "brief explanation" },
-    ...
-  ]
-}
 `
 
   const message = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 1024,
+    max_tokens: 4096,
     messages: [{ role: 'user', content: prompt }],
+    output_config: { format: { type: 'json_schema', schema: VERDICT_SCHEMA } },
   })
 
-  const text = message.content[0].type === 'text' ? message.content[0].text : ''
-
-  let parsed
-  try {
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    parsed = JSON.parse(jsonMatch?.[0] ?? '{}')
-  } catch {
-    throw new Error(`llm-judge: failed to parse response: ${text}`)
+  if (message.stop_reason !== 'end_turn') {
+    throw new Error(`llm-judge: judge stopped with ${message.stop_reason}`)
   }
 
-  const details = (parsed.results ?? []).map((r, i) => ({
-    criterion: r.criterion ?? rubric[i]?.criterion ?? `criterion ${i + 1}`,
-    passed: Boolean(r.passed),
-    note: r.note ?? '',
+  const text = message.content.find(b => b.type === 'text')?.text ?? '{}'
+  const parsed = JSON.parse(text)
+
+  const details = parsed.results.map((r, i) => ({
+    criterion: r.criterion || rubric[i]?.criterion || `criterion ${i + 1}`,
+    passed: r.passed,
+    note: r.note,
   }))
 
   const passedCount = details.filter(d => d.passed).length

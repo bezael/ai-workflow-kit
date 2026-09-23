@@ -179,6 +179,3 @@ Issue → Spec → Tasks → Implementation → Verification
 - If `gh` is not installed, generate the text to paste manually in GitHub.
 - Never invent verification results. A check that wasn't executed is listed
   as "not run" — the Verification section reports evidence, not optimism.
-- `gh pr create` runs after your confirmation, i.e. in a later turn than the one
-  that invoked this skill. A frontmatter grant has already expired by then, so
-  the allow rule for it belongs in your permission settings.
