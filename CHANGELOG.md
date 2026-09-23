@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [3.0.0] - 2026-09-23
+
 ### Changed
 - **BREAKING — command names**: skills and agents are now `/ak-<name>` instead of `/ak:<name>` (`/ak-commit`, `/ak-pr`, `/ak-api`, …), the same names Codex already used. Claude Code accepts only lowercase letters, digits and hyphens in a skill or agent `name`, so `name: ak:<id>` was not honoured: skills showed up under their bare directory name (`/review`) and the agents did not load at all.
 - **install layout**: Claude Code skills install to `skills/ak-<id>/` and agents to `agents/ak-<id>.md`. On upgrade and on `--uninstall`, the installer removes the copies left under the old names (`skills/<id>/`, `agents/<id>.md`), but only those whose frontmatter carries the kit's `name: ak:<id>` — a user's own skill with the same directory name is left alone.
+- **rule templates**: the `AGENTS.md` and `GEMINI.md` the installer drops into a project now live in `templates/`. The repo's own agent instructions moved from `CLAUDE.md` to the root `AGENTS.md`, and `CLAUDE.md` imports it with `@AGENTS.md`, so Claude Code, Codex and Antigravity read one file. What a user gets installed is unchanged, except as noted below.
+- **templates/GEMINI.md**: the hand-written skill and agent tables are gone. They listed 7 of the 11 skills; Antigravity discovers the installed skills itself, and `@help` routes a task to the one that fits.
+- **prompts**: dated patterns removed after a prompt audit. The memory skill's "when in doubt, save it" rule, which contradicted its own save filter, now points at that filter. The pr skill drops a note meant for the human (it lives in `docs/skills/pr.md`). The api and refactor agents drop a textbook HTTP-status table and code-smell catalogue in favour of "follow the project's existing conventions", and the test agent's gold example no longer asserts on a returned password hash.
+- **evals**: the LLM judge uses structured outputs (`output_config.format` with a JSON schema) instead of "respond with exactly this JSON" plus regex extraction, and fails loudly on a non-`end_turn` stop. The review and vibe-audit evals raise `max_tokens` to 16000 and fail on truncation instead of scoring a cut-off report. `@anthropic-ai/sdk` `^0.39.0` → `^0.128.0` (dev dependency; `output_config` needs it).
 
 ---
 
@@ -161,7 +169,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Eval framework with Vitest + LLM-based evals via Anthropic SDK
 - Spanish README (`README.es.md`)[1.1.0]: https://github.com/bezael/ai-workflow-kit/compare/...v1.1.0[2.0.0]: https://github.com/bezael/ai-workflow-kit/compare/v1.1.0...v2.0.0
 [2.2.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.1.0...v2.2.0
-[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v2.6.0...HEAD
+[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.6.0...v3.0.0
 [2.6.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.3.0...v2.4.0
