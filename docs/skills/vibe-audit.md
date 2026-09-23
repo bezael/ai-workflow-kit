@@ -1,4 +1,4 @@
-# /ak:vibe-audit
+# /ak-vibe-audit
 
 ## What it does
 
@@ -8,9 +8,9 @@ It checks a fixed list of twenty risk patterns, loaded before the audit starts. 
 
 ## When to reach for it
 
-You invoke this by typing `/ak:vibe-audit`, optionally with a folder to scope it — the agent won't reach for it on its own.
+You invoke this by typing `/ak-vibe-audit`, optionally with a folder to scope it — the agent won't reach for it on its own.
 
-Reach for it when you've inherited or generated a codebase nobody has reviewed, and you want to know how bad it is before shipping. For a focused read of code you wrote deliberately, [`/ak:review`](review.md) is the sharper tool; for one specific misbehaviour, [`/ak:debug`](debug.md).
+Reach for it when you've inherited or generated a codebase nobody has reviewed, and you want to know how bad it is before shipping. For a focused read of code you wrote deliberately, [`/ak-review`](review.md) is the sharper tool; for one specific misbehaviour, [`/ak-debug`](debug.md).
 
 ## Nothing is reported that isn't in the code
 
@@ -27,8 +27,8 @@ The report is grouped Critical / Important / Improvements with a count per group
 
 ## Where it fits
 
-A reach-for-it-anytime standalone, usually the first thing you run on unfamiliar code. What it finds normally becomes a [`/ak:plan`](plan.md) — the audit tells you what's wrong, the plan sequences the fixing and proves each step.
+A reach-for-it-anytime standalone, usually the first thing you run on unfamiliar code. What it finds normally becomes a [`/ak-plan`](plan.md) — the audit tells you what's wrong, the plan sequences the fixing and proves each step.
 
 Its pattern list lives in `patterns.md` next to the skill (Claude Code and Antigravity) or in `~/.codex/ak-workflow-kit/vibe-audit-patterns.md` (Codex) — Codex prompts are flat files, so an asset beside one would register as a phantom slash command.
 
-[`/ak:help`](help.md) routes across the whole set when you're not sure which skill a task wants.
+[`/ak-help`](help.md) routes across the whole set when you're not sure which skill a task wants.

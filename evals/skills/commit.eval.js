@@ -20,7 +20,7 @@ const __dir = path.dirname(fileURLToPath(import.meta.url))
 const client = new Anthropic()
 
 function loadSkillPrompt(name) {
-  return fs.readFileSync(path.join(REPO_ROOT, 'skills', name, 'SKILL.md'), 'utf8')
+  return fs.readFileSync(path.join(REPO_ROOT, 'skills', `ak-${name}`, 'SKILL.md'), 'utf8')
 }
 
 function loadFixture(relativePath) {

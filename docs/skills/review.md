@@ -1,4 +1,4 @@
-# /ak:review
+# /ak-review
 
 ## What it does
 
@@ -8,9 +8,9 @@ Every finding has to cite the line or snippet it came from. A review that says "
 
 ## When to reach for it
 
-Type `/ak:review @path/to/file`, or `/ak:review` on its own to review the branch diff. The agent can also reach for it when you ask for a code review.
+Type `/ak-review @path/to/file`, or `/ak-review` on its own to review the branch diff. The agent can also reach for it when you ask for a code review.
 
-Reach for it before opening a PR, or on a file you've just changed heavily. For code nobody has ever reviewed — a whole AI-generated app — [`/ak:vibe-audit`](vibe-audit.md) is the wider sweep. For a specific misbehaviour rather than a general read, [`/ak:debug`](debug.md).
+Reach for it before opening a PR, or on a file you've just changed heavily. For code nobody has ever reviewed — a whole AI-generated app — [`/ak-vibe-audit`](vibe-audit.md) is the wider sweep. For a specific misbehaviour rather than a general read, [`/ak-debug`](debug.md).
 
 ## Severity is a decision, not a label
 
@@ -43,7 +43,7 @@ Before the severity pass, the review runs `npx ai-workflow-kit risk`: a determin
 
 ## The review ends by remembering
 
-A review that surfaces a durable learning — a decision confirmed or overturned, an alternative rejected with its reason, a risk that materialized in a specific module — offers to persist it to `memory/decisions/` via [`/ak:memory`](memory.md). Pure code fixes stay in the review; only durable knowledge is promoted. The next review starts from what this one learned instead of rediscovering it.
+A review that surfaces a durable learning — a decision confirmed or overturned, an alternative rejected with its reason, a risk that materialized in a specific module — offers to persist it to `memory/decisions/` via [`/ak-memory`](memory.md). Pure code fixes stay in the review; only durable knowledge is promoted. The next review starts from what this one learned instead of rediscovering it.
 
 ## It's working if
 
@@ -54,8 +54,8 @@ A review that surfaces a durable learning — a decision confirmed or overturned
 
 ## Where it fits
 
-A chain step just before the PR — [`/ak:plan`](plan.md) → work → [`/ak:commit`](commit.md) → `/ak:review` → [`/ak:pr`](pr.md) — and a standalone you can point at any file.
+A chain step just before the PR — [`/ak-plan`](plan.md) → work → [`/ak-commit`](commit.md) → `/ak-review` → [`/ak-pr`](pr.md) — and a standalone you can point at any file.
 
-If [`/ak:setup`](setup.md) has run, it diffs against the base branch `.ak/config.md` recorded, and can quote lint and typecheck output as evidence rather than opinion.
+If [`/ak-setup`](setup.md) has run, it diffs against the base branch `.ak/config.md` recorded, and can quote lint and typecheck output as evidence rather than opinion.
 
-[`/ak:help`](help.md) routes across the whole set when you're not sure which skill a task wants.
+[`/ak-help`](help.md) routes across the whole set when you're not sure which skill a task wants.

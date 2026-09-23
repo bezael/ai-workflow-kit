@@ -20,7 +20,7 @@
  * Subcommands (dispatched before the installer):
  *   npx ai-workflow-kit verify [slug]   → run the Verify commands of a specs/<slug>/ plan or task list
  *   npx ai-workflow-kit risk [files...] → churn / fix-history risk signal for the changed files
- *   npx ai-workflow-kit risk --focus    → per-file review need (HIGH / MEDIUM / LOW) + reason, for /ak:pr
+ *   npx ai-workflow-kit risk --focus    → per-file review need (HIGH / MEDIUM / LOW) + reason, for /ak-pr
  */
 
 import { spawnSync } from 'child_process'
@@ -60,7 +60,7 @@ if (args[0] === 'verify') {
 
 // ─── `risk` subcommand ───────────────────────────────────────────────────────
 // Churn / fix-history hotspots for the files under review — the deterministic
-// bug-proneness signal /ak:review uses to decide where review depth goes.
+// bug-proneness signal /ak-review uses to decide where review depth goes.
 if (args[0] === 'risk') {
   const { runRisk } = await import('./risk.js')
   process.exit(runRisk(args.slice(1)))
@@ -124,12 +124,15 @@ function readManifest() {
 
 const MANIFEST = readManifest()
 
-/** ` experimental` / ` deprecated → /ak:x`, or '' for a stable or unknown skill. */
+/** Skill id from an installed name: `ak-commit` → `commit`. The manifest is keyed by id. */
+const skillId = (name) => name.replace(/^ak-/, '')
+
+/** ` experimental` / ` deprecated → /ak-x`, or '' for a stable or unknown skill. */
 function statusTag(name) {
-  const entry = MANIFEST.get(name)
+  const entry = MANIFEST.get(skillId(name))
   if (!entry || entry.status === 'stable') return ''
   if (entry.status === 'deprecated')
-    return `  ${c.yellow}deprecated${c.reset}${c.dim} → /ak:${entry.replaced_by}`
+    return `  ${c.yellow}deprecated${c.reset}${c.dim} → /ak-${entry.replaced_by}`
   return `  ${c.yellow}experimental${c.reset}${c.dim}`
 }
 
@@ -142,12 +145,12 @@ function statusTag(name) {
  */
 function noteNonStable(items) {
   const flagged = items
-    .map(i => MANIFEST.get(i.name))
+    .map(i => MANIFEST.get(skillId(i.name)))
     .filter(e => e && e.status !== 'stable')
   if (flagged.length === 0) return
   for (const e of flagged) {
     warn(e.status === 'deprecated'
-      ? `${e.id} is deprecated — use /ak:${e.replaced_by} instead`
+      ? `${e.id} is deprecated — use /ak-${e.replaced_by} instead`
       : `${e.id} is experimental — its behaviour can change between releases`)
   }
 }
@@ -561,7 +564,7 @@ if (ide === 'antigravity') {
 // ─── OpenAI Codex ────────────────────────────────────────────────────────────
 if (ide === 'codex') {
   const allPrompts   = listFiles(path.join(REPO_ROOT, 'codex-prompts'), '.md')
-  const patternsSrc  = path.join(REPO_ROOT, 'skills', 'vibe-audit', 'patterns.md')
+  const patternsSrc  = path.join(REPO_ROOT, 'skills', 'ak-vibe-audit', 'patterns.md')
   const agentsMdSrc  = path.join(REPO_ROOT, 'templates', 'AGENTS.md')
 
   if (UNINSTALL) {
@@ -685,6 +688,44 @@ const scopeLabel = isLocal
   : `global ${c.dim}(~/.claude/)${c.reset}`
 info(`Scope: ${scopeLabel}`)
 
+// ─── Clean up the pre-3.0 `ak:` names ────────────────────────────────────────
+// Skills used to install as `skills/<id>/` and agents as `agents/<id>.md`,
+// both with `name: ak:<id>`. Claude Code accepts only lowercase letters,
+// digits and hyphens in a name, so they now install as `skills/ak-<id>/` and
+// `agents/ak-<id>.md`. An in-place upgrade would leave the old copies behind
+// as duplicates; this removes them, but only when the file's frontmatter
+// carries the kit's `name: ak:<id>` — a user's own `commit` skill is not ours.
+function isKitLegacy(file, id) {
+  try {
+    return fs.readFileSync(file, 'utf8')
+      .split(/\r?\n/)
+      .some(line => line.trim() === `name: ak:${id}`)
+  } catch {
+    return false
+  }
+}
+
+function removeLegacyColonNames(skills, agents) {
+  let cleaned = 0
+  for (const s of skills) {
+    const id  = skillId(s.name)
+    const dir = path.join(SKILLS_DST, id)
+    if (id === s.name || !isKitLegacy(path.join(dir, 'SKILL.md'), id)) continue
+    fs.rmSync(dir, { recursive: true, force: true })
+    dim(`removed legacy skills/${id}/`)
+    cleaned++
+  }
+  for (const a of agents) {
+    const id   = skillId(a.name)
+    const file = path.join(AGENTS_DST, id + '.md')
+    if (id === a.name || !isKitLegacy(file, id)) continue
+    fs.unlinkSync(file)
+    dim(`removed legacy agents/${id}.md`)
+    cleaned++
+  }
+  return cleaned
+}
+
 // ─── Uninstall ───────────────────────────────────────────────────────────────
 if (UNINSTALL) {
   step('Uninstalling...')
@@ -700,7 +741,10 @@ if (UNINSTALL) {
     dst: path.join(HOOKS_DST, path.basename(f)), isDir: false,
   }))
 
-  let removed = 0
+  let removed = removeLegacyColonNames(
+    listSkills(path.join(REPO_ROOT, 'skills')),
+    listAgents(path.join(REPO_ROOT, 'agents')),
+  )
   for (const item of [...skillsToRemove, ...agentsToRemove, ...hooksToRemove]) {
     if (!fs.existsSync(item.dst)) continue
     item.isDir
@@ -784,6 +828,9 @@ if (selectedSkills.length > 0 || selectedAgents.length > 0) {
     ...selectedAgents.map(a => ({ ...a, isDir: true })),
   ])
   if (legacy > 0) info(`Cleaned up ${legacy} file(s) from the old flat layout`)
+
+  const colon = removeLegacyColonNames(selectedSkills, selectedAgents)
+  if (colon > 0) info(`Cleaned up ${colon} item(s) installed under the old ak: names`)
 }
 
 if (selectedSkills.length > 0) {

@@ -6,7 +6,7 @@ A skill has exactly one hand-written file: `src/skills/<id>.md`. It is YAML fron
 
 | Distribution | Path | Invoked as |
 |---|---|---|
-| Claude Code | `skills/<id>/SKILL.md` | `/ak:<id>` |
+| Claude Code | `skills/ak-<id>/SKILL.md` | `/ak-<id>` |
 | Google Antigravity | `antigravity-skills/<id>/SKILL.md` | `@<id>` |
 | OpenAI Codex | `codex-prompts/ak-<id>.md` | `/ak-<id>` |
 
@@ -43,7 +43,7 @@ Optional. Omit it and the skill is `stable`.
 | `experimental` | shipped, still being shaped | banner under the H1; the CLI warns before installing it |
 | `deprecated` | still runs, on the way out | banner naming the replacement; the CLI warns and points at it |
 
-`deprecated` requires `replaced_by: <skill id>`, and the builder renders it in each target's own invocation style — `/ak:plan` for Claude Code, `@plan` for Antigravity, `/ak-plan` for Codex. A deprecation with nowhere to send people fails the schema.
+`deprecated` requires `replaced_by: <skill id>`, and the builder renders it in each target's own invocation style — `/ak-plan` for Claude Code, `@plan` for Antigravity, `/ak-plan` for Codex. A deprecation with nowhere to send people fails the schema.
 
 The point is to be able to ship something unfinished, and to retire something, **visibly** — the failure this replaces is a skill that is quietly one or the other. Prefer `experimental` over holding a skill back: a labelled rough edge beats an unshipped one.
 
@@ -81,7 +81,7 @@ Keep the frame:
 | `## Prerequisites` | only where one exists — a workspace it writes into, tooling it needs. Omit the heading otherwise. |
 | free-form middle | one to three sections in the skill's own vocabulary, surfacing its leading word — *tight loop*, *seam*, *Verify command* |
 | `## It's working if` | signals the reader can check without opening `SKILL.md` |
-| `## Where it fits` | its role (chain step, run-once setup, standalone), its neighbours, and a pointer to `/ak:help` |
+| `## Where it fits` | its role (chain step, run-once setup, standalone), its neighbours, and a pointer to `/ak-help` |
 
 Explain the why, not the runbook. A human choosing a tool does not need the steps.
 

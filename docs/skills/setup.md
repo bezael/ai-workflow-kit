@@ -1,4 +1,4 @@
-# /ak:setup
+# /ak-setup
 
 ## What it does
 
@@ -17,7 +17,7 @@ A path is recorded only if it exists in the repo. Sensitive *paths* are fine in 
 
 ## When to reach for it
 
-You invoke this by typing `/ak:setup` — the agent won't reach for it on its own.
+You invoke this by typing `/ak-setup` — the agent won't reach for it on its own.
 
 Run it once per repo, right after installing the kit. Run it again when something structural changes: a new test runner, a move from GitHub to GitLab, a switch of default branch.
 
@@ -41,14 +41,14 @@ An existing `.ak/config.md` is read and updated, never overwritten. If you hand-
 
 | Skill | What it takes from the config |
 |---|---|
-| [`/ak:commit`](commit.md) | commit convention, message language |
-| [`/ak:pr`](pr.md) | base branch, git host, whether `gh` is available; the sensitive paths that make a file HIGH in the Review focus table |
-| [`/ak:plan`](plan.md) | the commands a step's `Verify:` line should use |
-| [`/ak:execute`](execute.md) | the real commands a task's evidence runs against |
-| [`/ak:review`](review.md) | base branch to diff against; lint and typecheck commands |
-| [`/ak:debug`](debug.md) | the test command, as the fastest route to a red loop |
+| [`/ak-commit`](commit.md) | commit convention, message language |
+| [`/ak-pr`](pr.md) | base branch, git host, whether `gh` is available; the sensitive paths that make a file HIGH in the Review focus table |
+| [`/ak-plan`](plan.md) | the commands a step's `Verify:` line should use |
+| [`/ak-execute`](execute.md) | the real commands a task's evidence runs against |
+| [`/ak-review`](review.md) | base branch to diff against; lint and typecheck commands |
+| [`/ak-debug`](debug.md) | the test command, as the fastest route to a red loop |
 | `verify --final` | the `Test` / `Lint` / `Typecheck` / `Build` / `E2E` entries under `## Commands`, executed as the global checks |
-| `risk --focus` | the `Sensitive paths` globs under `## Review` — any changed file matching one is HIGH review need whatever its history; [`/ak:review`](review.md) starts its deep pass there too |
+| `risk --focus` | the `Sensitive paths` globs under `## Review` — any changed file matching one is HIGH review need whatever its history; [`/ak-review`](review.md) starts its deep pass there too |
 
 Each of those falls back to a sensible default without the file. The defaults are right often enough to be dangerous and wrong often enough to matter, which is the argument for running this once.
 
@@ -64,6 +64,6 @@ The last two rows are the ones that make the file a contract rather than prose: 
 
 ## Where it fits
 
-A run-once setup, the other half of orientation alongside [`/ak:help`](help.md): that one tells you which skill to use, this one tells the skills how this repo works.
+A run-once setup, the other half of orientation alongside [`/ak-help`](help.md): that one tells you which skill to use, this one tells the skills how this repo works.
 
 Nothing depends on it — every skill works without it — but every skill that touches git, tests, or conventions works better with it.

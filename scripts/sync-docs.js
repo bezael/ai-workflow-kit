@@ -12,7 +12,7 @@
  *
  *   <!-- ak:block quickstart.en -->
  *   ...generated, do not edit...
- *   <!-- /ak:block -->
+ *   <!-- /ak-block -->
  *
  * It also lints what it cannot generate:
  *
@@ -63,7 +63,7 @@ function commandList() {
   const agents = fs.existsSync(agentsDir)
     ? fs.readdirSync(agentsDir).filter(e => fs.statSync(path.join(agentsDir, e)).isDirectory())
     : []
-  return [...skills, ...agents].sort().map(n => `\`/ak:${n}\``).join(', ')
+  return [...skills, ...agents].sort().map(n => `\`/ak-${n}\``).join(', ')
 }
 
 function hookCount() {
@@ -82,13 +82,13 @@ function resolve(block, vars) {
 
 const marker = (name) => ({
   open: `<!-- ak:block ${name} -->`,
-  close: '<!-- /ak:block -->',
+  close: '<!-- /ak-block -->',
 })
 
 /** Replace every marked region in `text`; returns the new text. */
 function inject(text, blocks, vars, file) {
   return text.replace(
-    /<!-- ak:block ([\w.-]+) -->[\s\S]*?<!-- \/ak:block -->/g,
+    /<!-- ak:block ([\w.-]+) -->[\s\S]*?<!-- \/ak-block -->/g,
     (_, name) => {
       if (!blocks.has(name)) throw new Error(`${file}: no canonical block named "${name}" in src/install-block.md`)
       const { open, close } = marker(name)
@@ -125,7 +125,7 @@ function lint(blocks) {
   //
   // The tables can't be generated — their prose column is translated per
   // language — but they can be checked. Both READMEs had been sitting on a
-  // list that predated /ak:handoff and /ak:memory.
+  // list that predated /ak-handoff and /ak-memory.
   const manifest = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'src', 'manifest.json'), 'utf8'))
   const shipped = manifest.skills.filter(s => s.status !== 'deprecated').map(s => s.name)
   for (const rel of LINTED) {
@@ -136,7 +136,7 @@ function lint(blocks) {
     // script's own documentation does) is not claiming to be a catalogue.
     if (!/^<!-- ak:skill-table -->\s*$/m.test(text)) continue
     for (const name of shipped) {
-      if (!text.includes(`/ak:${name}`)) failures.push(`${rel}: claims to list every skill but never mentions \`/ak:${name}\``)
+      if (!text.includes(`/ak-${name}`)) failures.push(`${rel}: claims to list every skill but never mentions \`/ak-${name}\``)
     }
   }
 

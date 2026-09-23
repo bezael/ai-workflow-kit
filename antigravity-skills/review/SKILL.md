@@ -1,6 +1,6 @@
 ---
 name: review
-description: Review code with real engineering criteria — logic bugs, security vulnerabilities, and technical debt. Use when the user says /review, asks for a code review, or wants the branch diff checked before opening a PR.
+description: Review code with real engineering criteria — logic bugs, security vulnerabilities, and technical debt. Use when the user says /ak-review, asks for a code review, or wants the branch diff checked before opening a PR.
 ---
 
 # Skill: @review
@@ -73,7 +73,7 @@ When the user writes @review with a file path, or @review on its own to review t
 
    Sensitive paths join the top of the queue. If `.ak/config.md` has a
    `## Review` section with `- Sensitive paths:` (auth, billing, migrations —
-   whatever `/ak:setup` recorded), every changed file matching one of those
+   whatever `/ak-setup` recorded), every changed file matching one of those
    globs starts the deep review alongside the `HIGH` files, whatever its
    history says: a quiet `src/auth/` file is quiet, not safe. `npx
    ai-workflow-kit risk --focus` already folds them in as HIGH review need

@@ -4,7 +4,7 @@ name: memory
 description: >-
   Manage persistent memory across sessions. Subcommands: save [topic] captures
   session learnings, recall [question] retrieves relevant context before
-  acting, clean removes stale entries. Use when the user says /memory, asks
+  acting, clean removes stale entries. Use when the user says /ak-memory, asks
   what was decided earlier, or when a session produces a learning worth
   keeping.
 invocation: model

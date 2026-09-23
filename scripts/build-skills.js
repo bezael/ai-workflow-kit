@@ -4,7 +4,7 @@
  *
  * Renders one source skill (src/skills/<id>.md) into every distribution:
  *
- *   skills/<id>/SKILL.md            Claude Code
+ *   skills/ak-<id>/SKILL.md         Claude Code
  *   antigravity-skills/<id>/SKILL.md  Google Antigravity
  *   codex-prompts/ak-<id>.md        OpenAI Codex
  *
@@ -43,12 +43,12 @@ function readAllowlist() {
 
 const TARGETS = {
   claude: {
-    out: (id) => path.join(REPO_ROOT, 'skills', id, 'SKILL.md'),
-    invoke: (spec) => `/ak:${spec.name}`,
+    out: (id) => path.join(REPO_ROOT, 'skills', `ak-${id}`, 'SKILL.md'),
+    invoke: (spec) => `/ak-${spec.name}`,
     args: '$ARGUMENTS',
     severity: { critical: '🔴 Critical', important: '🟡 Important', suggestion: '🔵 Suggestion', improvement: '🔵 Improvements', good: '✅ What\'s good' },
     frontmatter: (spec) => ({
-      name: `ak:${spec.name}`,
+      name: `ak-${spec.name}`,
       description: spec.description,
       ...(spec['argument-hint'] ? { 'argument-hint': spec['argument-hint'] } : {}),
       // Derived from `invocation`. Claude Code is the only target with a flag

@@ -20,13 +20,13 @@ acceptance:
   cases:
     - name: finished work, wants a PR
       input: I've finished the feature branch and want to get it reviewed.
-      vars: { expected: "/ak:pr" }
+      vars: { expected: "/ak-pr" }
     - name: something is broken
       input: The login button does nothing when I tap it on mobile.
-      vars: { expected: "/ak:debug" }
+      vars: { expected: "/ak-debug" }
     - name: large multi-file change
       input: I need to add JWT auth across the API, the database and the frontend.
-      vars: { expected: "/ak:plan" }
+      vars: { expected: "/ak-plan" }
     - name: nothing fits
       input: What colour should the primary button be?
       vars: { expected: "no skill — it says plainly that none of them fits" }
@@ -64,15 +64,15 @@ Skills marked **model** invocation can also fire on their own when a task obviou
 3. Give the **exact command to type**, arguments filled in from what they said:
 
    ```
-   /ak:plan add JWT auth across the API, DB and frontend
+   /ak-plan add JWT auth across the API, DB and frontend
    ```
 
-4. Where a second skill is the obvious *next* step, name it as a next step — a chain, not an alternative. `/ak:plan` → `/ak:pr` → `/ak:review` is the common one.
+4. Where a second skill is the obvious *next* step, name it as a next step — a chain, not an alternative. `/ak-plan` → `/ak-pr` → `/ak-review` is the common one.
 5. **If there is no task above**, show the table and stop. Don't guess at what they might want.
 
 ## When nothing fits
 
-Say so. "None of these covers that — it's a design question, not a workflow one" is a useful answer; steering someone into `/ak:review` because it was the nearest match is not.
+Say so. "None of these covers that — it's a design question, not a workflow one" is a useful answer; steering someone into `/ak-review` because it was the nearest match is not.
 
 The set covers a narrow band: git workflow, planning, debugging, auditing, and memory. Anything outside it is a normal conversation, and saying so costs the user nothing.
 

@@ -1,4 +1,4 @@
-# /ak:handoff
+# /ak-handoff
 
 ## What it does
 
@@ -8,9 +8,9 @@ It references rather than duplicates. Anything already written down — a `specs
 
 ## When to reach for it
 
-You invoke this by typing `/ak:handoff [focus of the next session]` — the agent won't reach for it on its own.
+You invoke this by typing `/ak-handoff [focus of the next session]` — the agent won't reach for it on its own.
 
-Reach for it when a session is ending with work unfinished: you're out of time, the context window is filling, or someone else is picking it up. If the work is mid-plan, this document points at the plan; [`/ak:plan`](plan.md) is where the step-by-step progress actually lives.
+Reach for it when a session is ending with work unfinished: you're out of time, the context window is filling, or someone else is picking it up. If the work is mid-plan, this document points at the plan; [`/ak-plan`](plan.md) is where the step-by-step progress actually lives.
 
 ## Prerequisites
 
@@ -35,8 +35,8 @@ Secrets and PII are redacted on the way out.
 
 ## Where it fits
 
-A reach-for-it-anytime standalone that closes a session rather than opening one. Its most common companion is [`/ak:plan`](plan.md) — the plan holds progress, the handoff holds everything around the plan.
+A reach-for-it-anytime standalone that closes a session rather than opening one. Its most common companion is [`/ak-plan`](plan.md) — the plan holds progress, the handoff holds everything around the plan.
 
-[`/ak:memory`](memory.md) is the other half of continuity, and the split is worth knowing: a handoff is *this* work, right now, disposable. Memory is what stays true across sessions.
+[`/ak-memory`](memory.md) is the other half of continuity, and the split is worth knowing: a handoff is *this* work, right now, disposable. Memory is what stays true across sessions.
 
-[`/ak:help`](help.md) routes across the whole set when you're not sure which skill a task wants.
+[`/ak-help`](help.md) routes across the whole set when you're not sure which skill a task wants.

@@ -353,7 +353,7 @@ if ! $HOOKS_ONLY; then
   # /ak-vibe-audit lee este fichero de referencia (fuera de prompts/ para no
   # generar un slash command fantasma)
   run "mkdir -p '$CODEX_REF_DIR'"
-  run "cp '$SCRIPT_DIR/skills/vibe-audit/patterns.md' '$CODEX_REF_DIR/vibe-audit-patterns.md'"
+  run "cp '$SCRIPT_DIR/skills/ak-vibe-audit/patterns.md' '$CODEX_REF_DIR/vibe-audit-patterns.md'"
   success "Instalada referencia: $CODEX_REF_DIR/vibe-audit-patterns.md"
 
   info "Codex prompts instalados: $INSTALLED_CX | Omitidos: $SKIPPED_CX"
@@ -498,8 +498,8 @@ echo ""
 
 if ! $HOOKS_ONLY; then
   echo -e "  ${GREEN}Claude Code:${RESET}  $SKILLS_DIR"
-  echo -e "  Comandos: /ak:help /ak:setup /ak:commit /ak:pr /ak:review /ak:plan /ak:execute /ak:debug /ak:vibe-audit /ak:handoff /ak:memory"
-  echo -e "  Agentes:  /ak:frontend /ak:api /ak:test /ak:refactor /ak:docs"
+  echo -e "  Comandos: /ak-help /ak-setup /ak-commit /ak-pr /ak-review /ak-plan /ak-execute /ak-debug /ak-vibe-audit /ak-handoff /ak-memory"
+  echo -e "  Agentes:  /ak-frontend /ak-api /ak-test /ak-refactor /ak-docs"
   echo ""
   echo -e "  ${GREEN}Antigravity:${RESET}  $ANTIGRAVITY_SKILLS_DIR"
   echo -e "  Skills:   @help @setup @commit @pr @review @plan @execute @debug @vibe-audit"

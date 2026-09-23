@@ -1,7 +1,7 @@
 /**
  * Plan verifier — closes the loop on specs/<slug>/plan.md and tasks.md.
  *
- * /ak:plan writes steps as checkboxes, each carrying the command that proves
+ * /ak-plan writes steps as checkboxes, each carrying the command that proves
  * it done. SDD tools (sdd-creator) write specs/<slug>/tasks.md in the same
  * checkbox grammar. This runs those commands and ticks a box only when its
  * command exits 0, so progress recorded in the file is progress that was
@@ -93,7 +93,7 @@ export function setStatus(lines, statusLine, value) {
 
 /**
  * Global checks --final runs after the per-task Verifies, in this order.
- * They come from the `## Commands` section /ak:setup writes — `- Key: value`
+ * They come from the `## Commands` section /ak-setup writes — `- Key: value`
  * bullets. A value starting with "unknown" means setup couldn't find one.
  */
 const CONFIG_KEYS = ['Test', 'Lint', 'Typecheck', 'Build', 'E2E']
@@ -130,7 +130,7 @@ export function parseConfigCommands(root = process.cwd()) {
 
 /**
  * A slug is runnable when specs/<slug>/ holds tasks.md or plan.md. tasks.md
- * wins by default — it's the SDD execution artifact; plan.md is the /ak:plan
+ * wins by default — it's the SDD execution artifact; plan.md is the /ak-plan
  * lightweight flow. preferPlan flips that for slugs that have both.
  */
 export function findPlans(root = process.cwd(), { preferPlan = false } = {}) {

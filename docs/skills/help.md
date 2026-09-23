@@ -1,4 +1,4 @@
-# /ak:help
+# /ak-help
 
 ## What it does
 
@@ -8,7 +8,7 @@ It commits to a single answer. A shortlist hands the decision back to the person
 
 ## When to reach for it
 
-You invoke this by typing `/ak:help <what you're trying to do>` — the agent won't reach for it on its own.
+You invoke this by typing `/ak-help <what you're trying to do>` — the agent won't reach for it on its own.
 
 Reach for it when you know the kit has something for this and can't remember which. Most of the set is user-invoked: the agent will never fire those for you, so *you* are the index that has to remember they exist. This skill is that index, externalised.
 
@@ -28,6 +28,6 @@ The table also marks each skill's **invocation**: `model` skills can fire on the
 
 ## Where it fits
 
-The map over the whole set — reach for it any time, and especially early on. Where a second skill is the obvious *next* step it names that too, as a chain rather than an alternative: [`/ak:plan`](plan.md) → [`/ak:commit`](commit.md) → [`/ak:review`](review.md) → [`/ak:pr`](pr.md).
+The map over the whole set — reach for it any time, and especially early on. Where a second skill is the obvious *next* step it names that too, as a chain rather than an alternative: [`/ak-plan`](plan.md) → [`/ak-commit`](commit.md) → [`/ak-review`](review.md) → [`/ak-pr`](pr.md).
 
-The other run-once orientation skill is [`/ak:setup`](setup.md): this one tells you which skill to use, that one tells the skills how this repo works.
+The other run-once orientation skill is [`/ak-setup`](setup.md): this one tells you which skill to use, that one tells the skills how this repo works.

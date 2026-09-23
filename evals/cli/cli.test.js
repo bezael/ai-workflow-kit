@@ -72,18 +72,27 @@ describe('CLI --skills --yes', () => {
   it('copies skill directories to ~/.claude/skills/', () => {
     const dir = path.join(skillsHome, '.claude', 'skills')
     const entries = fs.readdirSync(dir)
-    expect(entries).toContain('commit')
-    expect(entries).toContain('pr')
-    expect(entries).toContain('review')
-    expect(entries).toContain('plan')
-    expect(entries).toContain('debug')
-    expect(entries).toContain('vibe-audit')
-    expect(entries).toContain('memory')
+    expect(entries).toContain('ak-commit')
+    expect(entries).toContain('ak-pr')
+    expect(entries).toContain('ak-review')
+    expect(entries).toContain('ak-plan')
+    expect(entries).toContain('ak-debug')
+    expect(entries).toContain('ak-vibe-audit')
+    expect(entries).toContain('ak-memory')
+  })
+
+  it('names every skill with the ak- prefix, matching its directory', () => {
+    const skillsDir = path.join(skillsHome, '.claude', 'skills')
+    for (const dir of fs.readdirSync(skillsDir)) {
+      const md = fs.readFileSync(path.join(skillsDir, dir, 'SKILL.md'), 'utf8')
+      expect(md).toMatch(new RegExp(`^name: ${dir}$`, 'm'))
+      expect(dir).toMatch(/^ak-[a-z0-9-]+$/)
+    }
   })
 
   it('each skill directory contains SKILL.md', () => {
     const skillsDir = path.join(skillsHome, '.claude', 'skills')
-    for (const name of ['commit', 'pr', 'review', 'plan', 'debug', 'vibe-audit', 'memory']) {
+    for (const name of ['ak-commit', 'ak-pr', 'ak-review', 'ak-plan', 'ak-debug', 'ak-vibe-audit', 'ak-memory']) {
       const skillMd = path.join(skillsDir, name, 'SKILL.md')
       expect(fs.existsSync(skillMd), `${name}/SKILL.md should exist`).toBe(true)
     }
@@ -93,11 +102,19 @@ describe('CLI --skills --yes', () => {
     const dir = path.join(skillsHome, '.claude', 'agents')
     expect(fs.existsSync(dir)).toBe(true)
     const files = fs.readdirSync(dir)
-    expect(files).toContain('frontend.md')
-    expect(files).toContain('api.md')
-    expect(files).toContain('test.md')
-    expect(files).toContain('refactor.md')
-    expect(files).toContain('docs.md')
+    expect(files).toContain('ak-frontend.md')
+    expect(files).toContain('ak-api.md')
+    expect(files).toContain('ak-test.md')
+    expect(files).toContain('ak-refactor.md')
+    expect(files).toContain('ak-docs.md')
+  })
+
+  it('names every agent with the ak- prefix, matching its file', () => {
+    const dir = path.join(skillsHome, '.claude', 'agents')
+    for (const file of fs.readdirSync(dir)) {
+      const md = fs.readFileSync(path.join(dir, file), 'utf8')
+      expect(md).toMatch(new RegExp(`^name: ${path.basename(file, '.md')}$`, 'm'))
+    }
   })
 
   it('does NOT create hooks directory', () => {
@@ -211,8 +228,8 @@ describe('CLI --uninstall', () => {
     const skillsDir = path.join(uninstallHome, '.claude', 'skills')
     if (fs.existsSync(skillsDir)) {
       const entries = fs.readdirSync(skillsDir)
-      expect(entries).not.toContain('commit')
-      expect(entries).not.toContain('pr')
+      expect(entries).not.toContain('ak-commit')
+      expect(entries).not.toContain('ak-pr')
     }
     // If dir doesn't exist, that's also acceptable (fully cleaned up)
   })
@@ -223,6 +240,46 @@ describe('CLI --uninstall', () => {
       const files = fs.readdirSync(hooksDir)
       expect(files).not.toContain('pre-bash-safety.sh')
     }
+  })
+})
+
+describe('CLI upgrade from the ak: names', () => {
+  let upgradeHome, skillsDir, agentsDir
+
+  beforeAll(() => {
+    upgradeHome = fs.mkdtempSync(path.join(os.tmpdir(), 'awk-upgrade-test-'))
+    skillsDir = path.join(upgradeHome, '.claude', 'skills')
+    agentsDir = path.join(upgradeHome, '.claude', 'agents')
+
+    // What a pre-3.0 install left behind
+    fs.mkdirSync(path.join(skillsDir, 'commit'), { recursive: true })
+    fs.writeFileSync(path.join(skillsDir, 'commit', 'SKILL.md'), '---\nname: ak:commit\n---\n')
+    fs.mkdirSync(agentsDir, { recursive: true })
+    fs.writeFileSync(path.join(agentsDir, 'api.md'), '---\nname: ak:api\n---\n')
+
+    // The user's own skill that happens to share a directory name
+    fs.mkdirSync(path.join(skillsDir, 'review'), { recursive: true })
+    fs.writeFileSync(path.join(skillsDir, 'review', 'SKILL.md'), '---\nname: review\n---\n')
+
+    runCLI(['--skills', '--yes'], upgradeHome)
+  })
+
+  afterAll(() => {
+    fs.rmSync(upgradeHome, { recursive: true, force: true })
+  })
+
+  it('removes the kit skill installed under its old name', () => {
+    expect(fs.existsSync(path.join(skillsDir, 'commit'))).toBe(false)
+    expect(fs.existsSync(path.join(skillsDir, 'ak-commit', 'SKILL.md'))).toBe(true)
+  })
+
+  it('removes the kit agent installed under its old name', () => {
+    expect(fs.existsSync(path.join(agentsDir, 'api.md'))).toBe(false)
+    expect(fs.existsSync(path.join(agentsDir, 'ak-api.md'))).toBe(true)
+  })
+
+  it("leaves a user's own same-named skill alone", () => {
+    expect(fs.existsSync(path.join(skillsDir, 'review', 'SKILL.md'))).toBe(true)
   })
 })
 
