@@ -19,7 +19,7 @@ npm i -D ai-workflow-kit@3.0.0
 npx ai-workflow-kit
 ```
 
-Restart your AI tool. You'll have `/ak-ak-api`, `/ak-ak-docs`, `/ak-ak-frontend`, `/ak-ak-refactor`, `/ak-ak-test`, `/ak-commit`, `/ak-debug`, `/ak-execute`, `/ak-handoff`, `/ak-help`, `/ak-memory`, `/ak-plan`, `/ak-pr`, `/ak-review`, `/ak-setup`, `/ak-vibe-audit` available — plus 5 automatic hooks.
+Restart your AI tool. You'll have `/ak-ak-api`, `/ak-ak-docs`, `/ak-ak-frontend`, `/ak-ak-refactor`, `/ak-ak-test`, `/ak-commit`, `/ak-debug`, `/ak-execute`, `/ak-handoff`, `/ak-help`, `/ak-memory`, `/ak-plan`, `/ak-pr`, `/ak-review`, `/ak-setup`, `/ak-vibe-audit` available — plus 6 automatic hooks.
 
 ```bash
 npx ai-workflow-kit --global   # install into ~/.claude/ — all projects (default)
@@ -193,6 +193,7 @@ ai-workflow-kit/
 │   ├── pre-commit-secrets.sh       # Detects API keys before committing
 │   ├── post-write-format.sh        # Auto-formats with Prettier/Biome
 │   ├── post-edit-lint.sh           # Lints after each edit
+│   ├── protect-tests.sh            # Blocks edits to existing tests during a fix
 │   └── notify-done.sh              # Desktop notification when Claude finishes
 └── memory/
     └── project.md                  # Persistent project memory
@@ -238,6 +239,7 @@ Hooks run **automatically** — no activation needed from the dev.
 | `pre-commit-secrets` | Before `git commit` | Scans staged files for API keys and tokens |
 | `post-write-format` | After Write/Edit | Formats with Prettier or Biome automatically |
 | `post-edit-lint` | After Edit | Runs ESLint and returns errors to Claude |
+| `protect-tests` | Before Edit/Write | With `.ak/protect-tests` present, blocks edits to existing test files: fix the code, not the test |
 | `notify-done` | When Claude finishes | Desktop notification (Mac/Linux/Windows) |
 
 See `hooks/README.md` for installation instructions.

@@ -153,6 +153,7 @@ describe('CLI --hooks --yes', () => {
     expect(files).toContain('post-write-format.sh')
     expect(files).toContain('post-edit-lint.sh')
     expect(files).toContain('notify-done.sh')
+    expect(files).toContain('protect-tests.sh')
   })
 
   it('creates settings.json', () => {

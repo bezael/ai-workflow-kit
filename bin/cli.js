@@ -906,13 +906,16 @@ if (selectedHooks.length > 0) {
       if (!existing.hooks) existing.hooks = {}
 
       const newHooks = {
-        PreToolUse: [{
-          matcher: 'Bash',
-          hooks: [
-            { type: 'command', command: `bash ${HOOKS_DST}/pre-bash-safety.sh` },
-            { type: 'command', command: `bash ${HOOKS_DST}/pre-commit-secrets.sh` },
-          ]
-        }],
+        PreToolUse: [
+          {
+            matcher: 'Bash',
+            hooks: [
+              { type: 'command', command: `bash ${HOOKS_DST}/pre-bash-safety.sh` },
+              { type: 'command', command: `bash ${HOOKS_DST}/pre-commit-secrets.sh` },
+            ]
+          },
+          { matcher: 'Edit|Write|MultiEdit|Bash', hooks: [{ type: 'command', command: `bash ${HOOKS_DST}/protect-tests.sh` }] },
+        ],
         PostToolUse: [
           { matcher: 'Write', hooks: [{ type: 'command', command: `bash ${HOOKS_DST}/post-write-format.sh` }] },
           { matcher: 'Edit',  hooks: [

@@ -19,7 +19,7 @@ npm i -D ai-workflow-kit@3.0.0
 npx ai-workflow-kit
 ```
 
-Reinicia tu herramienta de AI. Tendrás disponibles `/ak-ak-api`, `/ak-ak-docs`, `/ak-ak-frontend`, `/ak-ak-refactor`, `/ak-ak-test`, `/ak-commit`, `/ak-debug`, `/ak-execute`, `/ak-handoff`, `/ak-help`, `/ak-memory`, `/ak-plan`, `/ak-pr`, `/ak-review`, `/ak-setup`, `/ak-vibe-audit` — más 5 hooks automáticos.
+Reinicia tu herramienta de AI. Tendrás disponibles `/ak-ak-api`, `/ak-ak-docs`, `/ak-ak-frontend`, `/ak-ak-refactor`, `/ak-ak-test`, `/ak-commit`, `/ak-debug`, `/ak-execute`, `/ak-handoff`, `/ak-help`, `/ak-memory`, `/ak-plan`, `/ak-pr`, `/ak-review`, `/ak-setup`, `/ak-vibe-audit` — más 6 hooks automáticos.
 
 ```bash
 npx ai-workflow-kit --global   # instala en ~/.claude/ — todos los proyectos (por defecto)
@@ -194,6 +194,7 @@ ai-workflow-kit/
 │   ├── pre-commit-secrets.sh       # Detecta API keys antes de commitear
 │   ├── post-write-format.sh        # Auto-formatea con Prettier/Biome
 │   ├── post-edit-lint.sh           # Lintea después de cada edición
+│   ├── protect-tests.sh            # Bloquea editar tests existentes durante un fix
 │   └── notify-done.sh              # Notificación de escritorio cuando Claude termina
 └── memory/
     └── project.md                  # Memoria persistente del proyecto
@@ -239,6 +240,7 @@ Los hooks se ejecutan **automáticamente** — el dev no necesita activarlos.
 | `pre-commit-secrets` | Antes de `git commit` | Escanea archivos staged buscando API keys y tokens |
 | `post-write-format` | Después de Write/Edit | Formatea con Prettier o Biome automáticamente |
 | `post-edit-lint` | Después de Edit | Corre ESLint y devuelve errores a Claude |
+| `protect-tests` | Antes de Edit/Write | Con `.ak/protect-tests`, bloquea editar tests existentes: se arregla el código, no el test |
 | `notify-done` | Cuando Claude termina | Notificación de escritorio (Mac/Linux/Windows) |
 
 Ver `hooks/README.md` para instrucciones de instalación.
