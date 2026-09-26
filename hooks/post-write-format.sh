@@ -7,7 +7,7 @@
 # Input: JSON with the file that was written
 
 INPUT=$(cat)
-FILE=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('file_path',''))" 2>/dev/null)
+FILE=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print((d.get('tool_input') or {}).get('file_path') or d.get('file_path',''))" 2>/dev/null)
 
 if [ -z "$FILE" ]; then
   exit 0

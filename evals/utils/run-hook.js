@@ -19,6 +19,7 @@ const HOOKS_DIR = path.resolve(__dir, '../../hooks')
  * @param {object} payload   - JSON object passed to the hook via stdin
  * @param {object} [options]
  * @param {string} [options.cwd]  - working directory for the hook (default: project root)
+ * @param {object} [options.env]  - extra environment variables for the hook
  * @returns {{ exitCode: number, stdout: string, stderr: string }}
  */
 export function runHook(hookFile, payload, options = {}) {
@@ -29,7 +30,7 @@ export function runHook(hookFile, payload, options = {}) {
     input,
     encoding: 'utf8',
     cwd: options.cwd ?? path.resolve(__dir, '../..'),
-    env: { ...process.env },
+    env: { ...process.env, ...options.env },
   })
 
   return {

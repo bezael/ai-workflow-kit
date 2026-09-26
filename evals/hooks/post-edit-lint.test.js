@@ -1,7 +1,10 @@
 import { describe, it, expect } from 'vitest'
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
 import { runHook } from '../utils/run-hook.js'
 
-const hook = (file_path) => runHook('post-edit-lint.sh', { file_path })
+const hook = (file_path) => runHook('post-edit-lint.sh', { tool_name: 'Edit', tool_input: { file_path } })
 
 describe('post-edit-lint: JS/TS files are linted', () => {
   const lintable = ['src/app.ts', 'src/index.tsx', 'lib/utils.js', 'components/Button.jsx']
@@ -55,5 +58,19 @@ describe('post-edit-lint: empty input', () => {
   it('exits 0 when file_path is missing', () => {
     const r = runHook('post-edit-lint.sh', {})
     expect(r.exitCode).toBe(0)
+  })
+})
+
+describe('post-edit-lint: lint errors reach Claude', () => {
+  it('exits 2 with the ESLint output in stderr when lint fails', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ak-lint-'))
+    const bin = path.join(dir, 'node_modules', '.bin')
+    fs.mkdirSync(bin, { recursive: true })
+    fs.writeFileSync(path.join(bin, 'eslint'), '#!/bin/bash\necho "app.ts: line 1, Error - no-unused-vars"\nexit 1\n')
+    fs.chmodSync(path.join(bin, 'eslint'), 0o755)
+
+    const r = runHook('post-edit-lint.sh', { tool_name: 'Edit', tool_input: { file_path: 'app.ts' } }, { cwd: dir })
+    expect(r.exitCode).toBe(2)
+    expect(r.stderr).toMatch(/no-unused-vars/)
   })
 })

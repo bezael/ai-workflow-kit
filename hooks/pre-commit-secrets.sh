@@ -7,7 +7,7 @@
 # Detected patterns: API keys, tokens, hardcoded passwords, URLs with credentials
 
 INPUT=$(cat)
-COMMAND=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('command',''))" 2>/dev/null)
+COMMAND=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print((d.get('tool_input') or {}).get('command') or d.get('command',''))" 2>/dev/null)
 
 # Only act on git commit commands
 if ! echo "$COMMAND" | grep -q "git commit"; then
@@ -90,7 +90,7 @@ if [ $FOUND_SECRETS -eq 1 ]; then
   echo "  1. Remove the secret from code and use environment variables" >&2
   echo "  2. Add the file to .gitignore if it contains secrets" >&2
   echo "  3. If this is a false positive, review the pattern in hooks/pre-commit-secrets.sh" >&2
-  exit 1
+  exit 2
 fi
 
 exit 0
