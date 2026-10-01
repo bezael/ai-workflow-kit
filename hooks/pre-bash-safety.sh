@@ -5,15 +5,23 @@
 #
 # Installation: see hooks/settings.template.json
 # Input: the command Claude wants to run comes from stdin as JSON
-# Output: exit 0 = allow, exit 1 = block (with error message)
+# Output: exit 0 = allow, exit 2 = block (stderr goes to Claude),
+#         JSON permissionDecision "ask" on stdout = ask the user
 
 # Read JSON input from stdin
 INPUT=$(cat)
-COMMAND=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('command',''))" 2>/dev/null)
+COMMAND=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print((d.get('tool_input') or {}).get('command') or d.get('command',''))" 2>/dev/null)
 
 if [ -z "$COMMAND" ]; then
   exit 0
 fi
+
+# Asks the user to confirm instead of blocking. Exit 0 + stderr is only visible
+# in verbose mode, so the warning must go through a permission decision.
+ask_user() {
+  python3 -c 'import json,sys; print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "ask", "permissionDecisionReason": sys.argv[1]}}))' "$1"
+  exit 0
+}
 
 # ─── ABSOLUTE BLOCK ──────────────────────────────────────────────────────────
 # Commands that must never run without direct human intervention.
@@ -33,7 +41,7 @@ for pattern in "${BLOCKED_PATTERNS[@]}"; do
   if echo "$COMMAND" | grep -qF "$pattern"; then
     echo "BLOCKED: Command contains an irreversible destructive operation: '$pattern'" >&2
     echo "If you need to run this, do it manually in your terminal." >&2
-    exit 1
+    exit 2
   fi
 done
 
@@ -53,11 +61,9 @@ WARN_PATTERNS=(
 
 for pattern in "${WARN_PATTERNS[@]}"; do
   if echo "$COMMAND" | grep -qi "$pattern"; then
-    echo "WARNING: Command contains a high-risk operation: '$pattern'" >&2
-    echo "Review the command before approving it." >&2
-    # Not blocking — just warning. Claude Code will show the warning to the user.
-    # The user can approve or reject in the UI.
-    exit 0
+    # Not blocking — Claude Code shows a permission prompt with this reason.
+    # The user approves or rejects it in the UI.
+    ask_user "WARNING: Command contains a high-risk operation: '$pattern'. Review it before approving."
   fi
 done
 
@@ -74,9 +80,7 @@ SECRET_PATTERNS=(
 
 for pattern in "${SECRET_PATTERNS[@]}"; do
   if echo "$COMMAND" | grep -qE "$pattern"; then
-    echo "WARNING: Command may expose credentials or secrets." >&2
-    echo "Verify you're not logging or exposing sensitive information." >&2
-    exit 0
+    ask_user "WARNING: Command may expose credentials or secrets. Verify you're not logging or exposing sensitive information."
   fi
 done
 

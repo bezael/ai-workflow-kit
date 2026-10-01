@@ -24,6 +24,16 @@
             "command": "bash ~/.claude/hooks/pre-commit-secrets.sh"
           }
         ]
+      },
+      {
+        "_comment": "Protege los tests durante un fix (solo si existe .ak/protect-tests)",
+        "matcher": "Edit|Write|MultiEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/protect-tests.sh"
+          }
+        ]
       }
     ],
 

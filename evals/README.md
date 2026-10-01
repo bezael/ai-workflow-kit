@@ -86,10 +86,11 @@ These test the shell scripts and Node CLI with real subprocess calls — no mock
 
 | Suite | Tests | What it covers |
 |---|---|---|
-| pre-bash-safety | 25 | 7 blocked, 7 warned, 2 secret-detected, 9 safe |
+| pre-bash-safety | 26 | 7 blocked, 7 ask the user, 2 secret-detected, 9 safe, 1 legacy payload |
 | pre-commit-secrets | 12 | 7 blocked (various secret types), 5 allowed (clean/exempt) |
 | post-write-format | 20 | 10 formattable extensions, 8 skipped, 2 empty input |
-| post-edit-lint | 17 | 4 lintable, 5 config files skipped, 6 non-JS skipped, 2 empty |
+| post-edit-lint | 18 | 4 lintable, 5 config files skipped, 6 non-JS skipped, 2 empty, 1 errors reach Claude |
+| protect-tests | 13 | inactive without marker, 6 test-file patterns blocked, new tests and prod code allowed, marker guarded |
 | CLI installer | 21 | --list, --skills, --hooks, --yes, --uninstall, settings merge |
 
 ## LLM evals (3 evals, ~30s, requires API key)

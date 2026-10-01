@@ -11,6 +11,7 @@ The difference between a skills repo and a hooks repo is that hooks **don't requ
 | `pre-commit-secrets.sh` | Before `git commit` | Scans staged files for API keys, tokens, passwords |
 | `post-write-format.sh` | After Write or Edit | Formats the file with Prettier or Biome automatically |
 | `post-edit-lint.sh` | After Edit | Runs ESLint and returns errors for Claude to fix |
+| `protect-tests.sh` | Before Edit/Write/Bash | While `.ak/protect-tests` exists, blocks edits to existing test files (new tests are allowed) |
 | `notify-done.sh` | When Claude finishes | Desktop notification (Mac, Linux, Windows) |
 
 ## Installation
@@ -62,8 +63,10 @@ Each script reads input as JSON from `stdin`. Input structure:
 // PreToolUse / PostToolUse
 {
   "tool_name": "Bash",
-  "command": "git status",       // only for Bash
-  "file_path": "/path/to/file"   // only for Write/Edit
+  "tool_input": {
+    "command": "git status",       // only for Bash
+    "file_path": "/path/to/file"   // only for Write/Edit
+  }
 }
 
 // Stop
@@ -73,8 +76,21 @@ Each script reads input as JSON from `stdin`. Input structure:
 ```
 
 Output:
-- `exit 0` — allow / continue
-- `exit 1` + message in stderr — block + show message to user
+- `exit 0` — allow / continue (stderr is only visible in verbose mode)
+- `exit 2` + message in stderr — block the action and send the message to Claude. In `PostToolUse` the action already ran, so it only sends the message
+- `exit 0` + JSON on stdout with `hookSpecificOutput.permissionDecision: "ask"` — ask the user to confirm (used by `pre-bash-safety` for risky commands)
+- Any other exit code (including `1`) is a non-blocking error: the action runs anyway
+
+## Protecting tests during a fix
+
+`protect-tests.sh` does nothing until you create the marker:
+
+```bash
+mkdir -p .ak && touch .ak/protect-tests   # before the fix
+rm .ak/protect-tests                      # when you're done (Claude can't)
+```
+
+While it exists, Claude can write new test files (the failing test that reproduces the bug) but can't edit existing ones. It has to make them pass by changing the code.
 
 ## Security
 

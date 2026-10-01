@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { runHook } from '../utils/run-hook.js'
 
-const hook = (file_path) => runHook('post-write-format.sh', { file_path })
+const hook = (file_path) => runHook('post-write-format.sh', { tool_name: 'Write', tool_input: { file_path } })
 
 describe('post-write-format: formattable extensions', () => {
   const formattable = ['app.ts', 'Component.tsx', 'index.js', 'utils.jsx', 'styles.css', 'theme.scss', 'data.json', 'config.yaml', 'workflow.yml', 'README.md']

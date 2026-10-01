@@ -7,7 +7,7 @@
 # immediately in the same session and can fix them without dev intervention.
 
 INPUT=$(cat)
-FILE=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('file_path',''))" 2>/dev/null)
+FILE=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print((d.get('tool_input') or {}).get('file_path') or d.get('file_path',''))" 2>/dev/null)
 
 if [ -z "$FILE" ]; then
   exit 0
@@ -42,9 +42,11 @@ LINT_OUTPUT=$($ESLINT_BIN "$FILE" --format compact 2>&1)
 LINT_EXIT=$?
 
 if [ $LINT_EXIT -ne 0 ] && [ -n "$LINT_OUTPUT" ]; then
-  echo "ESLint found issues in $FILE:"
-  echo "$LINT_OUTPUT"
-  # Exit with 0 to not block — Claude will see the output and can fix it
+  echo "ESLint found issues in $FILE:" >&2
+  echo "$LINT_OUTPUT" >&2
+  # In PostToolUse, exit 2 doesn't undo the edit: it sends stderr to Claude so it
+  # can fix the issues. With exit 0 the output would only show in verbose mode.
+  exit 2
 fi
 
 exit 0

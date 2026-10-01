@@ -14,7 +14,7 @@ let tmpRepo
  * Run the hook against the current staged state of tmpRepo.
  * The hook only acts when the command contains "git commit".
  */
-function runHookInRepo(payload = { command: 'git commit -m "test"' }) {
+function runHookInRepo(payload = { tool_name: 'Bash', tool_input: { command: 'git commit -m "test"' } }) {
   const result = spawnSync('bash', [HOOK_PATH], {
     input: JSON.stringify(payload),
     encoding: 'utf8',
@@ -65,7 +65,7 @@ describe('pre-commit-secrets: BLOCKED — secrets detected', () => {
     resetStaged()
     stageFile('config.js', `const key = "sk-abcdefghijklmnopqrstuvwxyz123456789012345678"`)
     const r = runHookInRepo()
-    expect(r.exitCode).toBe(1)
+    expect(r.exitCode).toBe(2)
     expect(r.stderr).toMatch(/BLOCKED/)
   })
 
@@ -73,7 +73,7 @@ describe('pre-commit-secrets: BLOCKED — secrets detected', () => {
     resetStaged()
     stageFile('src/api.ts', `const key = "sk-ant-api03-abcdefghijklmnopqrstuvwxyz1234567890abcdefgh"`)
     const r = runHookInRepo()
-    expect(r.exitCode).toBe(1)
+    expect(r.exitCode).toBe(2)
     expect(r.stderr).toMatch(/BLOCKED/)
   })
 
@@ -81,7 +81,7 @@ describe('pre-commit-secrets: BLOCKED — secrets detected', () => {
     resetStaged()
     stageFile('deploy.js', `const key = "AKIAIOSFODNN7EXAMPLE"`)
     const r = runHookInRepo()
-    expect(r.exitCode).toBe(1)
+    expect(r.exitCode).toBe(2)
     expect(r.stderr).toMatch(/BLOCKED/)
   })
 
@@ -89,7 +89,7 @@ describe('pre-commit-secrets: BLOCKED — secrets detected', () => {
     resetStaged()
     stageFile('db.js', `const password = "supersecretpassword123"`)
     const r = runHookInRepo()
-    expect(r.exitCode).toBe(1)
+    expect(r.exitCode).toBe(2)
     expect(r.stderr).toMatch(/BLOCKED/)
   })
 
@@ -97,7 +97,7 @@ describe('pre-commit-secrets: BLOCKED — secrets detected', () => {
     resetStaged()
     stageFile('config.js', `const url = "https://admin:password123@mydb.example.com"`)
     const r = runHookInRepo()
-    expect(r.exitCode).toBe(1)
+    expect(r.exitCode).toBe(2)
     expect(r.stderr).toMatch(/BLOCKED/)
   })
 
@@ -105,7 +105,7 @@ describe('pre-commit-secrets: BLOCKED — secrets detected', () => {
     resetStaged()
     stageFile('db.js', `const uri = "mongodb://root:secret@mongo.example.com:27017/mydb"`)
     const r = runHookInRepo()
-    expect(r.exitCode).toBe(1)
+    expect(r.exitCode).toBe(2)
     expect(r.stderr).toMatch(/BLOCKED/)
   })
 
@@ -113,7 +113,7 @@ describe('pre-commit-secrets: BLOCKED — secrets detected', () => {
     resetStaged()
     stageFile('key.pem', '-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA...\n-----END RSA PRIVATE KEY-----')
     const r = runHookInRepo()
-    expect(r.exitCode).toBe(1)
+    expect(r.exitCode).toBe(2)
     expect(r.stderr).toMatch(/BLOCKED/)
   })
 })
@@ -154,7 +154,7 @@ describe('pre-commit-secrets: ALLOWED — clean or exempt files', () => {
     resetStaged()
     stageFile('src/index.js', `const key = "sk-abcdefghijklmnopqrstuvwxyz1234567890"`)
     // Pass a non-commit command — hook should exit 0 without scanning
-    const r = runHookInRepo({ command: 'git status' })
+    const r = runHookInRepo({ tool_name: 'Bash', tool_input: { command: 'git status' } })
     expect(r.exitCode).toBe(0)
   })
 })
