@@ -5,6 +5,14 @@ on:
     tags:
       - 'v*'
 
+# Trusted publishing: npm exchanges the GitHub OIDC token for a short-lived
+# publish credential, so there is no NPM_TOKEN secret to expire or leak, and
+# provenance is attached automatically. Requires the trusted publisher to be
+# configured on npmjs.com for this repo and this workflow file.
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   publish:
     name: Publish
@@ -18,7 +26,13 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
+      # Trusted publishing needs npm >= 11.5.1.
+      - run: npm install -g npm@^11.5.1
+
       - run: npm ci
+
+      # A tag on a broken commit must not reach the registry.
+      - run: npm test
 
       - name: Set dist-tag
         id: tag
@@ -30,5 +44,3 @@ jobs:
           fi
 
       - run: npm publish --access public --tag ${{ steps.tag.outputs.dist_tag }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

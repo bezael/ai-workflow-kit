@@ -6,6 +6,20 @@
   "bin": {
     "ai-workflow-kit": "./bin/cli.js"
   },
+  "files": [
+    "bin/",
+    "skills/",
+    "agents/",
+    "hooks/",
+    "antigravity-skills/",
+    "codex-prompts/",
+    "templates/",
+    "src/manifest.json",
+    ".cursorrules",
+    ".github/copilot-instructions.md",
+    "README.es.md",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "start": "npx node bin/cli.js",
     "build": "node scripts/build-skills.js && node scripts/sync-docs.js",
