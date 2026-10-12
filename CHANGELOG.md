@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [3.1.0] - 2026-10-12
+
+### Added
+- **hooks**: `protect-tests` — while `.ak/protect-tests` exists, Claude can create new test files but cannot edit existing ones, nor touch the marker from Bash, so a fix has to make the test pass by changing the code, not the test. Wired into `settings.template.json` and the CLI installer, documented in `hooks/README.md`.
+
+### Fixed
+- **hooks**: `pre-bash-safety` and `pre-commit-secrets` let everything through. Claude Code sends the command and file path under `tool_input` and only exit 2 blocks; the hooks read top-level fields and exited 1. They now read `tool_input.command` / `tool_input.file_path` (top-level kept as a fallback) and block with exit 2. Risky commands ask the user through `permissionDecision: "ask"` instead of a stderr warning nobody saw, and `post-edit-lint` sends ESLint errors back to Claude with exit 2. The tests now use the real payload shape — the old ones passed against the same wrong one.
+
 ### Changed
 - The npm package now ships only what the installer reads (`files` whitelist): 115 kB instead of 711 kB, without the banner image, evals, specs or repo memory.
 - Releases publish through npm trusted publishing (OIDC) with provenance instead of an `NPM_TOKEN` secret, and run `npm test` before publishing.
