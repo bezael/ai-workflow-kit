@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- The npm package now ships only what the installer reads (`files` whitelist): 115 kB instead of 711 kB, without the banner image, evals, specs or repo memory.
+- Releases publish through npm trusted publishing (OIDC) with provenance instead of an `NPM_TOKEN` secret, and run `npm test` before publishing.
+
 ---
 
 ## [3.0.0] - 2026-09-23
