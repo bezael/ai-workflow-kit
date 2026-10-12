@@ -19,7 +19,7 @@ npm i -D ai-workflow-kit@3.1.0
 npx ai-workflow-kit
 ```
 
-Reinicia tu herramienta de AI. Tendrás disponibles `/ak-ak-api`, `/ak-ak-docs`, `/ak-ak-frontend`, `/ak-ak-refactor`, `/ak-ak-test`, `/ak-commit`, `/ak-debug`, `/ak-execute`, `/ak-handoff`, `/ak-help`, `/ak-memory`, `/ak-plan`, `/ak-pr`, `/ak-review`, `/ak-setup`, `/ak-vibe-audit` — más 6 hooks automáticos.
+Reinicia tu herramienta de AI. Tendrás disponibles `/ak-api`, `/ak-commit`, `/ak-debug`, `/ak-docs`, `/ak-execute`, `/ak-frontend`, `/ak-handoff`, `/ak-help`, `/ak-memory`, `/ak-plan`, `/ak-pr`, `/ak-refactor`, `/ak-review`, `/ak-setup`, `/ak-test`, `/ak-vibe-audit` — más 6 hooks automáticos.
 
 ```bash
 npx ai-workflow-kit --global   # instala en ~/.claude/ — todos los proyectos (por defecto)
