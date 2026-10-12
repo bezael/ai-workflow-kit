@@ -60,8 +60,11 @@ function commandList() {
     .filter(s => s.status !== 'deprecated')
     .map(s => s.name)
   const agentsDir = path.join(REPO_ROOT, 'agents')
+  // Agent directories already carry the prefix (agents/ak-api/); skill names don't.
   const agents = fs.existsSync(agentsDir)
-    ? fs.readdirSync(agentsDir).filter(e => fs.statSync(path.join(agentsDir, e)).isDirectory())
+    ? fs.readdirSync(agentsDir)
+      .filter(e => fs.statSync(path.join(agentsDir, e)).isDirectory())
+      .map(e => e.replace(/^ak-/, ''))
     : []
   return [...skills, ...agents].sort().map(n => `\`/ak-${n}\``).join(', ')
 }
