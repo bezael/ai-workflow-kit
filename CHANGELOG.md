@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [3.3.0] - 2026-10-21
+
 ### Added
 - **verify**: `--final` also runs the short and long loop of a CBRM lane in `AGENTS.md` (the harness `dominicode-harness-init` from bezael/sdd-creator writes). A command already in `.ak/config.md` runs once, and one annotated `known red` is reported as `KNOWN RED` without failing the verification. The summary names each lane command.
 - **setup**: a CBRM lane in `AGENTS.md` is read as a source of verified commands and mapped into `## Commands`; `AGENTS.md` is never written.
@@ -201,7 +205,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Eval framework with Vitest + LLM-based evals via Anthropic SDK
 - Spanish README (`README.es.md`)[1.1.0]: https://github.com/bezael/ai-workflow-kit/compare/...v1.1.0[2.0.0]: https://github.com/bezael/ai-workflow-kit/compare/v1.1.0...v2.0.0
 [2.2.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.1.0...v2.2.0
-[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v3.3.0...HEAD
+[3.3.0]: https://github.com/bezael/ai-workflow-kit/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/bezael/ai-workflow-kit/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/bezael/ai-workflow-kit/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.6.0...v3.0.0
