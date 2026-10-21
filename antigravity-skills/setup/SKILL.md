@@ -19,7 +19,7 @@ Every question you ask is one the user has already answered somewhere in the rep
 | Git host | `git remote get-url origin` |
 | `gh` available and authenticated | `gh auth status` |
 | Package manager | the lockfile — `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lockb` |
-| Test / lint / build commands | `scripts` in `package.json`; otherwise `Makefile`, `justfile`, `pyproject.toml`, `Cargo.toml`, `go.mod` |
+| Test / lint / build commands | a CBRM lane in `AGENTS.md` first (see below); then `scripts` in `package.json`; otherwise `Makefile`, `justfile`, `pyproject.toml`, `Cargo.toml`, `go.mod` |
 | E2E command | a Playwright/Cypress config or an `e2e`/`test:e2e` script |
 | Formatter | a Prettier/Biome config, or the `format` script |
 | Commit convention | `git log --oneline -30` — do the subjects match `type(scope): …`? |
@@ -35,6 +35,14 @@ confirm, drop or add. They know that `src/billing/` is dead code and that
 `packages/ledger/` is where the money moves — the directory name is a
 starting point, not a verdict. If nothing matched, ask once whether there is
 a path a reviewer must never skim; record `none` if the answer is no.
+
+### A repo that already has a CBRM lane
+
+If `AGENTS.md` has `#### Short loop` and `#### Long loop` blocks, the repo was prepared with the Contract Based Review Method (`dominicode-harness-init` from `bezael/sdd-creator`), and those commands were run when the lane was written. Use them:
+
+- Map each one to its `## Commands` key — the test runner to `Test`, the linter to `Lint`, the type checker to `Typecheck`, the build to `Build`, the end-to-end suite to `E2E`. A command that fits no key stays only in the lane: `npx ai-workflow-kit verify --final` runs the lane too.
+- A command annotated `known red` keeps the annotation in your report; record it, the lane already says why it fails.
+- Never write `AGENTS.md`. The lane belongs to harness-init; if it looks wrong, say so and leave it.
 
 ## Verify before recording
 
@@ -87,8 +95,9 @@ Drop any section where everything is unknown. A short honest file beats a long s
 
 `## Commands` is more than prose: `npx ai-workflow-kit verify <slug> --final`
 executes the `Test` / `Lint` / `Typecheck` / `Build` / `E2E` entries as the
-global checks of a final verification, skipping any marked `unknown`. What you
-record here is what the harness will actually run.
+global checks of a final verification, skipping any marked `unknown`, then
+the lane's loops from `AGENTS.md` if there is one (a command in both runs
+once). What you record here is what the harness will actually run.
 
 `## Review` is read the same way: `npx ai-workflow-kit risk --focus` marks
 every file matching a `Sensitive paths` glob as HIGH review need, whatever its

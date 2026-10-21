@@ -47,10 +47,12 @@ An existing `.ak/config.md` is read and updated, never overwritten. If you hand-
 | [`/ak-execute`](execute.md) | the real commands a task's evidence runs against |
 | [`/ak-review`](review.md) | base branch to diff against; lint and typecheck commands |
 | [`/ak-debug`](debug.md) | the test command, as the fastest route to a red loop |
-| `verify --final` | the `Test` / `Lint` / `Typecheck` / `Build` / `E2E` entries under `## Commands`, executed as the global checks |
+| `verify --final` | the `Test` / `Lint` / `Typecheck` / `Build` / `E2E` entries under `## Commands`, executed as the global checks (plus the AGENTS.md lane, if any) |
 | `risk --focus` | the `Sensitive paths` globs under `## Review` — any changed file matching one is HIGH review need whatever its history; [`/ak-review`](review.md) starts its deep pass there too |
 
-Each of those falls back to a sensible default without the file. The defaults are right often enough to be dangerous and wrong often enough to matter, which is the argument for running this once.
+Each of those falls back to a sensible default without the file.
+
+**A repo prepared with CBRM.** If `AGENTS.md` has the lane `dominicode-harness-init` writes (`#### Short loop` / `#### Long loop`), setup takes its commands as already verified and maps them into `## Commands`. It never writes `AGENTS.md`: the lane belongs to harness-init. The two formats are compatible both ways — sdd-creator's verified-done check reads `.ak/config.md` when a repo has no lane. The defaults are right often enough to be dangerous and wrong often enough to matter, which is the argument for running this once.
 
 The last two rows are the ones that make the file a contract rather than prose: `npx ai-workflow-kit verify <slug> --final` executes the `## Commands` entries directly, skipping any marked `unknown`, and `npx ai-workflow-kit risk --focus` matches the `## Review` globs against every changed file. What the file records is what the harness runs.
 

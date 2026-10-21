@@ -64,22 +64,98 @@ Antigravity's global root moved from `~/.gemini/antigravity/` to `~/.gemini/conf
 /ak-handoff implement auth in the next session
 ```
 
-## Project conventions
+The repo follows the Contract Based Review Method (CBRM by Bezael Pérez · Dominicode) with its own tools: the next three sections are its **Contract**, **Lane** and **Verdict**. `.ak/config.md` records the same commands for the `/ak-` skills and `npx ai-workflow-kit verify --final`.
+
+## Contract
+
+Work starts from a contract, never from a vague request. The contract is the list of acceptance criteria for the change, and each criterion has the command that proves it.
+
+- **Where the contract lives:** `specs/<slug>/plan.md` (`/ak-plan`) or `specs/<slug>/tasks.md` (SDD), each step with its `Verify:` command. For a skill, the `contract:` and `acceptance:` fields of `src/skills/<id>.md` are part of it.
+- **No contract, no code.** If the change has no acceptance criteria, write them and get them approved before touching code.
+- **The contract is the only source of scope.** If implementing it requires a decision the contract does not make, stop and update the contract first.
+- **Before proposing a feature, check [`.out-of-scope/`](.out-of-scope/README.md).** It holds one file per thing this repo has decided not to build, with the reasoning — so a settled decision isn't re-litigated. A request declined on design grounds gets a new file there.
+
+A change is done when:
+
+1. Every acceptance criterion has evidence: which command proves it and what its output was (`npx ai-workflow-kit verify <slug> --final` runs them all).
+2. The short loop and the long loop of the Lane pass, with no new reds.
+3. The diff contains nothing the contract did not request.
+
+## Lane
+
+The lane is where the agent is allowed to work and the harness it uses to check itself. Leaving the lane requires explicit permission.
+
+### Stack
+
+- **Language:** JavaScript ESM (`bin/`, `scripts/`), Bash (`hooks/`), TypeScript loaded by Pi (`pi/extensions/`), Markdown + YAML (`src/skills/`)
+- **Package manager:** npm — derived from `package-lock.json`. Do not use another.
+- **Runtime / version:** Node 24 in CI
+- **Tests:** Vitest (`evals/hooks`, `evals/cli`, `evals/pi`); LLM skill evals in `evals/run-evals.js`
+
+### Harness
+
+These commands have been run and checked. If one fails, the work is not done.
+
+#### Short loop — after every change
+
+```bash
+npm test   # 28s: build:check (drift + eval coverage), then the Vitest suites
+```
+
+#### Long loop — before opening the PR
+
+```bash
+npm test   # 28s
+```
+
+CI runs `npm run build:check` and `npm test` on every PR. The LLM skill evals (`npm run eval`) are not in either loop: they need `ANTHROPIC_API_KEY` and spend real tokens. Run them by hand, or through the Evals workflow's `run_llm_evals` input, when the contract changes a skill's prompt.
+
+#### Known reds
+
+None. The entire harness is green as of 2026-10-21.
+
+### Conventions
 
 - Commits: Conventional Commits (`feat:`, `fix:`, `chore:`, `refactor:`)
-- PRs: always with description + test plan
+- PRs: always with description + test plan, closing with the Verdict below
 - Tests: before merge, not after
 - Code language: English. Comments: English.
+- A skill is edited in `src/skills/<id>.md` only, then `npm run build`; the distributions are generated (see the top of this file).
 
-**Before proposing a feature, check [`.out-of-scope/`](.out-of-scope/README.md).** It holds one file per thing this repo has decided not to build, with the reasoning — so a settled decision isn't re-litigated. A request declined on design grounds gets a new file there.
+### Boundaries
 
-## Default stack
+What the agent must not touch without explicit permission:
 
-Adapt this section to your real project. Example:
-- Frontend: React + TypeScript + Tailwind
-- Backend: Node.js / Express
-- Tests: Vitest / Jest
-- CI/CD: GitHub Actions
+- Files outside the change scope declared in the contract
+- Generated files by hand: `skills/`, `antigravity-skills/`, `codex-prompts/`, `pi/skills/`
+- `hooks/*.sh`: they are safety guardrails for every user of the kit
+- `.github/workflows/`, `scripts/release.js` and the release flow (version bumps, tags, `CHANGELOG.md` release headings)
+- Dependencies: do not add or update packages without asking first
+- A decision recorded in `.out-of-scope/`
+- Secrets, `.env` files, and credentials
+
+## Verdict
+
+The verdict is what the reviewer reads instead of the diff. The agent does not say "done"; it delivers a verdict, and the verdict is only as good as its evidence. `/ak-review` emits the alignment part.
+
+```markdown
+Status: PASS | CHANGES REQUIRED
+Alignment: Exact | Tangling | Missing | Missing and Tangling
+
+| # | Acceptance criterion | Status | Evidence |
+|---|----------------------|--------|----------|
+| 1 | ...                  | PASS   | `command` -> output |
+
+Long loop: {{summarized output}}
+New reds: none | {{list}}
+Out-of-scope changes: none | {{list with justification}}
+Not run: none | {{checks that were not executed, and why}}
+```
+
+- **Exact**: the change covers every criterion and nothing else. **Tangling**: it includes code no criterion asks for. **Missing**: a criterion is not satisfied. **Missing and Tangling**: both.
+- Only `Exact` can be `PASS`, unless the deviation was accepted and written into the contract first.
+- A check that was not executed is reported as *not run*, never as PASS. LLM evals not run on a prompt change go here.
+- The reviewer inspects the diff only where the verdict is red or the evidence is missing.
 
 ## Project memory
 

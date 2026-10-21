@@ -53,7 +53,7 @@ When the last box is ticked:
 npx ai-workflow-kit verify <slug> --final
 ```
 
-re-runs every task's Verify (catching regressions) plus the Test / Lint / Typecheck / Build / E2E commands recorded in `.ak/config.md`. Only `Result: PASS` earns "done".
+re-runs every task's Verify (catching regressions) plus the Test / Lint / Typecheck / Build / E2E commands recorded in `.ak/config.md` and, in a repo prepared with CBRM, the short and long loop of the lane in `AGENTS.md`. Only `Result: PASS` earns "done".
 
 ## Cross-tool notes
 

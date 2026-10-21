@@ -14,7 +14,8 @@
  *     --all       run every remaining step, stopping at the first failure
  *     --recheck   re-run already-ticked steps to catch regressions
  *     --final     re-run every step's Verify plus the global checks recorded
- *                 in .ak/config.md (Test/Lint/Typecheck/Build/E2E); read-only
+ *                 in .ak/config.md (Test/Lint/Typecheck/Build/E2E) and the
+ *                 short and long loop of a CBRM lane in AGENTS.md; read-only
  *     --plan      prefer plan.md when tasks.md also exists
  *     --dry-run   print what would run, execute nothing
  *     --yes / -y  don't prompt before executing
@@ -126,6 +127,53 @@ export function parseConfigCommands(root = process.cwd()) {
   return found.sort((a, b) => CONFIG_KEYS.indexOf(a.key) - CONFIG_KEYS.indexOf(b.key))
 }
 
+// ─── CBRM lane (AGENTS.md) ───────────────────────────────────────────────────
+
+/**
+ * The commands of the first fenced block under a heading that names `loop`
+ * ("Short loop", "Long loop") — the harness block dominicode-harness-init
+ * (bezael/sdd-creator) writes into AGENTS.md. Comment lines and blank lines
+ * are skipped; a trailing `# comment` is dropped, and one that says
+ * "known red" marks a command that fails for reasons predating the agent.
+ * The same parser lives in sdd-creator's verified-done-core.mjs.
+ */
+export function parseLaneLoop(markdown, loop) {
+  const lines = markdown.split(/\r?\n/)
+  const heading = lines.findIndex(l => new RegExp(`^#{1,6}\\s+${loop}\\b`, 'i').test(l))
+  if (heading === -1) return []
+
+  let i = heading + 1
+  while (i < lines.length && !lines[i].startsWith('```')) {
+    if (/^#{1,6}\s/.test(lines[i])) return [] // next section before any code block
+    i++
+  }
+
+  const commands = []
+  for (i++; i < lines.length && !lines[i].startsWith('```'); i++) {
+    const line = lines[i].trim()
+    if (!line || line.startsWith('#')) continue
+    const comment = line.match(/\s+#\s.*$/)
+    commands.push({
+      command: comment ? line.slice(0, comment.index).trim() : line,
+      knownRed: comment ? /known red/i.test(comment[0]) : false,
+    })
+  }
+  return commands
+}
+
+/**
+ * Both loops of the lane in AGENTS.md, short first, each command once. CBRM's
+ * definition of done asks for both, and they usually share commands.
+ */
+export function parseLaneCommands(root = process.cwd()) {
+  const file = path.join(root, 'AGENTS.md')
+  if (!fs.existsSync(file)) return []
+  const markdown = fs.readFileSync(file, 'utf8')
+  const seen = new Set()
+  return [...parseLaneLoop(markdown, 'short loop'), ...parseLaneLoop(markdown, 'long loop')]
+    .filter(c => !seen.has(c.command) && seen.add(c.command))
+}
+
 // ─── Spec discovery ──────────────────────────────────────────────────────────
 
 /**
@@ -233,18 +281,22 @@ async function runFinal(plan, root, { DRY, YES }) {
 
   const checkable    = steps.filter(s => s.verify)
   const unverifiable = steps.filter(s => !s.verify)
-  const globals      = parseConfigCommands(root)
+  const config       = parseConfigCommands(root)
+  const lane         = parseLaneCommands(root)
+    .filter(l => !config.some(g => g.command === l.command))
+    .map(l => ({ key: 'Lane', command: l.command, knownRed: l.knownRed }))
+  const globals      = [...config, ...lane]
 
   console.log()
   console.log(`${c.bold}  ${plan.slug}${c.reset}  ${c.dim}${path.relative(root, plan.file).replaceAll('\\', '/')}${c.reset}`)
-  info(`Final verification: ${checkable.length} task check(s) + ${globals.length} global check(s) from .ak/config.md`)
+  info(`Final verification: ${checkable.length} task check(s) + ${config.length} global check(s) from .ak/config.md + ${lane.length} from the AGENTS.md lane`)
   if (unverifiable.length > 0) {
     warn(`${unverifiable.length} step(s) have no \`Verify:\` command and cannot be machine-checked.`)
   }
   console.log()
 
   if (checkable.length === 0 && globals.length === 0) {
-    fail('Nothing verifiable — no `Verify:` lines and no .ak/config.md commands.')
+    fail('Nothing verifiable — no `Verify:` lines, no .ak/config.md commands and no AGENTS.md lane.')
     return 1
   }
 
@@ -292,13 +344,15 @@ async function runFinal(plan, root, { DRY, YES }) {
     console.log()
     const passed = runCommand(g.command, root)
     console.log()
-    globalResults.push({ key: g.key, passed })
-    if (passed) ok('PASS'); else fail('FAIL')
+    globalResults.push({ key: g.key, command: g.command, passed, knownRed: Boolean(g.knownRed) })
+    if (passed) ok('PASS')
+    else if (g.knownRed) warn('FAIL — known red in the lane, does not fail the verification')
+    else fail('FAIL')
     console.log()
   }
 
   // Summary
-  const allPassed = taskFail === 0 && globalResults.every(r => r.passed)
+  const allPassed = taskFail === 0 && globalResults.every(r => r.passed || r.knownRed)
   const pad = (s) => s.padEnd(12)
 
   console.log(`${c.bold}  Final Verification${c.reset}`)
@@ -306,7 +360,9 @@ async function runFinal(plan, root, { DRY, YES }) {
   const tasksNote = unverifiable.length > 0 ? ` ${c.dim}(${unverifiable.length} unverifiable skipped)${c.reset}` : ''
   console.log(`  ${pad('Tasks')}${taskPass}/${checkable.length} ${taskFail === 0 ? `${c.green}PASS${c.reset}` : `${c.red}FAIL${c.reset}`}${tasksNote}`)
   for (const r of globalResults) {
-    console.log(`  ${pad(r.key)}${r.passed ? `${c.green}PASS${c.reset}` : `${c.red}FAIL${c.reset}`}`)
+    const verdict = r.passed ? `${c.green}PASS${c.reset}` : r.knownRed ? `${c.yellow}KNOWN RED${c.reset}` : `${c.red}FAIL${c.reset}`
+    const what = r.key === 'Lane' ? ` ${c.dim}${r.command}${c.reset}` : ''
+    console.log(`  ${pad(r.key)}${verdict}${what}`)
   }
   if (regressions > 0) console.log(`  ${pad('Regressions')}${c.red}${regressions}${c.reset}`)
   console.log()

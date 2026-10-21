@@ -12,7 +12,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
-import { findPlans, parseConfigCommands, runVerify } from '../../bin/plan-verify.js'
+import { findPlans, parseConfigCommands, parseLaneCommands, runVerify } from '../../bin/plan-verify.js'
 
 let root
 
@@ -205,6 +205,60 @@ describe('parseConfigCommands', () => {
   })
 })
 
+// ─── CBRM lane (AGENTS.md) ───────────────────────────────────────────────────
+
+const FENCE = '```'
+
+// The harness block dominicode-harness-init writes into AGENTS.md.
+const LANE = `# Demo
+
+## Lane
+
+#### Short loop — after every change
+
+${FENCE}bash
+# comments and blank lines are skipped
+
+true            # 1s
+npm run lint    # 2s, known red: 3 of 120
+${FENCE}
+
+#### Long loop — before opening the PR
+
+${FENCE}bash
+true            # 1s
+node build.js   # 9s
+${FENCE}
+
+#### Known reds
+
+None.
+`
+
+const laneWith = (...commands) => `#### Short loop\n\n${FENCE}bash\n${commands.join('\n')}\n${FENCE}\n`
+
+describe('parseLaneCommands', () => {
+  it('reads both loops, drops duplicates and comments, and flags known reds', () => {
+    write('AGENTS.md', LANE)
+    expect(parseLaneCommands(root)).toEqual([
+      { command: 'true', knownRed: false },
+      { command: 'npm run lint', knownRed: true },
+      { command: 'node build.js', knownRed: false },
+    ])
+  })
+
+  it('returns nothing without AGENTS.md or without a loop section', () => {
+    expect(parseLaneCommands(root)).toEqual([])
+    write('AGENTS.md', `# Demo\n\n${FENCE}bash\nnpm test\n${FENCE}\n`)
+    expect(parseLaneCommands(root)).toEqual([])
+  })
+
+  it('keeps a # that is part of the command', () => {
+    write('AGENTS.md', laneWith("grep -c '#' notes.txt"))
+    expect(parseLaneCommands(root)).toEqual([{ command: "grep -c '#' notes.txt", knownRed: false }])
+  })
+})
+
 // ─── Final verification ──────────────────────────────────────────────────────
 
 describe('runVerify --final', () => {
@@ -263,6 +317,43 @@ describe('runVerify --final', () => {
   it('executes nothing on a dry run', async () => {
     write('specs/foo/tasks.md', DONE_TASKS.replace('Verify: `true`', 'Verify: `false`'))
     expect(await runVerify(['foo', '--final', '--dry-run'], { root })).toBe(0)
+  })
+
+  // Appends a line to runs.txt every time it runs, to count executions.
+  const COUNT = `node -e "require('fs').appendFileSync('runs.txt', 'x')"`
+
+  it('runs the AGENTS.md lane as global checks', async () => {
+    write('specs/foo/tasks.md', DONE_TASKS)
+    write('AGENTS.md', laneWith(COUNT))
+    expect(await runVerify(['foo', '--final', '--yes'], { root })).toBe(0)
+    expect(read('runs.txt')).toBe('x')
+  })
+
+  it('fails when a lane command fails', async () => {
+    write('specs/foo/tasks.md', DONE_TASKS)
+    write('AGENTS.md', laneWith('false'))
+    expect(await runVerify(['foo', '--final', '--yes'], { root })).toBe(1)
+  })
+
+  it('does not fail on a lane command marked known red', async () => {
+    write('specs/foo/tasks.md', DONE_TASKS)
+    write('AGENTS.md', laneWith('false   # 2s, known red: 1 of 40'))
+    expect(await runVerify(['foo', '--final', '--yes'], { root })).toBe(0)
+  })
+
+  it('runs a command listed in both .ak/config.md and the lane once', async () => {
+    write('specs/foo/tasks.md', DONE_TASKS)
+    write('.ak/config.md', `## Commands\n- Test: ${COUNT}\n`)
+    write('AGENTS.md', laneWith(COUNT))
+    expect(await runVerify(['foo', '--final', '--yes'], { root })).toBe(0)
+    expect(read('runs.txt')).toBe('x')
+  })
+
+  it('lists the lane on a dry run without executing it', async () => {
+    write('specs/foo/tasks.md', DONE_TASKS)
+    write('AGENTS.md', laneWith(COUNT))
+    expect(await runVerify(['foo', '--final', '--dry-run'], { root })).toBe(0)
+    expect(fs.existsSync(path.join(root, 'runs.txt'))).toBe(false)
   })
 
   it('fails when nothing at all is verifiable', async () => {
