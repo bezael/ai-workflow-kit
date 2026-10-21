@@ -7,6 +7,7 @@
  *   skills/ak-<id>/SKILL.md         Claude Code
  *   antigravity-skills/<id>/SKILL.md  Google Antigravity
  *   codex-prompts/ak-<id>.md        OpenAI Codex
+ *   pi/skills/ak-<id>/SKILL.md      Pi (plus agents/<name>/AGENT.md as skills)
  *
  * The generated files are committed, because the installers read them
  * directly. `--check` re-renders and fails if anything drifted — that's the
@@ -109,6 +110,56 @@ const TARGETS = {
       '```',
     ].join('\n'),
   },
+
+  pi: {
+    out: (id) => path.join(REPO_ROOT, 'pi', 'skills', `ak-${id}`, 'SKILL.md'),
+    invoke: (spec) => `/skill:ak-${spec.name}`,
+    // Pi has no argument placeholder in skills: whatever follows
+    // `/skill:<name>` is appended to the instructions as a user request.
+    args: null,
+    severity: { critical: '🔴 Critical', important: '🟡 Important', suggestion: '🔵 Suggestion', improvement: '🔵 Improvements', good: '✅ What\'s good' },
+    // Pi implements the Agent Skills spec, which honours
+    // `disable-model-invocation` the same way Claude Code does.
+    frontmatter: (spec) => ({
+      name: `ak-${spec.name}`,
+      description: spec.description,
+      ...(spec.invocation === 'user' ? { 'disable-model-invocation': true } : {}),
+    }),
+    // No inline shell execution — describe the commands instead.
+    context: (ctx) => [
+      '## Context to gather first',
+      '',
+      'Run these commands and read their output before starting:',
+      '',
+      '```bash',
+      ...ctx.map(c => `${c.command}   # ${c.label}`),
+      '```',
+    ].join('\n'),
+    // Skill bodies name their siblings as `/ak-<name>`, the Claude Code and
+    // Codex command. In Pi that command is `/skill:ak-<name>`. Paths such as
+    // `skills/ak-x` are left alone: the character before the slash is a letter.
+    rewrite: (text) => text.replace(/(^|[^\w:/.])\/ak-([a-z][a-z-]*)/g, '$1/skill:ak-$2'),
+  },
+}
+
+const rewriteFor = (target) => target.rewrite ?? ((text) => text)
+
+// Pi has no subagents, so each Claude Code agent (agents/<name>/AGENT.md) ships
+// to Pi as a model-invoked skill with the same body. Only `name` and
+// `description` survive: model, tools, permissionMode and memory are Claude
+// Code agent settings with no Pi equivalent.
+const AGENTS_DIR = path.join(REPO_ROOT, 'agents')
+const piAgentOut = (name) => path.join(REPO_ROOT, 'pi', 'skills', name, 'SKILL.md')
+
+function renderPiAgent(raw, label) {
+  const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
+  if (!m) throw new Error(`${label}: missing YAML frontmatter`)
+  const field = (k) => m[1].match(new RegExp(`^${k}:\\s*(.+)$`, 'm'))?.[1].trim()
+  const name = field('name')
+  const description = field('description')
+  if (!name || !description) throw new Error(`${label}: needs \`name\` and \`description\``)
+  const text = `${renderFrontmatter({ name, description })}\n\n${m[2].replace(/^\n+/, '').trimEnd()}\n`
+  return { name, text: TARGETS.pi.rewrite(text) }
 }
 
 // ─── Rendering ───────────────────────────────────────────────────────────────
@@ -198,7 +249,7 @@ function statusBanner(spec, target) {
 
 function render(spec, body, target, catalogue) {
   const fm = renderFrontmatter(target.frontmatter(spec))
-  return `${fm}\n\n${renderBody(body, spec, target, catalogue)}`
+  return rewriteFor(target)(`${fm}\n\n${renderBody(body, spec, target, catalogue)}`)
 }
 
 /**
@@ -269,7 +320,7 @@ function build() {
         const to   = target.asset
           ? target.asset(spec.id, asset)
           : path.join(path.dirname(dst), asset)
-        const want = fs.readFileSync(from, 'utf8')
+        const want = rewriteFor(target)(fs.readFileSync(from, 'utf8'))
         const have = fs.existsSync(to) ? fs.readFileSync(to, 'utf8') : null
 
         if (CHECK) {
@@ -297,6 +348,23 @@ function build() {
     const acc = resolveAcceptance(spec)
     if (acc.pending) coverage.pending.push(`${spec.id} — ${acc.pending}`)
     else coverage.covered.push(spec.id)
+  }
+
+  for (const dir of fs.existsSync(AGENTS_DIR) ? fs.readdirSync(AGENTS_DIR).sort() : []) {
+    const src = path.join(AGENTS_DIR, dir, 'AGENT.md')
+    if (!fs.existsSync(src)) continue
+    const { name, text } = renderPiAgent(fs.readFileSync(src, 'utf8'), `agents/${dir}/AGENT.md`)
+    const dst  = piAgentOut(name)
+    const prev = fs.existsSync(dst) ? fs.readFileSync(dst, 'utf8') : null
+    const rel  = path.relative(REPO_ROOT, dst).replaceAll('\\', '/')
+    if (CHECK) {
+      if (prev !== text) drifted.push(rel)
+    } else if (prev !== text) {
+      fs.mkdirSync(path.dirname(dst), { recursive: true })
+      fs.writeFileSync(dst, text)
+      console.log(`  ${prev === null ? 'created' : 'updated'}  ${rel}`)
+      written++
+    }
   }
 
   // The manifest is what `bin/cli.js` reads to label a skill in its listing.

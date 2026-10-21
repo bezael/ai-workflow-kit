@@ -53,6 +53,8 @@ targets:
     patterns_ref: >-
       `~/.codex/ak-workflow-kit/vibe-audit-patterns.md` (or
       `$CODEX_HOME/ak-workflow-kit/vibe-audit-patterns.md` if `CODEX_HOME` is set)
+  pi:
+    patterns_ref: "[patterns.md](patterns.md)"
 ---
 
 # Skill: {{invoke}}

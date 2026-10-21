@@ -6,23 +6,26 @@
 # Useful when you send Claude to do something and go do something else.
 
 INPUT=$(cat)
+# The agent that finished: Claude Code unless the caller says otherwise
+# (the Pi extension sets AK_AGENT_NAME=Pi).
+AGENT="${AK_AGENT_NAME:-Claude Code}"
 MESSAGE=$(echo "$INPUT" | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
 # The stop message may include Claude's last text
 stop_reason = d.get('stop_reason', 'done')
-print(f'Claude Code finished ({stop_reason})')
-" 2>/dev/null || echo "Claude Code finished")
+print(f'{sys.argv[1]} finished ({stop_reason})')
+" "$AGENT" 2>/dev/null || echo "$AGENT finished")
 
 # ─── MACOS ───────────────────────────────────────────────────────────────────
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  osascript -e "display notification \"$MESSAGE\" with title \"Claude Code\" sound name \"Glass\"" 2>/dev/null
+  osascript -e "display notification \"$MESSAGE\" with title \"$AGENT\" sound name \"Glass\"" 2>/dev/null
   exit 0
 fi
 
 # ─── LINUX (notify-send) ─────────────────────────────────────────────────────
 if command -v notify-send &>/dev/null; then
-  notify-send "Claude Code" "$MESSAGE" --icon=terminal 2>/dev/null
+  notify-send "$AGENT" "$MESSAGE" --icon=terminal 2>/dev/null
   exit 0
 fi
 
@@ -33,7 +36,7 @@ if command -v powershell.exe &>/dev/null; then
     \$notify = New-Object System.Windows.Forms.NotifyIcon
     \$notify.Icon = [System.Drawing.SystemIcons]::Information
     \$notify.BalloonTipIcon = 'Info'
-    \$notify.BalloonTipTitle = 'Claude Code'
+    \$notify.BalloonTipTitle = '$AGENT'
     \$notify.BalloonTipText = '$MESSAGE'
     \$notify.Visible = \$true
     \$notify.ShowBalloonTip(5000)

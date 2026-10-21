@@ -3,11 +3,13 @@
 ## What this repo is
 
 A collection of skills, agents, and memory patterns to make working with AI coding tools faster and more consistent.
-Works with: **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravity**, **OpenAI Codex**.
+Works with: **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravity**, **OpenAI Codex**, **Pi**.
 
 For Codex the same skills ship as flat slash commands in `codex-prompts/`, under the same names as in Claude Code (`/ak-commit`) — install them with `npx ai-workflow-kit --codex`.
 
-**Every skill is generated.** The one hand-written file is `src/skills/<id>.md`; `skills/`, `antigravity-skills/`, and `codex-prompts/` are rendered from it by `npm run build`. Editing a generated file fails `npm run build:check` in CI. See [docs/authoring-skills.md](docs/authoring-skills.md) for the spec fields, the `invocation` axis, and the eval-coverage ratchet.
+For Pi the repo is a Pi package (`"pi"` key in `package.json`): `pi/skills/` holds the skills plus the five agents as skills (Pi has no subagents), invoked as `/skill:ak-<name>`, and `pi/extensions/ak-hooks.ts` runs `hooks/*.sh` on Pi's tool events. Install it with `pi install npm:ai-workflow-kit`.
+
+**Every skill is generated.** The one hand-written file is `src/skills/<id>.md`; `skills/`, `antigravity-skills/`, `codex-prompts/`, and `pi/skills/` are rendered from it by `npm run build` (`pi/skills/` also gets the agents from `agents/<name>/AGENT.md`). Editing a generated file fails `npm run build:check` in CI. See [docs/authoring-skills.md](docs/authoring-skills.md) for the spec fields, the `invocation` axis, and the eval-coverage ratchet.
 
 ### Where each tool reads skills from
 
@@ -16,6 +18,7 @@ For Codex the same skills ship as flat slash commands in `codex-prompts/`, under
 | Claude Code | `~/.claude/skills/<name>/SKILL.md` | `.claude/skills/` |
 | Antigravity | `~/.gemini/config/skills/<name>/SKILL.md` | `.agents/skills/` |
 | Codex | `~/.codex/prompts/<name>.md` (flat, no dirs) | — |
+| Pi | the package's `pi/skills/` via `~/.pi/agent/settings.json` | `.pi/settings.json` (`pi install -l`) |
 
 Antigravity's global root moved from `~/.gemini/antigravity/` to `~/.gemini/config/`; the old path only still works on installs that migrated in place, via a compatibility symlink. Don't write to it. Rules for Antigravity are `GEMINI.md`, `AGENTS.md`, and `.agents/rules/*.md`.
 

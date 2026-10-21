@@ -33,6 +33,7 @@ targets:
       allowed-tools: Read Grep Glob Bash(git *) Bash(gh *) Bash(ls *) Bash(cat *)
   antigravity: {}
   codex: {}
+  pi: {}
 ---
 
 # Skill: {{invoke}}

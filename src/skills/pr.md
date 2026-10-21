@@ -51,6 +51,7 @@ targets:
       allowed-tools: Bash(git *) Bash(gh *)
   antigravity: {}
   codex: {}
+  pi: {}
 ---
 
 # Skill: {{invoke}}

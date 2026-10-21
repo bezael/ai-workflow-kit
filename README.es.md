@@ -3,7 +3,7 @@
 ![AI Workflow Kit](./banner.png)
 
 Skills, agentes y hooks para trabajar con herramientas de AI coding de forma consistente y profesional.
-Compatible con **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravity** y **OpenAI Codex**.
+Compatible con **Claude Code**, **Cursor**, **GitHub Copilot**, **Google Antigravity**, **OpenAI Codex** y **Pi**.
 
 ## Instalación
 
@@ -169,6 +169,9 @@ ai-workflow-kit/
 │   ├── ak-vibe-audit.md            # /ak-vibe-audit — audita apps generadas con vibe coding
 │   ├── ak-handoff.md               # /ak-handoff — compacta la sesión para un agente nuevo
 │   └── ak-memory.md                # /ak-memory — save / recall / clean de la memoria
+├── pi/                            # paquete de Pi (generado, salvo la extensión)
+│   ├── skills/ak-<name>/SKILL.md   # /skill:ak-<name> — skills y agentes, generados por npm run build
+│   └── extensions/ak-hooks.ts      # ejecuta hooks/*.sh en los eventos de herramientas de Pi
 ├── skills/
 │   ├── help/SKILL.md               # /ak-help — enruta una tarea a la skill que encaja
 │   ├── setup/SKILL.md              # /ak-setup — registra las convenciones del repo en .ak/config.md
@@ -325,6 +328,23 @@ Para desinstalarlos:
 npx ai-workflow-kit --codex --uninstall
 ```
 
+### Usar con Pi
+
+[Pi](https://pi.dev) instala el kit como paquete de Pi. No hace falta el instalador:
+
+```bash
+pi install npm:ai-workflow-kit        # para ti (~/.pi/agent/settings.json)
+pi install -l npm:ai-workflow-kit     # para este proyecto (.pi/settings.json)
+```
+
+Tendrás:
+
+- **Skills** — `/skill:ak-commit`, `/skill:ak-pr`, `/skill:ak-review`, `/skill:ak-plan`, `/skill:ak-execute`, `/skill:ak-debug`, `/skill:ak-vibe-audit`, `/skill:ak-handoff`, `/skill:ak-memory`, `/skill:ak-help`, `/skill:ak-setup`. En Pi los comandos de skill son `/skill:<nombre>`; las que invoca el usuario quedan ocultas al modelo, igual que en Claude Code.
+- **Los agentes especializados como skills** — Pi no tiene subagentes, así que `ak-frontend`, `ak-api`, `ak-test`, `ak-refactor` y `ak-docs` llegan como skills que invoca el modelo, con las mismas instrucciones. Se ejecutan en la conversación principal, no en un contexto aparte.
+- **Los hooks** — la extensión `ak-hooks` ejecuta los mismos scripts `hooks/*.sh` en los eventos de herramientas de Pi: bloquea los comandos `bash` destructivos, pregunta antes de los arriesgados, detecta secretos antes de `git commit`, protege los tests existentes con `.ak/protect-tests`, formatea tras `write`/`edit`, devuelve al modelo los errores de ESLint y te avisa con una notificación cuando Pi te espera. Necesita `bash` y `python3` (Git Bash en Windows).
+
+Desactiva los hooks o cualquier skill con `pi config`. Actualiza con `pi update --extensions`; quítalo con `pi remove npm:ai-workflow-kit`.
+
 ## Versionado y Changelog
 
 Este proyecto sigue [Semantic Versioning](https://semver.org/) y [Keep a Changelog](https://keepachangelog.com/).
@@ -361,6 +381,6 @@ Antes de proponer una feature, revisa [`.out-of-scope/`](.out-of-scope/README.md
 
 - **Diagnosticar antes de actuar** — un plan aprobado vale más que código rápido
 - **Progreso demostrado** — una casilla se marca porque su comando salió con 0, nunca porque un agente lo afirme
-- **Skills cross-tool** — los mismos patrones funcionan en Claude Code, Cursor, Copilot, Antigravity y Codex
+- **Skills cross-tool** — los mismos patrones funcionan en Claude Code, Cursor, Copilot, Antigravity, Codex y Pi
 - **Memoria persistente** — la IA debe recordar el contexto, no pedirlo cada vez
 - **Output predecible** — cada skill produce el mismo formato, siempre

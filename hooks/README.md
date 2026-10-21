@@ -46,6 +46,19 @@ claude  # open Claude Code
 /hooks  # shows active hooks
 ```
 
+## Pi
+
+In [Pi](https://pi.dev) you don't copy anything: `pi install npm:ai-workflow-kit` loads `pi/extensions/ak-hooks.ts`, which runs these same scripts on Pi's events. It sends each script the JSON Claude Code would send (`tool_name` + `tool_input`, with `file_path` resolved against the session's working directory) and maps the answer back:
+
+| Script answer | In Pi |
+|---|---|
+| `exit 2` before a tool | the `bash`/`edit`/`write` call is blocked; stderr is the reason the model sees |
+| `permissionDecision: "ask"` | a confirm dialog; with no UI (print or JSON mode) the call is blocked |
+| `exit 2` after a tool | stderr is appended to the tool result, so the model can fix the lint errors |
+| `notify-done.sh` | runs on `agent_settled` in the terminal UI, titled "Pi" (`AK_AGENT_NAME`) |
+
+The scripts need `bash` and `python3`; without bash the extension warns once and lets everything through, as Claude Code does with a hook that can't run. Turn it off with `pi config`.
+
 ## How events work
 
 | Claude Code Event | When it fires |
