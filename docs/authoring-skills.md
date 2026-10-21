@@ -1,6 +1,6 @@
 # Authoring a skill
 
-## One source, three distributions
+## One source, four distributions
 
 A skill has exactly one hand-written file: `src/skills/<id>.md`. It is YAML frontmatter — the spec — plus a portable markdown body. `scripts/build-skills.js` renders it into every distribution:
 
@@ -9,6 +9,9 @@ A skill has exactly one hand-written file: `src/skills/<id>.md`. It is YAML fron
 | Claude Code | `skills/ak-<id>/SKILL.md` | `/ak-<id>` |
 | Google Antigravity | `antigravity-skills/<id>/SKILL.md` | `@<id>` |
 | OpenAI Codex | `codex-prompts/ak-<id>.md` | `/ak-<id>` |
+| Pi | `pi/skills/ak-<id>/SKILL.md` | `/skill:ak-<id>` |
+
+The Pi build also rewrites every `/ak-<name>` in the body to `/skill:ak-<name>`, so write sibling skills as `/ak-<name>`, and renders each `agents/<name>/AGENT.md` as a Pi skill, because Pi has no subagents.
 
 The generated files are committed, because the installers read them directly. **Never hand-edit one** — `npm run build:check` re-renders and fails on any drift, and it runs in CI ahead of the tests. Edit the source, then `npm run build`.
 

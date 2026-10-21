@@ -1,7 +1,7 @@
 {
   "name": "ai-workflow-kit",
   "version": "3.1.0",
-  "description": "Skills, agents & hooks for Claude Code, Cursor, GitHub Copilot, Google Antigravity, and OpenAI Codex",
+  "description": "Skills, agents & hooks for Claude Code, Cursor, GitHub Copilot, Google Antigravity, OpenAI Codex, and Pi",
   "type": "module",
   "bin": {
     "ai-workflow-kit": "./bin/cli.js"
@@ -13,6 +13,7 @@
     "hooks/",
     "antigravity-skills/",
     "codex-prompts/",
+    "pi/",
     "templates/",
     "src/manifest.json",
     ".cursorrules",
@@ -20,14 +21,22 @@
     "README.es.md",
     "CHANGELOG.md"
   ],
+  "pi": {
+    "skills": [
+      "./pi/skills"
+    ],
+    "extensions": [
+      "./pi/extensions/ak-hooks.ts"
+    ]
+  },
   "scripts": {
     "start": "npx node bin/cli.js",
     "build": "node scripts/build-skills.js && node scripts/sync-docs.js",
     "build:check": "node scripts/build-skills.js --check && node scripts/sync-docs.js --check",
-    "test": "npm run build:check && vitest run evals/hooks evals/cli",
-    "test:watch": "vitest evals/hooks evals/cli",
+    "test": "npm run build:check && vitest run evals/hooks evals/cli evals/pi",
+    "test:watch": "vitest evals/hooks evals/cli evals/pi",
     "eval": "npx node evals/run-evals.js",
-    "test:all": "vitest run evals/hooks evals/cli && npx node evals/run-evals.js",
+    "test:all": "vitest run evals/hooks evals/cli evals/pi && npx node evals/run-evals.js",
     "release:patch": "npx node scripts/release.js patch",
     "release:minor": "npx node scripts/release.js minor",
     "release:major": "npx node scripts/release.js major",
@@ -47,7 +56,8 @@
     "skills",
     "agents",
     "hooks",
-    "workflow"
+    "workflow",
+    "pi-package"
   ],
   "author": "Bezael Pérez <me@dominicode.com>",
   "license": "MIT",

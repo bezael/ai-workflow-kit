@@ -83,6 +83,9 @@ targets:
   codex:
     extra_rules:
       - "This is a read-only review. Report findings; don't edit files unless the user asks."
+  pi:
+    extra_rules:
+      - "This is a read-only review. Report findings; don't edit files unless the user asks."
 ---
 
 # Skill: {{invoke}}

@@ -41,6 +41,7 @@ targets:
   claude: {}
   antigravity: {}
   codex: {}
+  pi: {}
 ---
 
 # Skill: {{invoke}}
