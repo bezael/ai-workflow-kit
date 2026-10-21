@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [3.2.0] - 2026-10-21
+
 ### Added
 - **Pi support**: the npm package is also a [Pi](https://pi.dev) package (`pi install npm:ai-workflow-kit`). `npm run build` renders a fourth distribution, `pi/skills/ak-<id>/SKILL.md`, invoked as `/skill:ak-<id>`, with `/ak-<name>` references rewritten to Pi's command and `disable-model-invocation` on the user-invoked skills. The five agents ship as model-invoked skills, since Pi has no subagents.
 - **Pi hooks**: `pi/extensions/ak-hooks.ts` runs the existing `hooks/*.sh` on Pi's `tool_call`, `tool_result` and `agent_settled` events: `exit 2` blocks the call, `permissionDecision: "ask"` becomes a confirm dialog, and post-tool output reaches the model in the tool result. Covered by `evals/pi/`, which drives the extension with the real scripts.
@@ -190,7 +194,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Eval framework with Vitest + LLM-based evals via Anthropic SDK
 - Spanish README (`README.es.md`)[1.1.0]: https://github.com/bezael/ai-workflow-kit/compare/...v1.1.0[2.0.0]: https://github.com/bezael/ai-workflow-kit/compare/v1.1.0...v2.0.0
 [2.2.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.1.0...v2.2.0
-[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/bezael/ai-workflow-kit/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/bezael/ai-workflow-kit/compare/v3.1.0...v3.2.0
+[3.1.0]: https://github.com/bezael/ai-workflow-kit/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.6.0...v3.0.0
 [2.6.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/bezael/ai-workflow-kit/compare/v2.4.0...v2.5.0
