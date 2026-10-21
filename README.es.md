@@ -63,7 +63,7 @@ ejecuta Task → Verify → Fix → Review → Final Verify → PR.
 
 ```bash
 npx ai-workflow-kit verify <slug>            # siguiente task pendiente de tasks.md
-npx ai-workflow-kit verify <slug> --final    # el Verify de cada task + los checks globales de .ak/config.md
+npx ai-workflow-kit verify <slug> --final    # el Verify de cada task + los checks globales (.ak/config.md, carril de AGENTS.md)
 npx ai-workflow-kit verify <slug> --plan     # fuerza plan.md cuando conviven ambos ficheros
 ```
 
@@ -79,7 +79,10 @@ Las tasks sin línea `Verify:` se reportan como no verificables y nunca se
 marcan. `--final` es de solo lectura: reejecuta el Verify de cada task
 (detectando regresiones en tasks ya marcadas) y después los comandos `Test` /
 `Lint` / `Typecheck` / `Build` / `E2E` registrados bajo `## Commands` en
-`.ak/config.md`, e imprime un resumen que termina en `Result: PASS` o `FAIL`.
+`.ak/config.md`, luego el short loop y el long loop de un carril CBRM en
+`AGENTS.md` si el repo lo tiene (un comando que está en los dos se ejecuta una
+vez; uno marcado `known red` se reporta sin hacer fallar), e imprime un resumen
+que termina en `Result: PASS` o `FAIL`.
 La skill `/ak-execute` conduce este bucle task a task.
 
 ### Priorizar un review

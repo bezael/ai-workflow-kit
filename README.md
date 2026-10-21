@@ -63,7 +63,7 @@ Task → Verify → Fix → Review → Final Verify → PR.
 
 ```bash
 npx ai-workflow-kit verify <slug>            # next unchecked task in tasks.md
-npx ai-workflow-kit verify <slug> --final    # every task's Verify + the global checks from .ak/config.md
+npx ai-workflow-kit verify <slug> --final    # every task's Verify + the global checks (.ak/config.md, AGENTS.md lane)
 npx ai-workflow-kit verify <slug> --plan     # force plan.md when both files exist
 ```
 
@@ -78,8 +78,10 @@ one line, backticks required:
 Tasks without a `Verify:` line are reported as unverifiable and never ticked.
 `--final` is read-only: it re-runs every task's Verify (catching regressions in
 ticked tasks), then the `Test` / `Lint` / `Typecheck` / `Build` / `E2E`
-commands recorded under `## Commands` in `.ak/config.md`, and prints a summary
-that ends in `Result: PASS` or `FAIL`. The `/ak-execute` skill drives this loop
+commands recorded under `## Commands` in `.ak/config.md`, then the short and
+long loop of a CBRM lane in `AGENTS.md` if the repo has one (a command in both
+runs once; one marked `known red` is reported without failing), and prints a
+summary that ends in `Result: PASS` or `FAIL`. The `/ak-execute` skill drives this loop
 one task at a time.
 
 ### Prioritizing a review

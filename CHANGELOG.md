@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **verify**: `--final` also runs the short and long loop of a CBRM lane in `AGENTS.md` (the harness `dominicode-harness-init` from bezael/sdd-creator writes). A command already in `.ak/config.md` runs once, and one annotated `known red` is reported as `KNOWN RED` without failing the verification. The summary names each lane command.
+- **setup**: a CBRM lane in `AGENTS.md` is read as a source of verified commands and mapped into `## Commands`; `AGENTS.md` is never written.
+
+### Changed
+- This repo follows CBRM with its own tools: `AGENTS.md` has Contract, Lane (short and long loop `npm test`) and Verdict, replacing the leftover "Default stack" template, and `.ak/config.md` records the same commands.
+
 ---
 
 ## [3.2.0] - 2026-10-21
